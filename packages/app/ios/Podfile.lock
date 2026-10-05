@@ -2397,6 +2397,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNAppleAuthentication (2.5.1):
+    - React-Core
   - RNBootSplash (7.3.2):
     - hermes-engine
     - RCTRequired
@@ -2737,6 +2739,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - ReactNativeEnrichedMarkdown (from `../../../node_modules/react-native-enriched-markdown`)
+  - "RNAppleAuthentication (from `../../../node_modules/@invertase/react-native-apple-authentication`)"
   - RNBootSplash (from `../../../node_modules/react-native-bootsplash`)
   - RNKeychain (from `../../../node_modules/react-native-keychain`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
@@ -2949,6 +2952,8 @@ EXTERNAL SOURCES:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   ReactNativeEnrichedMarkdown:
     :path: "../../../node_modules/react-native-enriched-markdown"
+  RNAppleAuthentication:
+    :path: "../../../node_modules/@invertase/react-native-apple-authentication"
   RNBootSplash:
     :path: "../../../node_modules/react-native-bootsplash"
   RNKeychain:
@@ -3064,6 +3069,7 @@ SPEC CHECKSUMS:
   ReactCommon: d5c1bb4427bf51c443de5926aac332c89ddd9363
   ReactNativeDependencies: fa0a54b3f5319ae0e3b9aff32bfee7a424b88e66
   ReactNativeEnrichedMarkdown: 861d6937d7f4a6481e8446538dc715c93b545143
+  RNAppleAuthentication: a89c9804592b38ed4ab11f0aee68d05ba12ad432
   RNBootSplash: dcf4ccd62104bee81893e3d8c342860a491d3204
   RNKeychain: 6778b35b5bd067c322f8479526ac09b1d61f31d0
   RNReanimated: c66c5c9b1200bb4c0ca7b597064328b16bb1d667
