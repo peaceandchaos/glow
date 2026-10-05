@@ -1,0 +1,98 @@
+{
+  "lessons": [
+    {
+      "id": "commit-types",
+      "lesson": "A cherry-pick over a rename leaves commits that do not compile, so every commit in a range must typecheck.",
+      "seen": [
+        "A branch used model ids that a later commit renamed.",
+        "A second commit on that branch used the renamed model ids."
+      ],
+      "enforcement": {
+        "kind": "check",
+        "check": "commit-types"
+      }
+    },
+    {
+      "id": "context-image-size",
+      "lesson": "Count an image in the working context by its per-image token estimate, not by the length of its data URL.",
+      "seen": [
+        "Photos of about 800 KB filled the context threshold and failed every turn."
+      ],
+      "enforcement": {
+        "kind": "test",
+        "file": "packages/server/tests/compaction.test.ts",
+        "name": "an image counts by its per-image estimate, not its encoded length"
+      },
+      "paths": ["packages/server/src/compaction/**"]
+    },
+    {
+      "id": "context-json-escape",
+      "lesson": "Size text pieces by their JSON-escaped length, the measure the context limit uses.",
+      "seen": [
+        "Control-character text split by raw length exceeded the context threshold."
+      ],
+      "enforcement": {
+        "kind": "test",
+        "file": "packages/server/tests/compaction.test.ts",
+        "name": "text that JSON escapes heavily is still split into pieces below the threshold"
+      },
+      "paths": ["packages/server/src/compaction/**"]
+    },
+    {
+      "id": "fetch-timeout",
+      "lesson": "Give every fetch in app code a timeout or an abort signal. The security check scans the app, not the server.",
+      "seen": ["The native probe's report fetch had no timeout."],
+      "enforcement": {
+        "kind": "check",
+        "check": "security"
+      }
+    },
+    {
+      "id": "native-view-remount",
+      "lesson": "Do not remount native views with a key to reset them. nitro-symbols 0.0.8 does not reset a recycled view, so it keeps another icon.",
+      "seen": ["key={chatId} on the chat list showed the wrong SF Symbols."],
+      "enforcement": {
+        "kind": "guidance"
+      },
+      "paths": ["packages/app/**/*.tsx"]
+    },
+    {
+      "id": "responses-compact-threshold",
+      "lesson": "Every Responses model sets compactThreshold, the token count sent as compact_threshold. The working-context threshold is a different unit.",
+      "seen": [
+        "The GPT models sent the 800,000 working-context threshold as compact_threshold."
+      ],
+      "enforcement": {
+        "kind": "type",
+        "file": "packages/server/tests/models.test.ts",
+        "name": "a Responses model without compactThreshold is not a model config"
+      }
+    },
+    {
+      "id": "stale-watcher",
+      "lesson": "Bind a CI or result watcher to the commit you pushed, and confirm the head before you act on its result.",
+      "seen": ["A CI watcher checked an old head after the branch had moved."],
+      "enforcement": {
+        "kind": "guidance"
+      }
+    },
+    {
+      "id": "type-assertions",
+      "lesson": "Parse or narrow a value instead of asserting its type.",
+      "seen": ["6 assertions in legacy demo files at the first measurement."],
+      "enforcement": {
+        "kind": "lint",
+        "rule": "project/no-type-assertion"
+      }
+    },
+    {
+      "id": "unused-exports",
+      "lesson": "Stop exporting what nothing imports, or list the entry point with a reason.",
+      "seen": ["45 unused exports at the first measurement."],
+      "enforcement": {
+        "kind": "check",
+        "check": "unused-exports"
+      }
+    }
+  ]
+}

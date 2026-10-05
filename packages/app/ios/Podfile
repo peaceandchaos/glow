@@ -1,0 +1,50 @@
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+# Bumped from min_ios_version_supported (15.1) because react-native-nitro-markdown requires iOS 16.4
+ios_platform = '16.4'
+platform :ios, ios_platform
+prepare_react_native_project!
+
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'MargeloChat' do
+  config = use_native_modules!
+
+  # NitroWebImage (Swift) depends on SDWebImage, which doesn't define modules, so
+  # it can't be imported from Swift as a static lib without a module map.
+  pod 'SDWebImage', :modular_headers => true
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
+
+    # Xcode 27 rejects pod targets (including resource bundles) below iOS 15.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        target_version = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if target_version && Gem::Version.new(target_version) < Gem::Version.new(ios_platform)
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = ios_platform
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,632 @@
+{
+  "skills": {
+    "architect": {
+      "sha256": "bcba651eb9178785302cc0942107ba1958c4772d580cbaefd67ac0f38266fd51",
+      "headings": [
+        "Architect",
+        "Start",
+        "Phase A: Ground the problem",
+        "Phase B: Sketch",
+        "Phase C: Agree (opt-in)",
+        "Phase D: Implement against the sketch",
+        "Phase E: Scrap when the architecture is wrong",
+        "Outputs",
+        "Models",
+        "Reasoning effort"
+      ],
+      "rules": [
+        "Start 1",
+        "Start 2",
+        "Start 3",
+        "Start 4",
+        "Start 5",
+        "Phase E: Scrap when the architecture is wrong 1",
+        "Phase E: Scrap when the architecture is wrong 2",
+        "Phase E: Scrap when the architecture is wrong 3",
+        "Phase E: Scrap when the architecture is wrong 4"
+      ]
+    },
+    "blast-radius": {
+      "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+      "headings": [
+        "Blast radius",
+        "Don't trust your own writeup",
+        "How sure are you",
+        "Steps",
+        "What to hand back"
+      ],
+      "rules": [
+        "How sure are you 1",
+        "How sure are you 2",
+        "How sure are you 3",
+        "How sure are you 4",
+        "How sure are you 5",
+        "Steps 1",
+        "Steps 2",
+        "Steps 3",
+        "Steps 4",
+        "Steps 5",
+        "Steps 6"
+      ]
+    },
+    "deslop": {
+      "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+      "headings": ["Remove AI code slop", "Focus Areas", "Guardrails"],
+      "rules": []
+    },
+    "emil-prototype": {
+      "sha256": "2f0071b1f5cb4aef9a8bce592b57dacd1b1623897c0a546e90f6c6ac8db69366",
+      "headings": [
+        "Prototyping Variants",
+        "Operating Posture",
+        "Hard Rules",
+        "Workflow",
+        "Phase 1 — Scope",
+        "Phase 2 — Recon",
+        "Phase 3 — Choose directions",
+        "Phase 4 — Build the picker harness",
+        "Phase 5 — Verify and hand off",
+        "Phase 6 — Promote on selection",
+        "Invocation Variants",
+        "Tone"
+      ],
+      "rules": [
+        "Hard Rules 1",
+        "Hard Rules 2",
+        "Hard Rules 3",
+        "Hard Rules 4",
+        "Hard Rules 5"
+      ]
+    },
+    "expo-animation": {
+      "sha256": "cad39a1208a5b65e496fb14588e28b684cf94c263b9a2a97bd9da994058db057",
+      "headings": [
+        "Building Animations in Expo",
+        "Operating Posture",
+        "Hard Rules",
+        "The Build Sequence",
+        "1. Should this animate at all?",
+        "2. What is the purpose?",
+        "3. Pick the tool — cheapest that works",
+        "4. Pick the properties",
+        "5. Timing or spring",
+        "6. Keep it off the JS thread",
+        "7. Press, not hover",
+        "8. Haptics",
+        "9. Reduced motion and accessibility",
+        "Setup that silently breaks motion",
+        "120fps",
+        "Recipes",
+        "Never Ship",
+        "Output",
+        "Tone",
+        "Submitting Feedback"
+      ],
+      "rules": [
+        "Building Animations in Expo 1",
+        "Building Animations in Expo 2",
+        "Building Animations in Expo 3",
+        "Operating Posture 1",
+        "Operating Posture 2",
+        "Hard Rules 1",
+        "Hard Rules 2",
+        "Hard Rules 3",
+        "Hard Rules 4",
+        "Hard Rules 5"
+      ]
+    },
+    "expo-ios-hig": {
+      "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+      "headings": [
+        "Expo iOS HIG Best Practices",
+        "When to Apply",
+        "When NOT to Use This Skill",
+        "Rule Categories by Priority",
+        "Quick Reference",
+        "1. Native Navigation Architecture (CRITICAL)",
+        "2. Native Component Fidelity (CRITICAL)",
+        "3. Layout & Adaptivity (HIGH)",
+        "4. Touch, Gestures & Haptics (HIGH)",
+        "5. Visual System & Liquid Glass (HIGH)",
+        "6. Motion & Feedback (MEDIUM-HIGH)",
+        "7. Accessibility (MEDIUM-HIGH)",
+        "8. System Integration & Polish (MEDIUM)",
+        "How to Use",
+        "Related Skills"
+      ],
+      "rules": []
+    },
+    "find-animation-opportunities": {
+      "sha256": "91c1243164057fbf824088d12faea937878a757a7ac653e8288b775e8b27b882",
+      "headings": [
+        "Finding Animation Opportunities",
+        "Operating Posture",
+        "Hard Rules",
+        "The Gate",
+        "1. Frequency — how often will a user see this?",
+        "2. Purpose — why does this animate?",
+        "3. Speed — can it stay inside budget?",
+        "4. Function — does motion help or hinder here?",
+        "Where to Hunt",
+        "Workflow",
+        "Required Output Format",
+        "Part 1 — Opportunities table",
+        "Part 2 — Rejected candidates (REQUIRED)",
+        "Part 3 — Verdict",
+        "Tone"
+      ],
+      "rules": [
+        "Hard Rules 1",
+        "Hard Rules 2",
+        "Hard Rules 3",
+        "Hard Rules 4",
+        "Workflow 1",
+        "Workflow 2",
+        "Workflow 3",
+        "Workflow 4"
+      ]
+    },
+    "ios-debugger-agent": {
+      "sha256": "bb8ad932ec473cee097c9c8d106051134e9ab6cf9dc85d6a8e62ce80ad24c385",
+      "headings": [
+        "iOS Debugger Agent",
+        "Overview",
+        "Core Workflow",
+        "1) Discover the booted simulator",
+        "2) Set session defaults",
+        "3) Build + run (when requested)",
+        "UI Interaction & Debugging",
+        "Logs & Console Output",
+        "Troubleshooting"
+      ],
+      "rules": []
+    },
+    "no-comments": {
+      "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+      "headings": ["No comments", "Scope", "Steps"],
+      "rules": [
+        "Steps 1",
+        "Steps 2",
+        "Steps 3",
+        "Steps 4",
+        "Steps 5",
+        "Steps 6"
+      ]
+    },
+    "principle-boundary-discipline": {
+      "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+      "headings": ["Boundary Discipline"],
+      "rules": []
+    },
+    "principle-build-the-lever": {
+      "sha256": "21bc68f769b9cc6eff2614f4a11c5760d37334eb1b59309df04278dabb49bccf",
+      "headings": ["Build the Lever"],
+      "rules": []
+    },
+    "principle-encode-lessons-in-structure": {
+      "sha256": "99755a1add54e0f721842a0505230bf608bc44bd2d859ac4d792ffd576b9eead",
+      "headings": ["Encode Lessons in Structure"],
+      "rules": [
+        "Encode Lessons in Structure 1",
+        "Encode Lessons in Structure 2",
+        "Encode Lessons in Structure 3"
+      ]
+    },
+    "principle-experience-first": {
+      "sha256": "688917387e19da6a343fe657c726eb65998937da69ed7d29f1dfaadb53516a10",
+      "headings": ["Experience First"],
+      "rules": []
+    },
+    "principle-fix-root-causes": {
+      "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+      "headings": ["Fix Root Causes"],
+      "rules": []
+    },
+    "principle-make-operations-idempotent": {
+      "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+      "headings": ["Make Operations Idempotent"],
+      "rules": [
+        "Make Operations Idempotent 1",
+        "Make Operations Idempotent 2",
+        "Make Operations Idempotent 3"
+      ]
+    },
+    "principle-migrate-callers-then-delete-legacy-apis": {
+      "sha256": "8014f4eb04fe50474f7e3f9286bce2de276116b8b669cd2fe7b2100972efb68a",
+      "headings": ["Migrate Callers Then Delete Legacy APIs"],
+      "rules": []
+    },
+    "principle-minimize-reader-load": {
+      "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+      "headings": ["Minimize Reader Load"],
+      "rules": ["Minimize Reader Load 1", "Minimize Reader Load 2"]
+    },
+    "principle-prove-it-works": {
+      "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+      "headings": ["Prove It Works", "Script the check when you can"],
+      "rules": []
+    },
+    "principle-sequence-verifiable-units": {
+      "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+      "headings": ["Sequence work into verifiable units"],
+      "rules": []
+    },
+    "principle-subtract-before-you-add": {
+      "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+      "headings": ["Subtract Before You Add"],
+      "rules": []
+    },
+    "principle-test-behavior-not-implementation": {
+      "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+      "headings": ["Test behavior, not implementation"],
+      "rules": []
+    },
+    "principle-type-system-discipline": {
+      "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+      "headings": ["Type System Discipline"],
+      "rules": []
+    },
+    "react-native-best-practices": {
+      "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+      "headings": [
+        "React Native Best Practices",
+        "Overview",
+        "When to Apply",
+        "Security Notes",
+        "Priority-Ordered Guidelines",
+        "Quick Reference",
+        "Optimization Workflow",
+        "Review Guardrails",
+        "Critical: FPS & Re-renders",
+        "Critical: Bundle Size",
+        "High: TTI Optimization",
+        "High: Native Performance",
+        "References",
+        "JavaScript/React (`js-*`)",
+        "Native (`native-*`)",
+        "Bundling (`bundle-*`)",
+        "Problem → Skill Mapping",
+        "Attribution"
+      ],
+      "rules": [
+        "Optimization Workflow 1",
+        "Optimization Workflow 2",
+        "Optimization Workflow 3",
+        "Optimization Workflow 4"
+      ]
+    },
+    "react-native-best-practices-sm": {
+      "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+      "headings": ["React Native Best Practices", "Sub-skills"],
+      "rules": [],
+      "files": {
+        "references/animations/SKILL.md": {
+          "sha256": "cbf41937f716feb65c2b6fdc07c320623b6e19f9a9923b4b3c8a1462a0df8833",
+          "headings": ["Animations", "Critical Rules", "References"],
+          "rules": []
+        },
+        "references/audio/SKILL.md": {
+          "sha256": "8e3d4d7b87ee7455956128a390577ebf9a82990bf6c18a0b3a56295f6eb2aa97",
+          "headings": ["Audio", "Critical Rules", "References"],
+          "rules": []
+        },
+        "references/enable-worklets-bundle-mode/SKILL.md": {
+          "sha256": "c86a39fe84a20d1aaf60a8d71ef7ef7219d237c773bae249c679d73ac3e65c0f",
+          "headings": [
+            "Enable Worklets Bundle Mode",
+            "0. Detect current state and environment",
+            "1. Babel plugin",
+            "2. Metro config",
+            "3. Metro patches (do not skip)",
+            "4. Verify",
+            "Example",
+            "Gotchas"
+          ],
+          "rules": []
+        },
+        "references/gestures/SKILL.md": {
+          "sha256": "8608158a6b2979c42872a707dd5812fe641c82e9ccd9a150f7c9d9f5c758f438",
+          "headings": [
+            "React Native Gesture Handler",
+            "Version Decision Tree",
+            "Key API Differences (v2 vs v3)",
+            "Critical Rules",
+            "References"
+          ],
+          "rules": []
+        },
+        "references/jsi/SKILL.md": {
+          "sha256": "a70674691164d4c94b2615fab5da071536a3b00cdc769d96b9ec3c57538ff5a7",
+          "headings": ["React Native JSI", "References"],
+          "rules": []
+        },
+        "references/multithreading/SKILL.md": {
+          "sha256": "087d8fe9868f5453d1335dc72562db986181152d246c17358b9248ccc84ff02c",
+          "headings": [
+            "React Native Multithreading with Worklets",
+            "Version Check",
+            "Runtime Model",
+            "API Decision Tree",
+            "Critical Rules",
+            "References"
+          ],
+          "rules": ["Version Check 1", "Version Check 2", "Version Check 3"]
+        },
+        "references/on-device-ai/SKILL.md": {
+          "sha256": "10570525ac88f34deb1aac24607d48ca741012f097c5b2f41faf81219782576d",
+          "headings": [
+            "React Native ExecuTorch",
+            "Decision Tree",
+            "Critical Rules",
+            "Minimal Setup",
+            "Hook Quick Reference",
+            "Common Pitfalls",
+            "References",
+            "External Resources"
+          ],
+          "rules": []
+        },
+        "references/rich-text/SKILL.md": {
+          "sha256": "aae8fa526a72461de599ce7b35a338f378bc9646923b394856a57c96a062f4ae",
+          "headings": [
+            "Rich Text in React Native",
+            "Choosing the right library",
+            "react-native-enriched (Editor)",
+            "Basic usage",
+            "Key concepts",
+            "Supported styles",
+            "Links",
+            "Mentions",
+            "Inline images",
+            "react-native-enriched-markdown (Renderer)",
+            "Flavors",
+            "Tables (GFM)",
+            "Task lists (GFM)",
+            "LaTeX math",
+            "Customizing styles",
+            "Link handling",
+            "Additional features",
+            "Known limitations",
+            "react-native-enriched",
+            "react-native-enriched-markdown"
+          ],
+          "rules": []
+        },
+        "references/svg/SKILL.md": {
+          "sha256": "92353d60d2a42cf16d5206aa930edcf352c6ba71bc04de004bba75a38928f1f3",
+          "headings": ["SVG", "References"],
+          "rules": []
+        }
+      }
+    },
+    "review-animations": {
+      "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d",
+      "headings": [
+        "Reviewing Animations",
+        "Operating Posture",
+        "The Ten Non-Negotiable Standards",
+        "Aggressive Escalation Triggers",
+        "Remedial Preference Hierarchy",
+        "Required Output Format",
+        "Part 1 — Findings table (REQUIRED)",
+        "Part 2 — Verdict (REQUIRED)",
+        "Guidelines"
+      ],
+      "rules": [
+        "The Ten Non-Negotiable Standards 1",
+        "The Ten Non-Negotiable Standards 2",
+        "The Ten Non-Negotiable Standards 3",
+        "The Ten Non-Negotiable Standards 4",
+        "The Ten Non-Negotiable Standards 5",
+        "The Ten Non-Negotiable Standards 6",
+        "The Ten Non-Negotiable Standards 7",
+        "The Ten Non-Negotiable Standards 8",
+        "The Ten Non-Negotiable Standards 9",
+        "The Ten Non-Negotiable Standards 10",
+        "Remedial Preference Hierarchy 1",
+        "Remedial Preference Hierarchy 2",
+        "Remedial Preference Hierarchy 3",
+        "Remedial Preference Hierarchy 4",
+        "Remedial Preference Hierarchy 5",
+        "Remedial Preference Hierarchy 6",
+        "Remedial Preference Hierarchy 7",
+        "Remedial Preference Hierarchy 8",
+        "Remedial Preference Hierarchy 9",
+        "Part 2 — Verdict (REQUIRED) 1",
+        "Part 2 — Verdict (REQUIRED) 2",
+        "Part 2 — Verdict (REQUIRED) 3",
+        "Part 2 — Verdict (REQUIRED) 4",
+        "Part 2 — Verdict (REQUIRED) 5",
+        "Part 2 — Verdict (REQUIRED) 6"
+      ],
+      "files": {
+        "STANDARDS.md": {
+          "sha256": "e7d3605034acda54ca13e43aec9e64d65b53de20f75b11b8d694e373012fbe07",
+          "headings": [
+            "Animation Standards Reference",
+            "Should it animate? (frequency table)",
+            "Easing",
+            "Duration",
+            "Physicality",
+            "Springs",
+            "Interruptibility",
+            "Asymmetric timing",
+            "Performance",
+            "Transforms & clip-path",
+            "Gestures & drag",
+            "Masking imperfect crossfades",
+            "Stagger",
+            "Accessibility",
+            "Debugging (recommend in reviews when feel is uncertain)",
+            "Cohesion"
+          ],
+          "rules": []
+        }
+      }
+    },
+    "tdd": {
+      "sha256": "5e6b9c16b547113e90afbb946489d1c1384be5c2128f0159bd0bee57251ecf08",
+      "headings": [
+        "Test-Driven Development",
+        "What a good test is",
+        "Seams — where tests go",
+        "Anti-patterns",
+        "Rules of the loop"
+      ],
+      "rules": []
+    },
+    "technical-writing": {
+      "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+      "headings": [
+        "Technical writing",
+        "Vary the rhythm",
+        "Pick the mode first (Diátaxis)",
+        "Write sentences to the reader (Google developer style)",
+        "Make statements load one at a time (STE rules)",
+        "Leave no sentence open to two readings (Global English)",
+        "Voice and repo specifics",
+        "Worked example"
+      ],
+      "rules": []
+    },
+    "test-prune": {
+      "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+      "headings": [
+        "Test prune",
+        "Scope and evidence",
+        "Review questions",
+        "Decisions and repairs",
+        "Result",
+        "Writing guidance"
+      ],
+      "rules": []
+    },
+    "thermo-nuclear-code-quality-review": {
+      "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+      "headings": [
+        "Thermo-Nuclear Code Quality Review",
+        "Core Prompt",
+        "Non-Negotiable Additional Standards",
+        "Primary Review Questions",
+        "What to Flag Aggressively",
+        "Preferred Remedies",
+        "Review Tone",
+        "Output Expectations",
+        "Report Format",
+        "Approval Bar"
+      ],
+      "rules": [
+        "Non-Negotiable Additional Standards 0",
+        "Non-Negotiable Additional Standards 1",
+        "Non-Negotiable Additional Standards 2",
+        "Non-Negotiable Additional Standards 3",
+        "Non-Negotiable Additional Standards 4",
+        "Non-Negotiable Additional Standards 5",
+        "Non-Negotiable Additional Standards 6",
+        "Non-Negotiable Additional Standards 7",
+        "Output Expectations 1",
+        "Output Expectations 2",
+        "Output Expectations 3",
+        "Output Expectations 4",
+        "Output Expectations 5",
+        "Output Expectations 6",
+        "Output Expectations 7"
+      ]
+    },
+    "typescript-best-practices": {
+      "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+      "headings": ["TypeScript best practices"],
+      "rules": []
+    },
+    "unslop": {
+      "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+      "headings": [
+        "Unslop",
+        "Process",
+        "Patterns to detect and fix",
+        "Content",
+        "Language",
+        "Style",
+        "Communication artifacts",
+        "Filler",
+        "Jargon",
+        "Plain speech"
+      ],
+      "rules": [
+        "Process 1",
+        "Process 2",
+        "Content 3",
+        "Content 5",
+        "Language 7",
+        "Language 8",
+        "Language 9",
+        "Language 10",
+        "Language 11",
+        "Language 12",
+        "Style 13",
+        "Style 14",
+        "Style 15",
+        "Style 16",
+        "Style 17",
+        "Style 18",
+        "Style 19",
+        "Communication artifacts 20",
+        "Communication artifacts 22",
+        "Filler 23",
+        "Filler 24",
+        "Filler 25",
+        "Jargon 26",
+        "Plain speech 27",
+        "Plain speech 28",
+        "Plain speech 29",
+        "Plain speech 30",
+        "Plain speech 31",
+        "Plain speech 32",
+        "Plain speech 33"
+      ]
+    },
+    "workflow": {
+      "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+      "headings": [
+        "*CRITICAL*: Always Use Correct `workflow` Documentation",
+        "Official Resources",
+        "Quick Reference",
+        "Prefer Step Functions to Avoid Sandbox Errors",
+        "Workflow Sandbox Limitations",
+        "DurableAgent — AI Agents in Workflows",
+        "Starting Workflows & Child Workflows",
+        "Hooks — Pause & Resume with External Events",
+        "Single event",
+        "Multiple events (iterable hooks)",
+        "Resuming from API routes",
+        "Error Handling",
+        "Serialization",
+        "Streaming",
+        "Namespaced Streams",
+        "Debugging",
+        "Testing Workflows"
+      ],
+      "rules": [
+        "*CRITICAL*: Always Use Correct `workflow` Documentation 1",
+        "*CRITICAL*: Always Use Correct `workflow` Documentation 2"
+      ]
+    },
+    "writing-for-agents": {
+      "sha256": "a842323e664e5af104eac5c97ad22fda929ebeb62d81c501161ac1f6f482db58",
+      "headings": [
+        "Context pointers",
+        "The two loads",
+        "Information hierarchy",
+        "Steps and completion criteria",
+        "When to split",
+        "Leading words",
+        "Pruning"
+      ],
+      "rules": [
+        "Information hierarchy 1",
+        "Information hierarchy 2",
+        "Information hierarchy 3"
+      ]
+    }
+  }
+}

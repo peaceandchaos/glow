@@ -1,0 +1,12 @@
+{
+  "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm": {
+    "package": "braces",
+    "range": "<=3.0.3",
+    "severity": "high",
+    "reviewedAt": "2026-10-03",
+    "reviewBy": "2026-10-17",
+    "decision": "track-unpatched",
+    "latest": "3.0.3",
+    "reason": "No braces release fixes it, and 3.0.3 is the latest. braces comes in only through micromatch, which Jest, metro-file-map, fast-glob and find-yarn-workspace-root use. fast-glob comes from the React Native CLI, react-compiler-healthcheck, react-native-bootsplash and rnsec. The release iOS bundle and the server build from 3 October contain no braces, micromatch, fast-glob or picomatch code. The dependency re-review upgrades braces or renews this disposition by 17 October."
+  }
+}

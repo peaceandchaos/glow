@@ -5,86 +5,53 @@ permissions:
 
 on:
   push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ci.yml'
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.json'
-      - 'app/.prettierrc.js'
-      - 'app/.prettierignore'
+    branches: ['**']
   pull_request:
-    paths:
-      - '.github/workflows/ci.yml'
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.json'
-      - 'app/.prettierrc.js'
-      - 'app/.prettierignore'
+  workflow_dispatch:
 
-# One job per check so failures surface as separate status checks. Node version
-# tracks app/package.json "engines".
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
-    name: Lint (ESLint)
-    runs-on: ubuntu-latest
+  verify:
+    name: verify (${{ matrix.revision }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        revision: ${{ fromJSON(github.event_name == 'pull_request' && '["head","merge"]' || '["commit"]') }}
+    env:
+      HUSKY: '0'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - run: npm ci
-        working-directory: app
-      - run: npm run lint
-        working-directory: app
+          ref: ${{ matrix.revision == 'head' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+      - name: Verify committed source
+        run: npm run verify:current
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verification-${{ matrix.revision }}-${{ github.run_attempt }}
+          path: .quality-results/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
 
-  format:
-    name: Format (Prettier)
-    runs-on: ubuntu-latest
+  quality-gate:
+    name: ${{ github.event_name == 'pull_request' && 'quality-gate' || 'post-push-gate' }}
+    if: always()
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - run: npm ci
-        working-directory: app
-      - run: npm run format:check
-        working-directory: app
-
-  typecheck:
-    name: Typecheck (tsc)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - run: npm ci
-        working-directory: app
-      - run: npm run typecheck
-        working-directory: app
-
-  react-compiler:
-    name: React Compiler
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
-      - run: npm ci
-        working-directory: app
-      - run: npm run react-compiler-check
-        working-directory: app
+      - name: Require every verification job
+        env:
+          RESULT: ${{ needs.verify.result }}
+        run: test "$RESULT" = success

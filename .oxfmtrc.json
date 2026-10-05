@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "arrowParens": "avoid",
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "sortImports": false,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    ".quality-results/**",
+    "packages/app/android/**",
+    "packages/app/ios/**",
+    "packages/app/patches/**",
+    "packages/app/vendor/**",
+    "tools/vendor/**",
+    "**/node_modules/**",
+    "package-lock.json",
+    "yarn.lock",
+    "**/coverage/**",
+    "*.log",
+    "tools/fixtures/**",
+    "**/.nitro/**",
+    "**/.output/**",
+    "**/.vercel/**",
+    "**/.workflow-data/**"
+  ]
+}

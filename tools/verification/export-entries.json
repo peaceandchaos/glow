@@ -1,0 +1,38 @@
+{
+  "projects": ["packages/app/tsconfig.json", "packages/server/tsconfig.json"],
+  "files": [
+    {
+      "path": "packages/app/src/config.example.ts",
+      "reason": "The template for the untracked config.ts that the app imports."
+    },
+    {
+      "path": "packages/server/nitro.config.ts",
+      "reason": "Nitro loads its default export."
+    },
+    {
+      "path": "packages/server/src/http/routes/v1/[...path].ts",
+      "reason": "Nitro routes requests to the default export."
+    },
+    {
+      "path": "packages/server/src/http/routes/v1/responses.ts",
+      "reason": "Nitro routes requests to the default export."
+    }
+  ],
+  "exports": [
+    {
+      "file": "packages/app/src/state/chatStore.ts",
+      "name": "MessageRole",
+      "reason": "src/state/chatView.ts re-exports it with no importer. Remove both when chatView.ts changes."
+    },
+    {
+      "file": "packages/app/src/state/chatStore.ts",
+      "name": "MessageStatus",
+      "reason": "src/state/chatView.ts re-exports it with no importer. Remove both when chatView.ts changes."
+    },
+    {
+      "file": "shared/contracts.ts",
+      "name": "modelLabels",
+      "reason": "Display names for the models that nothing reads yet; the UI owner decides whether the picker uses them."
+    }
+  ]
+}

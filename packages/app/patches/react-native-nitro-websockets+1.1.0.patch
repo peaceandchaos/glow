@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-nitro-websockets/ios/NWWebSocketConnection.mm b/node_modules/react-native-nitro-websockets/ios/NWWebSocketConnection.mm
+index 2893215..2eb022f 100644
+--- a/node_modules/react-native-nitro-websockets/ios/NWWebSocketConnection.mm
++++ b/node_modules/react-native-nitro-websockets/ios/NWWebSocketConnection.mm
+@@ -53,6 +53,16 @@ - (void)URLSession:(NSURLSession *)session
+   if (self.onComplete) self.onComplete(error);
+ }
+ 
++// A handshake redirect would resend the connection headers, including
++// credentials, to another host. Refusing it fails the handshake instead.
++- (void)URLSession:(NSURLSession *)session
++                          task:(NSURLSessionTask *)task
++    willPerformHTTPRedirection:(NSHTTPURLResponse *)response
++                    newRequest:(NSURLRequest *)request
++             completionHandler:(void (^)(NSURLRequest *_Nullable))completionHandler {
++  completionHandler(nil);
++}
++
+ @end
+ 
+ 

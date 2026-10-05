@@ -1,0 +1,227 @@
+diff --git a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequest.swift b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequest.swift
+index e0a9c63..0d05b68 100644
+--- a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequest.swift
++++ b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequest.swift
+@@ -3,10 +3,10 @@ import NitroModules
+ 
+ class HybridUrlRequest: HybridUrlRequestSpec {
+   private weak var task: URLSessionDataTask?
+-  private weak var delegate: URLSessionDelegate?
++  private weak var delegate: URLSessionDelegateAdapter?
+   private var isDoneFlag = false
+ 
+-  init(task: URLSessionDataTask, delegate: URLSessionDelegate) {
++  init(task: URLSessionDataTask, delegate: URLSessionDelegateAdapter) {
+     self.task = task
+     self.delegate = delegate
+     super.init()
+@@ -17,8 +17,7 @@ class HybridUrlRequest: HybridUrlRequestSpec {
+   }
+ 
+   func followRedirect() throws {
+-    // Redirects are handled automatically by URLSession
+-    // This is a no-op on iOS but required for API compatibility
++    delegate?.resolveRedirect(follow: true)
+   }
+ 
+   func read() throws {
+@@ -28,6 +27,7 @@ class HybridUrlRequest: HybridUrlRequestSpec {
+ 
+   func cancel() throws {
+     task?.cancel()
++    delegate?.resolveRedirect(follow: false)
+     isDoneFlag = true
+   }
+ 
+diff --git a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
+index 310efae..d494473 100644
+--- a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
++++ b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
+@@ -88,6 +88,8 @@ class HybridUrlRequestBuilder: HybridUrlRequestBuilderSpec {
+   }
+ 
+   func build() throws -> any HybridUrlRequestSpec {
++    // DevTools would show the device credential, request body, and reply text.
++    let reportsToDevTools = urlRequest.value(forHTTPHeaderField: "X-Device-Id") == nil
+     let delegate = URLSessionDelegateAdapter(
+       onRedirectReceived: onRedirectReceivedCallback,
+       onResponseStarted: onResponseStartedCallback,
+@@ -97,7 +99,8 @@ class HybridUrlRequestBuilder: HybridUrlRequestBuilderSpec {
+       onCanceled: onCanceledCallback,
+       executor: executor,
+       hybridRequest: nil,
+-      devToolsRequestId: devToolsRequestId
++      devToolsRequestId: devToolsRequestId,
++      reportsToDevTools: reportsToDevTools
+     )
+ 
+     let config = URLSessionConfiguration.default
+@@ -116,7 +119,10 @@ class HybridUrlRequestBuilder: HybridUrlRequestBuilderSpec {
+     delegate.task = task
+ 
+     #if DEBUG
+-    if NitroDevToolsReporter.isDebuggingEnabled() {
++    if reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
++      #if NITROFETCH_HARNESS
++      NSLog("NitroFetchHarness devtools reported a request")
++      #endif
+       NitroDevToolsReporter.reportRequestStart(withRequest: devToolsRequestId, request: urlRequest)
+     }
+     #endif
+@@ -130,7 +136,7 @@ class HybridUrlRequestBuilder: HybridUrlRequestBuilderSpec {
+ 
+ // MARK: - URLSession Delegate Adapter
+ 
+-private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSessionTaskDelegate {
++final class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSessionTaskDelegate {
+   let onRedirectReceived: ((_ info: UrlResponseInfo, _ newLocationUrl: String) -> Void)?
+   let onResponseStarted: ((_ info: UrlResponseInfo) -> Void)?
+   let onReadCompleted: ((_ info: UrlResponseInfo, _ byteBuffer: ArrayBuffer, _ bytesRead: Double) -> Void)?
+@@ -143,7 +149,11 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+   weak var hybridRequest: HybridUrlRequest?
+ 
+   private var response: HTTPURLResponse?
++  private let redirectLock = NSLock()
++  private var pendingRedirect: ((Bool) -> Void)?
++  private var cancelled = false
+   private let devToolsRequestId: String
++  private let reportsToDevTools: Bool
+   private var devToolsBytes: Int = 0
+   private var devToolsTextual: Bool = false
+ 
+@@ -156,7 +166,8 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+     onCanceled: ((_ info: UrlResponseInfo?) -> Void)?,
+     executor: DispatchQueue,
+     hybridRequest: HybridUrlRequest?,
+-    devToolsRequestId: String
++    devToolsRequestId: String,
++    reportsToDevTools: Bool
+   ) {
+     self.onRedirectReceived = onRedirectReceived
+     self.onResponseStarted = onResponseStarted
+@@ -167,9 +178,29 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+     self.executor = executor
+     self.hybridRequest = hybridRequest
+     self.devToolsRequestId = devToolsRequestId
++    self.reportsToDevTools = reportsToDevTools
+     super.init()
++    #if NITROFETCH_HARNESS
++    Self.countLive(1)
++    #endif
++  }
++
++  #if NITROFETCH_HARNESS
++  private static let liveLock = NSLock()
++  private static var live = 0
++  private static func countLive(_ change: Int) {
++    liveLock.lock()
++    live += change
++    let count = live
++    liveLock.unlock()
++    NSLog("NitroFetchHarness adapters live=%d", count)
+   }
+ 
++  deinit {
++    Self.countLive(-1)
++  }
++  #endif
++
+   func urlSession(
+     _ session: URLSession,
+     task: URLSessionTask,
+@@ -177,15 +208,33 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+     newRequest request: URLRequest,
+     completionHandler: @escaping (URLRequest?) -> Void
+   ) {
+-    executor.sync { [weak self] in
+-      guard let self = self else { return }
+-      if let callback = self.onRedirectReceived {
+-        let info = response.toNitro()
+-        let newUrl = request.url?.absoluteString ?? ""
+-        callback(info, newUrl)
+-      }
++    guard let callback = onRedirectReceived else {
++      completionHandler(request)
++      return
++    }
++    // As with Cronet, a registered listener decides: followRedirect() or cancel().
++    // After cancel() nothing would resolve a held handler, and it would keep this
++    // delegate alive (tools/native-transport/redirect-handler.mjs).
++    redirectLock.lock()
++    if cancelled {
++      redirectLock.unlock()
++      completionHandler(nil)
++      return
++    }
++    pendingRedirect = { follow in completionHandler(follow ? request : nil) }
++    redirectLock.unlock()
++    executor.sync {
++      callback(response.toNitro(), request.url?.absoluteString ?? "")
+     }
+-    completionHandler(request)
++  }
++
++  func resolveRedirect(follow: Bool) {
++    redirectLock.lock()
++    let pending = pendingRedirect
++    pendingRedirect = nil
++    if !follow { cancelled = true }
++    redirectLock.unlock()
++    pending?(follow)
+   }
+ 
+   func urlSession(
+@@ -193,6 +242,8 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+     task: URLSessionTask,
+     didCompleteWithError error: Error?
+   ) {
++    // Each request owns its session, which retains this delegate until invalidated.
++    defer { session.finishTasksAndInvalidate() }
+     executor.sync { [weak self] in
+       guard let self = self else { return }
+       self.hybridRequest?.markDone()
+@@ -201,7 +252,7 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+         let nsError = error as NSError
+         if nsError.code == NSURLErrorCancelled {
+           #if DEBUG
+-          if NitroDevToolsReporter.isDebuggingEnabled() {
++          if self.reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
+             NitroDevToolsReporter.reportRequestFailed(self.devToolsRequestId, cancelled: true)
+           }
+           #endif
+@@ -211,7 +262,7 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+           }
+         } else {
+           #if DEBUG
+-          if NitroDevToolsReporter.isDebuggingEnabled() {
++          if self.reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
+             NitroDevToolsReporter.reportRequestFailed(self.devToolsRequestId, cancelled: false)
+           }
+           #endif
+@@ -223,7 +274,7 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+         }
+       } else if let response = self.response {
+         #if DEBUG
+-        if NitroDevToolsReporter.isDebuggingEnabled() {
++        if self.reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
+           NitroDevToolsReporter.reportResponseEnd(self.devToolsRequestId, encodedDataLength: self.devToolsBytes)
+         }
+         #endif
+@@ -251,7 +302,7 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+     executor.sync { [weak self] in
+       guard let self = self else { return }
+       #if DEBUG
+-      if NitroDevToolsReporter.isDebuggingEnabled() {
++      if self.reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
+         var headerDict: [String: String] = [:]
+         httpResponse.allHeaderFields.forEach { k, v in
+           if let key = k as? String { headerDict[key] = String(describing: v) }
+@@ -285,7 +336,7 @@ private class URLSessionDelegateAdapter: NSObject, URLSessionDataDelegate, URLSe
+         guard let self = self, let response = self.response else { return }
+ 
+         #if DEBUG
+-        if NitroDevToolsReporter.isDebuggingEnabled() {
++        if self.reportsToDevTools && NitroDevToolsReporter.isDebuggingEnabled() {
+           self.devToolsBytes += data.count
+           NitroDevToolsReporter.reportDataReceived(self.devToolsRequestId, length: data.count)
+           if self.devToolsTextual, let text = String(data: data, encoding: .utf8) {

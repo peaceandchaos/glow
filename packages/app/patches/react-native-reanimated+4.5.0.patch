@@ -1,0 +1,217 @@
+diff --git a/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.cpp b/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.cpp
+index 2db064c..89323e2 100644
+--- a/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.cpp
++++ b/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.cpp
+@@ -5,8 +5,10 @@
+ 
+ #include <react/debug/react_native_assert.h>
+ 
++#include <functional>
+ #include <memory>
+ #include <utility>
++#include <vector>
+ 
+ namespace reanimated {
+ 
+@@ -35,26 +37,65 @@ void AnimatedPropsRegistry::update(jsi::Runtime &rt, const jsi::Value &operation
+       addUpdatesToBatch(shadowNode->getFamilyShared(), jsi::dynamicFromValue(rt, updates));
+     }
+ 
+-    if constexpr (StaticFeatureFlags::getFlag("FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS")) {
+-      timestampMap_[shadowNode->getTag()] = timestamp;
++    // When USE_ANIMATION_BACKEND is enabled, updates bypass `updatesRegistry_`,
++    // so entries added to `timestampMap_` would never be synced and thus never
++    // evicted, leaking until view unmount.
++    if constexpr (
++        StaticFeatureFlags::getFlag("FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS") &&
++        !StaticFeatureFlags::getFlag("USE_ANIMATION_BACKEND")) {
++      const auto tag = shadowNode->getTag();
++      timestampMap_[tag] = timestamp;
++      // If JS already has a `settledProps` snapshot for this tag, it is now
++      // stale — schedule a refresh on the next `collectSettledUpdates`.
++      if (syncedTags_.erase(tag) > 0) {
++        invalidatedTags_.insert(tag);
++      }
+     }
+   }
+ }
+ 
+-jsi::Value AnimatedPropsRegistry::getUpdatesOlderThanTimestamp(
+-    jsi::Runtime &rt,
+-    const double timestamp,
+-    const double cleanupTimestamp) {
++jsi::Value AnimatedPropsRegistry::collectSettledUpdates(jsi::Runtime &rt, const double settledTimestamp) {
+   react_native_assert(UpdatesRegistryManager::isLockedByCurrentThread());
+-  removeUpdatesOlderThanTimestamp(cleanupTimestamp);
+ 
+   std::vector<std::pair<Tag, std::reference_wrapper<const folly::dynamic>>> updates;
+ 
+-  for (const auto &[viewTag, pair] : updatesRegistry_) {
+-    auto it = timestampMap_.find(viewTag);
+-    if (it != timestampMap_.end() && it->second < timestamp) {
+-      updates.emplace_back(viewTag, std::cref(pair.second));
++  for (auto it = updatesRegistry_.begin(); it != updatesRegistry_.end();) {
++    const auto viewTag = it->first;
++
++    if (syncedTags_.contains(viewTag)) {
++      // React already has the latest value for this tag (synced on a previous
++      // call, so the `settledProps` state is committed by now) — the registry
++      // entry is redundant. `syncedTags_` is intentionally retained to detect
++      // re-animation staleness. Note that `syncedTags_` and `invalidatedTags_`
++      // are disjoint — `update()` moves tags from the former to the latter.
++      timestampMap_.erase(viewTag);
++      it = updatesRegistry_.erase(it);
++      continue;
++    }
++
++    const auto timestampIt = timestampMap_.find(viewTag);
++    if (timestampIt == timestampMap_.end()) {
++      ++it;
++      continue;
++    }
++    const bool isSettled = timestampIt->second < settledTimestamp;
++    const auto invalidatedIt = invalidatedTags_.find(viewTag);
++    const bool isInvalidated = invalidatedIt != invalidatedTags_.end();
++    if (isSettled || isInvalidated) {
++      updates.emplace_back(viewTag, std::cref(it->second.second));
++      if (isSettled) {
++        // Only settled-path tags are tracked as "synced" so that an ongoing
++        // animation doesn't re-trigger an invalidation/sync on every GC tick.
++        syncedTags_.insert(viewTag);
++      }
++      if (isInvalidated) {
++        // Only erase serviced invalidations; if a tag was invalidated but the
++        // matching update batch hasn't been flushed into updatesRegistry_ yet,
++        // we leave the entry so the next sync picks it up.
++        invalidatedTags_.erase(invalidatedIt);
++      }
+     }
++    ++it;
+   }
+ 
+   const jsi::Array array(rt, updates.size());
+@@ -69,22 +110,11 @@ jsi::Value AnimatedPropsRegistry::getUpdatesOlderThanTimestamp(
+   return jsi::Value(rt, array);
+ }
+ 
+-void AnimatedPropsRegistry::removeUpdatesOlderThanTimestamp(const double timestamp) {
+-  for (auto it = timestampMap_.begin(); it != timestampMap_.end();) {
+-    const auto viewTag = it->first;
+-    const auto viewTimestamp = it->second;
+-    if (viewTimestamp < timestamp) {
+-      it = timestampMap_.erase(it);
+-      updatesRegistry_.erase(viewTag);
+-    } else {
+-      it++;
+-    }
+-  }
+-}
+-
+ void AnimatedPropsRegistry::removeTag(const Tag tag) {
+   updatesRegistry_.erase(tag);
+   timestampMap_.erase(tag);
++  syncedTags_.erase(tag);
++  invalidatedTags_.erase(tag);
+ }
+ 
+ } // namespace reanimated
+diff --git a/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.h b/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.h
+index 2197eec..a9cb24c 100644
+--- a/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.h
++++ b/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/updates/AnimatedPropsRegistry.h
+@@ -4,10 +4,8 @@
+ 
+ #include <react/renderer/uimanager/UIManager.h>
+ 
+-#include <memory>
+-#include <string>
+ #include <unordered_map>
+-#include <vector>
++#include <unordered_set>
+ 
+ namespace reanimated {
+ 
+@@ -15,13 +13,22 @@ class AnimatedPropsRegistry : public UpdatesRegistry {
+  public:
+   void update(jsi::Runtime &rt, const jsi::Value &operations, double timestamp);
+ 
+-  /// Also removes updates older than `cleanupTimestamp` from the registry.
+-  jsi::Value getUpdatesOlderThanTimestamp(jsi::Runtime &rt, double timestamp, double cleanupTimestamp);
++  /// Returns updates that settled (received no update since `settledTimestamp`)
++  /// or whose synced `settledProps` snapshot was invalidated by a fresh update.
++  /// Also evicts entries that have already been synced to React — by the time
++  /// of the next call, the corresponding `settledProps` state is guaranteed to
++  /// be committed, so the registry entries are redundant.
++  jsi::Value collectSettledUpdates(jsi::Runtime &rt, double settledTimestamp);
+ 
+  private:
+   std::unordered_map<Tag, double> timestampMap_;
++  // Tags whose latest values have already been pushed to React `settledProps`.
++  // Intentionally retained after eviction to detect re-animation staleness.
++  std::unordered_set<Tag> syncedTags_;
++  // Tags that were synced to React but received a fresh worklet update since;
++  // their `settledProps` are stale and need to be refreshed on the next sync.
++  std::unordered_set<Tag> invalidatedTags_;
+ 
+-  void removeUpdatesOlderThanTimestamp(double timestamp);
+   void removeTag(Tag tag) override;
+ };
+ 
+diff --git a/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxyCommon.h b/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxyCommon.h
+index 8603591..3d43e94 100644
+--- a/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxyCommon.h
++++ b/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxyCommon.h
+@@ -22,6 +22,7 @@ struct LayoutAnimation {
+   Tag parentTag;
+   std::optional<double> opacity;
+   bool isViewAlreadyMounted = false;
++  bool isExitingWhenSettled = false;
+   int count = 1;
+   LayoutAnimation &operator=(const LayoutAnimation &other) = default;
+ 
+diff --git a/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy_Legacy.cpp b/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy_Legacy.cpp
+index c28efd7..2b1e429 100644
+--- a/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy_Legacy.cpp
++++ b/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy_Legacy.cpp
+@@ -119,6 +119,7 @@ std::optional<SurfaceId> LayoutAnimationsProxy_Legacy::endLayoutAnimation(int ta
+   if (--layoutAnimation.count > 0) {
+     return {};
+   }
++  layoutAnimation.isExitingWhenSettled = shouldRemove;
+   maybeSettledAnimationTags_.insert(tag);
+   auto surfaceId = layoutAnimation.finalView.surfaceId;
+ 
+@@ -413,7 +414,8 @@ void LayoutAnimationsProxy_Legacy::addOngoingAnimations(SurfaceId surfaceId, Sha
+ 
+     auto layoutAnimationIt = layoutAnimations_.find(tag);
+ 
+-    if (layoutAnimationIt == layoutAnimations_.end() || layoutAnimationIt->second.isSettled()) {
++    if (layoutAnimationIt == layoutAnimations_.end() ||
++        (layoutAnimationIt->second.isSettled() && layoutAnimationIt->second.isExitingWhenSettled)) {
+       continue;
+     }
+ 
+diff --git a/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp b/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp
+index cf531e8..2b68ff7 100644
+--- a/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp
++++ b/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp
+@@ -651,16 +651,14 @@ jsi::Value ReanimatedModuleProxy::getSettledUpdates(jsi::Runtime &rt) {
+       StaticFeatureFlags::getFlag("FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS") &&
+       "getSettledUpdates requires FORCE_REACT_RENDER_FOR_SETTLED_ANIMATIONS static feature flag to be enabled");
+ 
++  constexpr double SETTLED_ANIMATION_THRESHOLD_MS = 1000;
++
+   // TODO(future): use unified timestamp
+   const auto currentTimestamp = getAnimationTimestamp_();
+ 
+-  // TODO: fix bug when threshold difference is smaller than 1 second
+   // TODO(future): flush updates from CSS animations and CSS transitions registries
+-  // TODO(future): find a better way to obtain timestamp for removing updates
+-  // TODO(future): move removing old updates to separate method
+   auto lock = updatesRegistryManager_->lock();
+-  return animatedPropsRegistry_->getUpdatesOlderThanTimestamp(
+-      rt, currentTimestamp - 1000 /* 1 second */, currentTimestamp - 2000 /* 2 seconds */);
++  return animatedPropsRegistry_->collectSettledUpdates(rt, currentTimestamp - SETTLED_ANIMATION_THRESHOLD_MS);
+ }
+ 
+ bool ReanimatedModuleProxy::handleEvent(

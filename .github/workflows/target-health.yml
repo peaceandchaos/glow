@@ -1,0 +1,49 @@
+name: Target health
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('{0} {1} {2} {3}', inputs.operation, inputs.pr, inputs.head, inputs.base) || github.workflow }}
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  workflow_run:
+    workflows: [CI]
+    types: [in_progress, completed]
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        options: [refresh, approve-repair]
+        default: refresh
+      pr:
+        description: 'Repair PR number (approve-repair only)'
+      head:
+        description: 'Exact repair head SHA (approve-repair only)'
+      base:
+        description: 'Exact unhealthy target SHA (approve-repair only)'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+  checks: write
+  statuses: write
+
+concurrency:
+  group: target-health
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Read only trusted default-branch code. Never checkout the candidate.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: tools/github
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const inspect = require('./tools/github/target-health.cjs');
+            await inspect(github, context, core);
