@@ -332,7 +332,7 @@ test('Stop before acceptance leaves a server tombstone, so the unsent turn can n
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Device-Id': server.device,
+        Authorization: `Bearer ${server.token}`,
       },
       body: JSON.stringify({
         kind: 'submit',

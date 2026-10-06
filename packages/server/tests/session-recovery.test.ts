@@ -389,6 +389,9 @@ test('a reply stream that closes cleanly before the reply finishes is watched ag
     () => phone.session.message(overHttp.id).text === 'a',
   );
   phone.network.endStreams();
+  await until('the phone watches the HTTP reply again', () =>
+    phone.network.requests.includes(`GET /v1/jobs/${overHttp.id}/events`),
+  );
   server.providers.script(overHttp.id).text('b').end();
   await settled(phone, overHttp.id);
   expect(phone.archive.message(overHttp.id)).toMatchObject({

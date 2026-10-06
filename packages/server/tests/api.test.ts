@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto';
 import {
   decodeJson,
   serverMessageSchema,
@@ -8,26 +7,31 @@ import {
 import { SseDecoder } from '../../../shared/provider-events';
 import { handleRequest, type ApiServices } from '../src/api';
 import { deliverJob } from '../src/delivery';
-import { deviceOwner } from '../src/auth';
+import { newSessionToken } from '../src/auth';
 import { InputParts } from '../src/input-parts';
 import { JobRepository, staleAfterMs } from '../src/jobs';
 import { testDatabase } from './database';
 import { submission } from './fixtures';
+import { signedIn, withoutDatabase } from './sessions';
 
-const device = randomBytes(32).toString('base64url');
-const anotherDevice = randomBytes(32).toString('base64url');
-const headers = { 'Content-Type': 'application/json', 'X-Device-Id': device };
-const owner = deviceOwner(new Headers(headers), device);
+const token = newSessionToken();
+const anotherToken = newSessionToken();
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${token}`,
+};
+const owner = 'apple-user-1';
+const anotherOwner = 'apple-user-2';
 
 function request(
   path: string,
   method = 'GET',
   body?: string,
-  id = device,
+  id: string = token,
 ): Request {
   return new Request(`https://fixture.example/v1/${path}`, {
     method,
-    headers: { ...headers, 'X-Device-Id': id },
+    headers: { ...headers, Authorization: `Bearer ${id}` },
     body,
   });
 }
@@ -38,7 +42,10 @@ async function fixture() {
   const dispatch = jest.fn(() => Promise.resolve('fixture-workflow'));
   const rank = jest.fn(() => Promise.resolve([]));
   const services: ApiServices = {
-    allowlist: `${device},${anotherDevice}`,
+    ...(await signedIn(database, [
+      [token, owner],
+      [anotherToken, anotherOwner],
+    ])),
     jobs: () => Promise.resolve(jobs),
     dispatch,
     rank,
@@ -52,7 +59,12 @@ test('unauthorized requests are rejected before body decoding, database access, 
   );
   const dispatch = jest.fn(() => Promise.resolve('never'));
   const rank = jest.fn(() => Promise.resolve([]));
-  const services: ApiServices = { allowlist: device, jobs, dispatch, rank };
+  const services: ApiServices = {
+    ...withoutDatabase(owner),
+    jobs,
+    dispatch,
+    rank,
+  };
   const response = await handleRequest(
     request('chat', 'POST', 'invalid JSON', 'unknown'),
     services,
@@ -64,19 +76,29 @@ test('unauthorized requests are rejected before body decoding, database access, 
 });
 
 test('a body that is not UTF-8 is a client error, not a server failure', async () => {
+  const { database, postgres } = await testDatabase();
   const jobs = jest.fn(() =>
     Promise.reject(new Error('Must not load database')),
   );
-  const response = await handleRequest(
-    new Request('https://fixture.example/v1/chat', {
-      method: 'POST',
-      headers,
-      body: new Uint8Array([0x7b, 0xff, 0x7d]),
-    }),
-    { allowlist: device, jobs, dispatch: jest.fn(), rank: jest.fn() },
-  );
-  expect(response.status).toBe(400);
-  expect(jobs).not.toHaveBeenCalled();
+  try {
+    const response = await handleRequest(
+      new Request('https://fixture.example/v1/chat', {
+        method: 'POST',
+        headers,
+        body: new Uint8Array([0x7b, 0xff, 0x7d]),
+      }),
+      {
+        ...(await signedIn(database, [[token, owner]])),
+        jobs,
+        dispatch: jest.fn(),
+        rank: jest.fn(),
+      },
+    );
+    expect(response.status).toBe(400);
+    expect(jobs).not.toHaveBeenCalled();
+  } finally {
+    await postgres.close();
+  }
 });
 
 test('contract errors and foreign-device reads return errors without reaching a provider', async () => {
@@ -108,7 +130,7 @@ test('contract errors and foreign-device reads return errors without reaching a 
           `jobs/${input.attemptId}${suffix}`,
           method,
           method === 'POST' ? '{"sequence":0}' : undefined,
-          anotherDevice,
+          anotherToken,
         ),
         f.services,
       );
