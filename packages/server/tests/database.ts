@@ -2,11 +2,12 @@ import { PGlite } from '@electric-sql/pglite';
 import type { Database } from '../src/database';
 import { schemaSql } from '../src/schema';
 
-export async function testDatabase(): Promise<{
+export async function testDatabase(earlierSchema = ''): Promise<{
   postgres: PGlite;
   database: Database;
 }> {
   const postgres = new PGlite();
+  await postgres.exec(earlierSchema);
   await postgres.exec(schemaSql);
   const database: Database = {
     async query(sql, values) {

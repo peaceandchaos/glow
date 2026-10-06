@@ -53,4 +53,47 @@ CREATE TABLE IF NOT EXISTS sign_in_nonces (
   nonce_hash text PRIMARY KEY,
   expires_at timestamptz NOT NULL
 );
+CREATE TABLE IF NOT EXISTS chat_owners (
+  owner text PRIMARY KEY,
+  seq bigint NOT NULL
+);
+CREATE TABLE IF NOT EXISTS chats (
+  owner text NOT NULL,
+  id uuid NOT NULL,
+  seq bigint NOT NULL,
+  title text NOT NULL,
+  picker text NOT NULL,
+  level text,
+  base_path_id uuid NOT NULL,
+  leaf_id uuid NOT NULL,
+  created_at bigint NOT NULL,
+  updated_at bigint NOT NULL,
+  PRIMARY KEY (owner, id)
+);
+CREATE INDEX IF NOT EXISTS chats_seq ON chats (owner, seq);
+CREATE TABLE IF NOT EXISTS chat_messages (
+  owner text NOT NULL,
+  id uuid NOT NULL,
+  seq bigint NOT NULL,
+  chat_id uuid NOT NULL,
+  parent_id uuid,
+  path_id uuid NOT NULL,
+  role text NOT NULL CHECK (role IN ('user', 'assistant')),
+  status text NOT NULL
+    CHECK (status IN ('completed', 'stopped', 'interrupted', 'failed')),
+  text text NOT NULL,
+  reasoning text NOT NULL,
+  image_count smallint NOT NULL DEFAULT 0,
+  picker text NOT NULL,
+  level text,
+  retry_model text,
+  actual_model text,
+  error text,
+  created_at bigint NOT NULL,
+  PRIMARY KEY (owner, id)
+);
+CREATE INDEX IF NOT EXISTS chat_messages_seq ON chat_messages (owner, seq);
+CREATE INDEX IF NOT EXISTS chat_messages_chat ON chat_messages (owner, chat_id);
+ALTER TABLE deleted_chats ADD COLUMN IF NOT EXISTS seq bigint;
+CREATE INDEX IF NOT EXISTS deleted_chats_seq ON deleted_chats (owner, seq);
 `;

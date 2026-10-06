@@ -11,6 +11,7 @@ import { handleRequest, type ApiServices } from '../src/api';
 import { newSessionToken } from '../src/auth';
 import { GatewayClient } from '../src/gateway';
 import { JevClient } from '../src/jev';
+import { ChatRows } from '../src/chats';
 import { JobRepository } from '../src/jobs';
 import type { RegistryKey } from '../src/models';
 import { LiveProviders } from '../src/providers';
@@ -110,6 +111,7 @@ beforeAll(async () => {
   services = {
     ...(await signedIn(fixture.database, [[token, owner]])),
     jobs: () => Promise.resolve(jobs),
+    chats: () => Promise.resolve(new ChatRows(fixture.database)),
     catalog: bakedCatalog,
     dispatch(dispatchOwner, attemptId) {
       workers.push(

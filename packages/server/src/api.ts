@@ -5,8 +5,10 @@ import {
   decode,
   decodeJson,
   idSchema,
+  seqSchema,
   sessionRequestSchema,
   socketCommandSchema,
+  syncPushSchema,
   type ServerMessage,
   type SessionResponse,
   type SocketCommand,
@@ -19,6 +21,7 @@ import {
   sessionOwner,
   type SessionStore,
 } from './auth';
+import type { ChatRows } from './chats';
 import { deliverJob, jobStream } from './delivery';
 import { RequestError } from './errors';
 import { InputParts } from './input-parts';
@@ -29,6 +32,7 @@ export type ApiServices = {
   appleKeys: JWTVerifyGetKey;
   sessions: () => Promise<SessionStore>;
   jobs: () => Promise<JobRepository>;
+  chats: () => Promise<ChatRows>;
   dispatch: Dispatcher;
   catalog: Catalog;
 };
@@ -293,6 +297,30 @@ async function handleJobRoute(
   throw new RequestError(404, 'Route not found.');
 }
 
+async function handleSyncRoute(
+  request: Request,
+  owner: string,
+  services: ApiServices,
+): Promise<Response> {
+  const chats = await services.chats();
+  if (request.method === 'GET') {
+    const after = seqSchema.parse(
+      Number(new URL(request.url).searchParams.get('after') ?? Number.NaN),
+    );
+    return Response.json(await chats.pull(owner, after), {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+  if (request.method === 'POST') {
+    await chats.push(
+      owner,
+      decodeJson(syncPushSchema, await readBody(request)),
+    );
+    return new Response(null, { status: 204 });
+  }
+  throw new RequestError(404, 'Route not found.');
+}
+
 async function signIn(
   request: Request,
   services: ApiServices,
@@ -353,6 +381,8 @@ async function handleSignedInRoute(
     await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
     return new Response(null, { status: 204 });
   }
+  if (path[1] === 'sync' && path.length === 2)
+    return handleSyncRoute(request, owner, services);
   throw new RequestError(404, 'Route not found.');
 }
 

@@ -25,6 +25,7 @@ import {
 } from '../src/api';
 import { newSessionToken } from '../src/auth';
 import { ProviderFailure } from '../src/errors';
+import { ChatRows } from '../src/chats';
 import { JobRepository } from '../src/jobs';
 import type {
   PreparedContext,
@@ -312,6 +313,7 @@ export async function startServer(): Promise<Server> {
   const services: ApiServices = {
     ...auth,
     jobs: () => Promise.resolve(jobs),
+    chats: () => Promise.resolve(new ChatRows(database)),
     catalog: bakedCatalog,
     // Durable dispatch starts the real worker asynchronously, as Workflow does.
     async dispatch(dispatchOwner, attemptId) {

@@ -2,7 +2,12 @@ import { createRemoteJWKSet } from 'jose';
 import { start } from 'workflow/api';
 import { replyWorkflow } from '../workflows/reply';
 import type { ApiServices } from './api';
-import { runtimeCatalog, runtimeJobs, runtimeSessions } from './runtime';
+import {
+  runtimeCatalog,
+  runtimeChats,
+  runtimeJobs,
+  runtimeSessions,
+} from './runtime';
 
 const appleKeys = createRemoteJWKSet(
   new URL('https://appleid.apple.com/auth/keys'),
@@ -14,6 +19,7 @@ export function services(): ApiServices {
     appleKeys,
     sessions: runtimeSessions,
     jobs: runtimeJobs,
+    chats: runtimeChats,
     async dispatch(owner, attemptId) {
       return (await start(replyWorkflow, [owner, attemptId])).runId;
     },

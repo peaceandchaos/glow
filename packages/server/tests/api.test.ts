@@ -12,6 +12,7 @@ import {
 } from '../../../shared/contracts';
 import { SseDecoder } from '../../../shared/provider-events';
 import { handleRequest, type ApiServices } from '../src/api';
+import { ChatRows } from '../src/chats';
 import { deliverJob } from '../src/delivery';
 import { newSessionToken } from '../src/auth';
 import { InputParts } from '../src/input-parts';
@@ -54,6 +55,7 @@ async function fixture() {
       [anotherToken, anotherOwner],
     ])),
     jobs: () => Promise.resolve(jobs),
+    chats: () => Promise.resolve(new ChatRows(database)),
     dispatch,
     catalog: bakedCatalog,
   };
@@ -68,6 +70,7 @@ test('unauthorized requests are rejected before body decoding or database access
   const services: ApiServices = {
     ...withoutDatabase(owner),
     jobs,
+    chats: jobs,
     dispatch,
     catalog: bakedCatalog,
   };
@@ -95,6 +98,7 @@ test('a body that is not UTF-8 is a client error, not a server failure', async (
       {
         ...(await signedIn(database, [[token, owner]])),
         jobs,
+        chats: jobs,
         dispatch: jest.fn(),
         catalog: bakedCatalog,
       },

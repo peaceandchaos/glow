@@ -1,5 +1,6 @@
 import type { Catalog } from '../../../shared/catalog';
 import { SessionStore } from './auth';
+import { ChatRows } from './chats';
 import { postgresDatabase, type Database } from './database';
 import { GatewayClient, type GatewayAuth } from './gateway';
 import { JobRepository } from './jobs';
@@ -36,6 +37,10 @@ function runtimeDatabase(): Promise<Database> {
 
 export async function runtimeJobs(): Promise<JobRepository> {
   return new JobRepository(await runtimeDatabase());
+}
+
+export async function runtimeChats(): Promise<ChatRows> {
+  return new ChatRows(await runtimeDatabase());
 }
 
 export async function runtimeSessions(): Promise<SessionStore> {

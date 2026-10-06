@@ -239,6 +239,54 @@ export const serverMessageSchema = z.discriminatedUnion('kind', [
 ]);
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
 
+export const seqSchema = z.number().int().nonnegative().safe();
+// model is {picker, level}; leaf is {leafId, updatedAt}.
+const chatFieldSchema = z.enum(['title', 'model', 'leaf']);
+const chatRowSchema = z.strictObject({
+  id: idSchema,
+  title: z.string().min(1).max(120),
+  picker: pickerSchema,
+  level: levelKeySchema.optional(),
+  basePathId: idSchema,
+  leafId: idSchema,
+  createdAt: z.number().int(),
+  updatedAt: z.number().int(),
+});
+const chatPushSchema = z.strictObject({
+  ...chatRowSchema.shape,
+  dirty: z.array(chatFieldSchema).min(1),
+});
+const messageRowSchema = z.strictObject({
+  id: idSchema,
+  chatId: idSchema,
+  parentId: idSchema.nullable(),
+  pathId: idSchema,
+  role: z.enum(['user', 'assistant']),
+  status: z.enum(['completed', 'stopped', 'interrupted', 'failed']),
+  text: z.string().max(1_000_000),
+  reasoning: z.string().max(1_000_000),
+  imageCount: z.number().int().min(0).max(4),
+  picker: pickerSchema,
+  level: levelKeySchema.optional(),
+  retryModel: modelKeySchema.nullable(),
+  actualModel: modelKeySchema.nullable(),
+  error: z.string().nullable(),
+  createdAt: z.number().int(),
+});
+export const syncPushSchema = z.strictObject({
+  chats: z.array(chatPushSchema).max(200),
+  messages: z.array(messageRowSchema).max(500),
+});
+export type SyncPush = z.infer<typeof syncPushSchema>;
+export const syncPageSchema = z.strictObject({
+  chats: z.array(chatRowSchema),
+  messages: z.array(messageRowSchema),
+  deletedChatIds: z.array(idSchema),
+  cursor: seqSchema,
+  more: z.boolean(),
+});
+export type SyncPage = z.infer<typeof syncPageSchema>;
+
 export const sessionTokenBytes = 32;
 export const sessionTokenSchema = z
   .string()
