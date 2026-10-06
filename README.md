@@ -4,7 +4,7 @@ This repository extends the [Margelo chat demo](https://blog.margelo.com/buildin
 
 Builds made before that removal embedded any real keys from `config.ts` in their bundle, and the native socket prewarmer stored the OpenAI socket request, key included, on the device. An install upgraded from such a build sends that stored request once on its first launch, before JavaScript runs and clears the queue. Rotate any key that was ever in a built app.
 
-The user owns the UI. Engineering scope is iOS and the shared app and server code. The Android sources are inherited and not maintained.
+The owner directs the UI design and approves how the app looks and feels. Engineering scope is iOS and the shared app and server code. The Android sources are inherited and not maintained.
 
 Read [AGENTS.md](AGENTS.md) for task boundaries. [Provider contracts](docs/providers.md) describe the approved provider behavior. [Dependency review](docs/dependencies.md) records all findings from the dated scan.
 
@@ -87,8 +87,8 @@ a submission automatically. Its consumer must persist acceptance, results, and
 cursors before acknowledging them to the server.
 
 `packages/app/src/state/chatView.ts` connects this layer, the native binding, and the
-session controller below to the existing screens. The user owns the UI work, and the
-screens keep their UI. Recents lists saved chats with a sent message, newest first,
+session controller below to the existing screens, which keep their UI.
+Recents lists saved chats with a sent message, newest first,
 and its search matches titles loosely. A chat opens at its newest 50 messages, and
 scrolling to the top loads the 50 before them.
 

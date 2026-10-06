@@ -5,7 +5,7 @@ This repository is a personal iOS chat app. Read `README.md` for the current imp
 ## Scope and authority
 
 - Work on iOS and shared app/server code. Android implementation and verification are outside the current scope.
-- The user owns the UI. Keep screens and visual behavior unchanged unless the task explicitly includes them.
+- The owner directs the UI design and approves how the app looks and feels. Keep screens and visual behavior unchanged unless the task explicitly includes them. Show the owner screenshots of each visual change before it merges.
 - Approved local edits, disposable fixtures, builds without paid services, and local commits do not need repeated confirmation. Preserve unrelated changes.
 - Review specific dependency changes before applying them. Do not run automatic audit fixes. Scoped overrides require a documented compatibility argument.
 - Make every agent write through the limited GitHub App bot. Do not merge, revert, deploy, publish, spend money, or call paid providers without task authorization.
