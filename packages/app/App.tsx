@@ -50,9 +50,9 @@ function leave(setGate: SetGate, account: Account): void {
     );
 }
 
-function App() {
+function App({ harnessAccount }: { harnessAccount?: Account }) {
   const [gate, setGate] = useState<Gate>({ kind: 'starting' });
-  useEffect(() => open(setGate), []);
+  useEffect(() => open(setGate, harnessAccount), [harnessAccount]);
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
