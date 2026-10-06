@@ -13,7 +13,6 @@ type Phase =
 
 type SignInScreenProps = { onSignedIn: (account: Account) => void };
 
-// A black capsule with Apple's logo and the title in white.
 const appleBlack = '#000000';
 const appleWhite = '#FFFFFF';
 const HEIGHT = 44;

@@ -23,7 +23,6 @@ import type { ClientResponse, ClientSocket } from '../src/network/client';
 import { nativeDrivers } from '../src/network/nativeDrivers';
 import { stopAppSession } from '../src/state/appSession';
 
-// The native Keychain, as one in-memory item per service.
 jest.mock('react-native-keychain', () => {
   const items = new Map<string, { username: string; password: string }>();
   return {
@@ -52,8 +51,6 @@ jest.mock('react-native-keychain', () => {
     ),
   };
 });
-// The library's JavaScript and its native module, with the library's own
-// constant values from lib/AppleAuthModule.js.
 jest.mock('@invertase/react-native-apple-authentication', () => ({
   appleAuth: {
     Error: { UNKNOWN: '1000', CANCELED: '1001' },
@@ -99,8 +96,6 @@ jest.mock('../src/components/Glass', () => ({
   Glass: ({ children }: { children: React.ReactNode }) => children,
 }));
 jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
-// The chat pages need native views. This stand-in shows that chats are open,
-// sends through the real store, and keeps the real Recents screen.
 jest.mock('../src/screens/RootDrawer', () => {
   const { Pressable: MockPressable, Text: MockText } =
     jest.requireActual('react-native');
@@ -166,7 +161,6 @@ function appleCredential(): AppleRequestResponse {
   };
 }
 
-// A server socket that opens and then stays quiet.
 class QuietSocket implements ClientSocket {
   readyState = 'CONNECTING';
   onopen: (() => void) | null = null;
@@ -202,7 +196,7 @@ beforeEach(async () => {
     sockets.push(opened);
     return opened;
   });
-  activated = 0;
+  foregroundedListeners = 0;
   jest
     .spyOn(TurboModuleRegistry, 'getEnforcing')
     .mockImplementation(name =>
@@ -212,7 +206,6 @@ beforeEach(async () => {
 
 let mounted: ReactTestRenderer | null = null;
 
-// Each test starts with no screen and no chat session, as after sign-out.
 afterEach(async () => {
   await act(async () => mounted?.unmount());
   mounted = null;
@@ -259,13 +252,11 @@ async function launch() {
   };
 }
 
-// Replies run only while the app is in the foreground. This sends the
-// foreground to the AppState listeners added since the last call.
-let activated = 0;
-async function activate() {
+let foregroundedListeners = 0;
+async function enterForeground() {
   const calls = jest.mocked(AppState.addEventListener).mock.calls;
-  const added = calls.slice(activated);
-  activated = calls.length;
+  const added = calls.slice(foregroundedListeners);
+  foregroundedListeners = calls.length;
   await act(async () => {
     for (const [event, listener] of added)
       if (event === 'change') listener('active');
@@ -364,7 +355,7 @@ test('a launch with an authorized session opens the chats, whose socket carries 
   const app = await launch();
   expect(app.texts()).toContain('Chats');
   expect(app.texts()).not.toContain(signInLabel);
-  await activate();
+  await enterForeground();
 
   await app.press('Send Hello');
   expect(socket.mock.calls).toEqual([
@@ -379,7 +370,7 @@ test('signing out from the Recents settings button asks first, deletes the sessi
   await savedAccount();
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
   const app = await launch();
-  await activate();
+  await enterForeground();
   await app.press('Send Hello');
   expect(sockets.map(opened => opened.readyState)).toEqual(['OPEN']);
 
@@ -419,7 +410,7 @@ test('after sign-out, the next sign-in starts chats that use its own token', asy
   await savedAccount();
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
   const app = await launch();
-  await activate();
+  await enterForeground();
   await app.press('Settings');
   const signOutButton = alert.mock.calls[0][2]?.find(
     button => button.text === 'Sign Out',
@@ -434,7 +425,7 @@ test('after sign-out, the next sign-in starts chats that use its own token', asy
     response(200, JSON.stringify({ token: nextToken })),
   );
   await app.press(signInLabel);
-  await activate();
+  await enterForeground();
   await app.press('Send Hello');
 
   expect(socket.mock.calls.at(-1)?.[1]).toEqual({

@@ -14,7 +14,6 @@ import { ChatStoreContext } from './src/state/chatStore';
 import type { ChatStore } from './src/state/chatView';
 import { SignOutContext } from './src/state/signOut';
 
-// No chat session exists until an account is signed in.
 type Gate =
   | { kind: 'starting' }
   | { kind: 'signedOut' }
@@ -22,8 +21,6 @@ type Gate =
 
 type SetGate = (gate: Gate) => void;
 
-// Opens the chats of a new sign-in, or else of the saved account if Apple
-// still allows it.
 function open(setGate: SetGate, signedIn?: Account): void {
   (signedIn ? Promise.resolve(signedIn) : restoreAccount())
     .then(async account => {

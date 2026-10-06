@@ -8,7 +8,6 @@ import { restoreAccount, signInWithApple, signOut } from '../src/account';
 import type { ClientResponse } from '../src/network/client';
 import { nativeDrivers } from '../src/network/nativeDrivers';
 
-// The native Keychain, as one in-memory item per service.
 jest.mock('react-native-keychain', () => {
   const items = new Map<string, { username: string; password: string }>();
   return {
@@ -37,8 +36,6 @@ jest.mock('react-native-keychain', () => {
     ),
   };
 });
-// The library's JavaScript and its native module, with the library's own
-// constant values from lib/AppleAuthModule.js.
 jest.mock('@invertase/react-native-apple-authentication', () => ({
   appleAuth: {
     Error: { UNKNOWN: '1000', CANCELED: '1001' },
@@ -56,9 +53,9 @@ jest.mock('../src/config', () => ({ PROXY_BASE_URL: 'https://chat.example' }));
 
 const service = 'personal-chat.session.v1';
 const sessionUrl = 'https://chat.example/v1/session';
+const getEnforcing = TurboModuleRegistry.getEnforcing;
 // 32 bytes of 0xfb, as the native CSPRNG returns them (base64) and as the raw
 // nonce carries them (base64url).
-const getEnforcing = TurboModuleRegistry.getEnforcing;
 const random = {
   getConstants: () => ({}),
   getRandomBase64: () => `${'+/v7'.repeat(10)}+/s=`,
