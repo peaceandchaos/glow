@@ -1,4 +1,5 @@
-import { postgresDatabase } from './database';
+import { SessionStore } from './auth';
+import { postgresDatabase, type Database } from './database';
 import { GatewayClient } from './gateway';
 import { JobRepository } from './jobs';
 import { JevClient } from './jev';
@@ -6,7 +7,7 @@ import { LiveProviders } from './providers';
 import { ResponsesClient } from './responses';
 import { schemaSql } from './schema';
 
-let repository: Promise<JobRepository> | null = null;
+let installed: Promise<Database> | null = null;
 
 function required(name: string): string {
   const value = process.env[name];
@@ -14,8 +15,8 @@ function required(name: string): string {
   return value;
 }
 
-export function runtimeJobs(): Promise<JobRepository> {
-  repository ??= (async () => {
+function runtimeDatabase(): Promise<Database> {
+  installed ??= (async () => {
     const database = postgresDatabase(required('DATABASE_URL'));
     await database.transaction(async db => {
       await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
@@ -23,12 +24,20 @@ export function runtimeJobs(): Promise<JobRepository> {
       ]);
       await db.query(schemaSql);
     });
-    return new JobRepository(database);
+    return database;
   })().catch(error => {
-    repository = null;
+    installed = null;
     throw error;
   });
-  return repository;
+  return installed;
+}
+
+export async function runtimeJobs(): Promise<JobRepository> {
+  return new JobRepository(await runtimeDatabase());
+}
+
+export async function runtimeSessions(): Promise<SessionStore> {
+  return new SessionStore(await runtimeDatabase());
 }
 
 // Without AI_GATEWAY_API_KEY, both Gateway clients use the Vercel OIDC token.
