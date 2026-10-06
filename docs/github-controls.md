@@ -23,11 +23,11 @@ Agent writes use a GitHub App installed only on this repository. Its webhook and
 | Metadata                                                | Read-only      | Identify the repository              |
 | Administration, checks, statuses, secrets, environments | None           | Remain outside the bot's authority   |
 
-Use an **installation access token**, which identifies the bot. A user access token would act as a person. Do not give the app a ruleset bypass. The owner approves the bot's PRs, and the bot never merges them.
+Use an **installation access token**, which identifies the bot. A user access token would act as a person. Do not give the app a ruleset bypass. The owner reviews changes to the code-owned control paths. The bot merges a PR when the ruleset allows it.
 
 Without Workflows write, GitHub rejects a bot push that adds or edits a workflow. It also returns HTTP 403 when the bot tries to create a status, a check run, or a workflow dispatch. CI runs with a read-only token, so the bot has no route to a required result. A workflow change needs a temporary owner grant for that one reviewed PR. With Workflows write, a bot workflow on an unreviewed `submission/**` branch could publish results as the GitHub Actions app, ID `15368`.
 
-No permission removes one limit. CI runs the candidate's own code, so a candidate can weaken its own tests or check list. Those results are real, not forged. CODEOWNERS review of every test and checking file is the control against them.
+No permission removes one limit. CI runs the candidate's own code, so a candidate can weaken its own tests or check list. Those results are real, not forged. CODEOWNERS review of every checking file, check list, and dependency file is the control against them. Tests outside `tools/` are not code-owned, so `AGENTS.md` forbids weakening them.
 
 A local helper verifies the app and installation identities, requests a short-lived installation token, and checks that the token grants exactly the permissions above on this one repository. Do not put private keys or tokens in chat, tracked files, URLs, shell history, or build artifacts.
 
@@ -37,7 +37,7 @@ Sources: [GitHub App permissions](https://docs.github.com/en/apps/creating-githu
 
 `tools/github/integration-rules.json` defines the repository ruleset. It protects every branch except `submission/**`. Those refs are candidate uploads, not acceptance targets. Do not merge or promote work through them. The repository owner can still change the rules on purpose.
 
-The ruleset requires `quality-gate` and `target-health` from the GitHub Actions app, ID `15368`. It requires a PR, current checks, owner review, dismissal of stale approvals, approval after the latest push, and resolved review conversations. It permits no bypass actors, force pushes, deletion, or merge commits on protected targets. Keep auto-merge off. CODEOWNERS assigns every file to the owner.
+The ruleset requires `quality-gate` and `target-health` from the GitHub Actions app, ID `15368`. It requires a PR, current checks, code-owner review, dismissal of stale approvals, approval after the latest push, and resolved review conversations. It permits no bypass actors, force pushes, deletion, or merge commits on protected targets. Keep auto-merge off. The ruleset requires no other approval. CODEOWNERS assigns the checks, CI, hooks, dependencies, and agent rules to the owner. A PR that touches none of them merges on green checks. GitHub reads CODEOWNERS from the base branch, so a PR cannot remove its own code owner.
 
 CI uses pinned actions and Ubuntu 24.04. For a PR, it verifies the candidate head and the proposed merge result in separate clean checkouts. Push CI verifies the resulting commit. The full suite covers lint, formatting, types, tests, credentials, the iOS and shared scanner, dependency policy, the server build, the iOS release JavaScript bundle, and the compiler report. The compiler report fails only when the tool crashes, so it is a report, not a gate. The overall check fails when a verification job fails, skips, or is cancelled.
 

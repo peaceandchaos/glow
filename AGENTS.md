@@ -43,7 +43,7 @@ Use the repository `test-prune` skill when reviewing test quality. Prefer meanin
 
 For bug fixes, show that the relevant check fails with the bug and passes with the fix where practical. Keep the first failure. After two unsuccessful repair attempts for the same failure, stop that repair and report the evidence and options. Continue independent authorized work.
 
-Do not weaken assertions, reduce discovery, ignore exits, skip checks, expand exclusions, or relax lint/security policy to get green. All test and control changes require owner review before merge. Automated guards cannot prove every assertion's meaning.
+Do not weaken assertions, reduce discovery, ignore exits, skip checks, expand exclusions, or relax lint/security policy to get green. Control changes require owner review before merge. `.github/CODEOWNERS` lists the control paths. Never edit or delete an existing test line to get green. Automated guards cannot prove every assertion's meaning.
 
 Every high/critical dependency advisory blocks acceptance. The one exception is a high advisory that no release fixes yet, under a dated `track-unpatched` disposition (`docs/dependencies.md`, "Unpatched high advisories"). Moderate/low findings need a disposition and review date; serious application risk also blocks. An unavailable, skipped, cancelled, or stale required result is not a pass. The compiler report does not prove device compilation. Native-driver fakes do not prove iOS behavior.
 
