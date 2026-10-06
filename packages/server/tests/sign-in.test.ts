@@ -285,6 +285,32 @@ test('sign-out revokes only the session that signs out', async () => {
   }
 });
 
+test.each([
+  ['GET', 404],
+  ['PUT', 404],
+  ['DELETE', 204],
+])(
+  '%s v1/session checks the session before it answers',
+  async (method, signedInStatus) => {
+    const server = await startServer();
+    try {
+      const token = await sessionToken(server);
+      const session = (authorization: string) =>
+        handleRequest(
+          new Request('https://fixture.example/v1/session', {
+            method,
+            headers: { Authorization: authorization },
+          }),
+          server.services,
+        );
+      expect((await session(`Bearer ${newSessionToken()}`)).status).toBe(401);
+      expect((await session(`Bearer ${token}`)).status).toBe(signedInStatus);
+    } finally {
+      await server.close();
+    }
+  },
+);
+
 test('removing a user from the allowlist locks out their existing sessions', async () => {
   const server = await startServer();
   try {

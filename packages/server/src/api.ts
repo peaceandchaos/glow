@@ -291,18 +291,48 @@ async function signIn(
   });
 }
 
-// Sign-in is the one route that needs no session. Sign-out deletes the
-// session that sends it.
-async function handleSessionRoute(
+async function handleSignedInRoute(
   request: Request,
+  owner: string,
+  path: string[],
   services: ApiServices,
 ): Promise<Response> {
-  if (request.method === 'POST') return signIn(request, services);
-  await sessionOwner(request.headers, services);
-  if (request.method !== 'DELETE')
-    throw new RequestError(404, 'Route not found.');
-  await (await services.sessions()).revoke(bearerToken(request.headers));
-  return new Response(null, { status: 204 });
+  if (path[0] !== 'v1') throw new RequestError(404, 'Route not found.');
+  if (
+    path[1] === 'session' &&
+    path.length === 2 &&
+    request.method === 'DELETE'
+  ) {
+    await (await services.sessions()).revoke(bearerToken(request.headers));
+    return new Response(null, { status: 204 });
+  }
+  if (path[1] === 'chat' && path.length === 2 && request.method === 'POST') {
+    const command = decodeJson(socketCommandSchema, await readBody(request));
+    const result = await executeCommand(owner, command, services);
+    if (result.kind !== 'accepted') return Response.json(result);
+    return jobStream(
+      await services.jobs(),
+      owner,
+      result.snapshot.attemptId,
+      request.signal,
+    );
+  }
+  if (path[1] === 'jobs' && path[2] && path.length <= 4)
+    return handleJobRoute(request, owner, path[2], path[3], services);
+  if (
+    path[1] === 'chats' &&
+    path[2] &&
+    path.length === 3 &&
+    request.method === 'DELETE'
+  ) {
+    await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
+    return new Response(null, { status: 204 });
+  }
+  if (path[1] === 'search' && path.length === 2 && request.method === 'POST') {
+    const body = decodeJson(searchRequestSchema, await readBody(request));
+    return Response.json({ ids: await services.rank(body, request.signal) });
+  }
+  throw new RequestError(404, 'Route not found.');
 }
 
 export async function handleRequest(
@@ -311,41 +341,10 @@ export async function handleRequest(
 ): Promise<Response> {
   try {
     const path = new URL(request.url).pathname.split('/').filter(Boolean);
-    if (path.join('/') === 'v1/session')
-      return await handleSessionRoute(request, services);
+    if (path.join('/') === 'v1/session' && request.method === 'POST')
+      return await signIn(request, services);
     const owner = await sessionOwner(request.headers, services);
-    if (path[0] !== 'v1') throw new RequestError(404, 'Route not found.');
-    if (path[1] === 'chat' && path.length === 2 && request.method === 'POST') {
-      const command = decodeJson(socketCommandSchema, await readBody(request));
-      const result = await executeCommand(owner, command, services);
-      if (result.kind !== 'accepted') return Response.json(result);
-      return jobStream(
-        await services.jobs(),
-        owner,
-        result.snapshot.attemptId,
-        request.signal,
-      );
-    }
-    if (path[1] === 'jobs' && path[2] && path.length <= 4)
-      return await handleJobRoute(request, owner, path[2], path[3], services);
-    if (
-      path[1] === 'chats' &&
-      path[2] &&
-      path.length === 3 &&
-      request.method === 'DELETE'
-    ) {
-      await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
-      return new Response(null, { status: 204 });
-    }
-    if (
-      path[1] === 'search' &&
-      path.length === 2 &&
-      request.method === 'POST'
-    ) {
-      const body = decodeJson(searchRequestSchema, await readBody(request));
-      return Response.json({ ids: await services.rank(body, request.signal) });
-    }
-    throw new RequestError(404, 'Route not found.');
+    return await handleSignedInRoute(request, owner, path, services);
   } catch (error) {
     return errorResponse(
       error instanceof Error || error instanceof Response
