@@ -1,6 +1,6 @@
 import { SessionStore } from './auth';
 import { postgresDatabase, type Database } from './database';
-import { GatewayClient } from './gateway';
+import { GatewayClient, type GatewayAuth } from './gateway';
 import { JobRepository } from './jobs';
 import { JevClient } from './jev';
 import { LiveProviders } from './providers';
@@ -40,19 +40,19 @@ export async function runtimeSessions(): Promise<SessionStore> {
   return new SessionStore(await runtimeDatabase());
 }
 
-// Without AI_GATEWAY_API_KEY, both Gateway clients use the Vercel OIDC token.
-function gatewayKey(): string | undefined {
-  return process.env.AI_GATEWAY_API_KEY || undefined;
+function gatewayAuth(): GatewayAuth {
+  const apiKey = process.env.AI_GATEWAY_API_KEY;
+  return apiKey ? { kind: 'api-key', apiKey } : { kind: 'oidc' };
 }
 
 export function runtimeProviders(): LiveProviders {
   return new LiveProviders(
     new ResponsesClient({ apiKey: required('OPENAI_API_KEY') }),
-    new GatewayClient({ apiKey: gatewayKey() }),
+    new GatewayClient({ auth: gatewayAuth() }),
     runtimeJev(),
   );
 }
 
 export function runtimeJev(): JevClient {
-  return new JevClient(gatewayKey());
+  return new JevClient(gatewayAuth());
 }

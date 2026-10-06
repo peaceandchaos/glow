@@ -8,7 +8,7 @@ import { JevClient } from '../src/jev';
 import type { ProviderChunk } from '../src/provider';
 import { models } from '../src/models';
 import { ResponsesClient, trimCompacted } from '../src/responses';
-import { submission } from './fixtures';
+import { exampleGatewayAuth, submission } from './fixtures';
 
 const before = () => Promise.resolve();
 const input = [textItem('user', 'Hello')];
@@ -26,7 +26,7 @@ function fakeGateway(
   requests: RequestInit[],
 ): GatewayClient {
   return new GatewayClient({
-    apiKey: 'example-key',
+    auth: exampleGatewayAuth,
     fetcher: (_url, init) => {
       if (init) requests.push(init);
       const bytes = new TextEncoder().encode(
@@ -83,7 +83,7 @@ test('a Gateway connection lost mid-stream is an uncertain interruption', async 
   const record = new TextEncoder().encode(`data: ${chunk('Partial')}\r\n\r\n`);
   let pulls = 0;
   const client = new GatewayClient({
-    apiKey: 'example-key',
+    auth: exampleGatewayAuth,
     fetcher: () =>
       Promise.resolve(
         new Response(
@@ -241,7 +241,7 @@ test('Jev uses one evaluation with no retry and propagates AbortSignal', async (
       controller.abort();
     });
   };
-  const client = new JevClient('example-key', fetcher);
+  const client = new JevClient(exampleGatewayAuth, fetcher);
   await expect(
     client.select(submission(), controller.signal, before),
   ).rejects.toThrow();
@@ -251,7 +251,7 @@ test('Jev uses one evaluation with no retry and propagates AbortSignal', async (
 
 test('Jev 500 failures do not trigger a second paid call', async () => {
   let calls = 0;
-  const client = new JevClient('example-key', () => {
+  const client = new JevClient(exampleGatewayAuth, () => {
     calls += 1;
     return Promise.resolve(
       Response.json({ error: 'Fixture failure' }, { status: 500 }),
