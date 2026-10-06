@@ -1,5 +1,6 @@
 import { setImmediate as tick } from 'node:timers/promises';
 import type { PGlite } from '@electric-sql/pglite';
+import { bakedCatalog, type Catalog } from '../../../shared/catalog';
 import type { Database } from '../src/database';
 import { JobRepository, staleAfterMs } from '../src/jobs';
 import { ProviderFailure } from '../src/errors';
@@ -16,6 +17,9 @@ let jobs: JobRepository;
 let selectionCalls: number;
 let generationCalls: number;
 let providers: Providers;
+let selection: string;
+let offers: (readonly string[])[];
+let generated: { model: string; effort: string | null }[];
 
 beforeAll(async () => {
   const fixture = await testDatabase();
@@ -27,18 +31,31 @@ beforeEach(async () => {
   await postgres.exec('TRUNCATE chat_job_events, chat_jobs, deleted_chats');
   selectionCalls = 0;
   generationCalls = 0;
+  selection = 'deepseek';
+  offers = [];
+  generated = [];
   providers = {
-    async select(_input, _signal, beforeCall) {
+    async select(_input, _signal, beforeCall, offered) {
       await beforeCall();
       selectionCalls += 1;
-      return 'deepseek';
+      offers.push(offered);
+      return selection;
     },
     async prepare() {
       return { items: [], checkpoint: null };
     },
-    async generate(_input, _model, _context, _signal, onChunk, beforeCall) {
+    async generate(
+      _input,
+      model,
+      _context,
+      _signal,
+      onChunk,
+      beforeCall,
+      effort,
+    ) {
       await beforeCall();
       generationCalls += 1;
+      generated.push({ model, effort });
       await onChunk({ wire: 'gateway', raw: 'fixture', text: 'Saved answer' });
       return { checkpoint: null };
     },
@@ -46,10 +63,14 @@ beforeEach(async () => {
 });
 afterAll(async () => postgres.close());
 
-async function execute(attemptId: string): Promise<void> {
+async function execute(
+  attemptId: string,
+  catalog: Catalog = bakedCatalog,
+): Promise<void> {
   return runAttempt({
     jobs,
     providers,
+    catalog,
     owner,
     attemptId,
     runId: 'run',
@@ -222,6 +243,7 @@ test.each([
     await runAttempt({
       jobs: new JobRepository(slow),
       providers,
+      catalog: bakedCatalog,
       owner,
       attemptId: input.attemptId,
       runId: 'run',
@@ -291,6 +313,7 @@ test('a worker lost mid-stream and a retry converge on one interrupted reply', a
   await runAttempt({
     jobs,
     providers,
+    catalog: bakedCatalog,
     owner,
     attemptId: input.attemptId,
     runId: 'retry',
@@ -315,4 +338,53 @@ test('a worker lost mid-stream and a retry converge on one interrupted reply', a
   expect(events.map(event => event.sequence)).toEqual(
     events.map((_, index) => index + 1),
   );
+});
+
+test('a stored level reaches the provider, and no level runs the model default', async () => {
+  for (const choice of [
+    { picker: 'gpt-6.1-sol', level: 'high' },
+    { picker: 'gpt-6.1-sol' },
+    { picker: 'deepseek' },
+    { picker: 'kimi', level: 'max' },
+  ]) {
+    const input = { ...submission(), ...choice };
+    await jobs.submit(owner, input, async () => 'run');
+    await execute(input.attemptId);
+  }
+  expect(selectionCalls).toBe(0);
+  expect(generated).toEqual([
+    { model: 'gpt-6.1-sol', effort: 'high' },
+    { model: 'gpt-6.1-sol', effort: 'medium' },
+    { model: 'deepseek', effort: null },
+    { model: 'kimi', effort: 'max' },
+  ]);
+});
+
+test('with Auto off, an Auto chat runs the first model without Jev', async () => {
+  const input = submission();
+  await jobs.submit(owner, input, async () => 'run');
+  await execute(input.attemptId, { ...bakedCatalog, auto: false });
+  expect(selectionCalls).toBe(0);
+  expect(generated).toEqual([{ model: 'deepseek', effort: null }]);
+});
+
+test('a model the menu does not offer runs the first model instead of failing', async () => {
+  const input = { ...submission(), picker: 'gpt-6-luna', level: 'high' };
+  await jobs.submit(owner, input, async () => 'run');
+  await execute(input.attemptId);
+  expect(generated).toEqual([{ model: 'deepseek', effort: null }]);
+  expect((await jobs.get(owner, input.attemptId)).snapshot).toMatchObject({
+    status: 'completed',
+    actualModel: 'deepseek',
+  });
+});
+
+test('Jev chooses among the offered models, and its pick runs at its default level', async () => {
+  const [, , sol, astra] = bakedCatalog.models;
+  selection = 'gpt-6-astra';
+  const input = { ...submission(), level: 'max' };
+  await jobs.submit(owner, input, async () => 'run');
+  await execute(input.attemptId, { auto: true, models: [sol, astra] });
+  expect(offers).toEqual([['gpt-6.1-sol', 'gpt-6-astra']]);
+  expect(generated).toEqual([{ model: 'gpt-6-astra', effort: 'medium' }]);
 });

@@ -1,8 +1,14 @@
 import { getVercelOidcToken } from '@vercel/oidc';
-import type { ModelKey, ResponseInputItem } from '../../../shared/contracts';
+import type { ResponseInputItem } from '../../../shared/contracts';
 import { parseGatewayEvent, SseDecoder } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
-import { gatewayHosts, isGatewayModel, models, type Effort } from './models';
+import {
+  gatewayHosts,
+  isGatewayModel,
+  models,
+  type Effort,
+  type RegistryKey,
+} from './models';
 import type { BeforePaidCall, ProviderChunk } from './provider';
 
 type GatewayPart =
@@ -44,7 +50,7 @@ export class GatewayClient {
   constructor(private readonly options: GatewayOptions) {}
 
   async generate(
-    model: ModelKey,
+    model: RegistryKey,
     items: ResponseInputItem[],
     signal: AbortSignal,
     beforeCall: BeforePaidCall,

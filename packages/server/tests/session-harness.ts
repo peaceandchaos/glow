@@ -2,12 +2,12 @@ import type { PGlite } from '@electric-sql/pglite';
 import { randomUUID } from 'node:crypto';
 import type {
   ContextCheckpoint,
-  ModelKey,
   Picker,
   ServerMessage,
   SessionToken,
   Submission,
 } from '../../../shared/contracts';
+import { bakedCatalog } from '../../../shared/catalog';
 import { ChatArchive, type ArchiveStorage } from '../../app/src/state/archive';
 import {
   ServerTransport,
@@ -31,6 +31,7 @@ import type {
   ProviderChunk,
   Providers,
 } from '../src/provider';
+import type { RegistryKey } from '../src/models';
 import { runAttempt } from '../src/worker';
 import { testDatabase } from './database';
 import { signedIn } from './sessions';
@@ -108,7 +109,7 @@ class Script {
   }
 }
 
-function providerChunk(model: ModelKey, text: string): ProviderChunk {
+function providerChunk(model: RegistryKey, text: string): ProviderChunk {
   return model === 'kimi' || model === 'deepseek'
     ? {
         wire: 'gateway',
@@ -129,9 +130,9 @@ function providerChunk(model: ModelKey, text: string): ProviderChunk {
 }
 
 class FakeProviders implements Providers {
-  selection: ModelKey | 'fail' = 'deepseek';
+  selection: RegistryKey | 'fail' = 'deepseek';
   selections = 0;
-  readonly generations: { input: Submission; model: ModelKey }[] = [];
+  readonly generations: { input: Submission; model: RegistryKey }[] = [];
   private readonly scripts = new Map<string, Script>();
 
   script(attemptId: string): Script {
@@ -146,7 +147,7 @@ class FakeProviders implements Providers {
     _input: Submission,
     _signal: AbortSignal,
     beforeCall: () => Promise<void>,
-  ): Promise<ModelKey> {
+  ): Promise<RegistryKey> {
     await beforeCall();
     this.selections += 1;
     if (this.selection === 'fail')
@@ -160,7 +161,7 @@ class FakeProviders implements Providers {
 
   async generate(
     input: Submission,
-    model: ModelKey,
+    model: RegistryKey,
     _context: PreparedContext,
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
@@ -315,6 +316,7 @@ export async function startServer(): Promise<Server> {
       const worker = runAttempt({
         jobs,
         providers,
+        catalog: bakedCatalog,
         owner: dispatchOwner,
         attemptId,
         runId,

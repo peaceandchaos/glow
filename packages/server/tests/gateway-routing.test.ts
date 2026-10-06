@@ -1,13 +1,12 @@
-import type { ModelKey } from '../../../shared/contracts';
 import { textItem } from '../src/compaction/context';
 import { GatewayClient } from '../src/gateway';
-import { gatewayHosts, models } from '../src/models';
+import { gatewayHosts, models, type RegistryKey } from '../src/models';
 import { exampleGatewayAuth } from './fixtures';
 
 const signal = new AbortController().signal;
 const before = () => Promise.resolve();
 
-async function sentBody(model: ModelKey): Promise<string> {
+async function sentBody(model: RegistryKey): Promise<string> {
   const bodies: string[] = [];
   const client = new GatewayClient({
     auth: exampleGatewayAuth,
@@ -30,7 +29,7 @@ async function sentBody(model: ModelKey): Promise<string> {
   return bodies[0];
 }
 
-test.each<[ModelKey, string[]]>([
+test.each<[RegistryKey, string[]]>([
   ['kimi', ['bedrock', 'fireworks']],
   ['deepseek', ['fireworks', 'baseten']],
 ])(

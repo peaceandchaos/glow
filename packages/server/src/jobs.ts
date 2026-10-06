@@ -15,11 +15,11 @@ import {
   type ContextCheckpoint,
   type EventPayload,
   type JobEvent,
-  type ModelKey,
   type Submission,
 } from '../../../shared/contracts';
 import type { Database, SqlConnection } from './database';
 import { AttemptCancelled, RequestError } from './errors';
+import type { RegistryKey } from './models';
 
 const storedJobSchema = z.strictObject({
   snapshot: attemptSnapshotSchema,
@@ -40,7 +40,7 @@ type JobUpdate = {
   text?: string;
   reasoning?: string;
   status?: AttemptStatus;
-  actualModel?: ModelKey;
+  actualModel?: RegistryKey;
   checkpoint?: ContextCheckpoint;
   error?: string;
 };

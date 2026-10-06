@@ -1,7 +1,6 @@
 import type {
   ContextCheckpoint,
   HistoryEntry,
-  ModelKey,
   ResponseInputItem,
   Submission,
 } from '../../../../shared/contracts';
@@ -10,6 +9,7 @@ import {
   checkpointMethod,
   models,
   type ModelConfig,
+  type RegistryKey,
   type ResponsesModel,
 } from '../models';
 import type { BeforePaidCall, PreparedContext } from '../provider';
@@ -27,7 +27,7 @@ export type ContextServices = {
     beforeCall: BeforePaidCall,
   ) => Promise<ResponseInputItem[]>;
   summarize: (
-    model: ModelKey,
+    model: RegistryKey,
     items: ResponseInputItem[],
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
@@ -104,7 +104,7 @@ function* messagePieces(
 
 function retainedStart(
   items: ResponseInputItem[],
-  model: ModelKey,
+  model: RegistryKey,
   config: ModelConfig,
 ): number {
   if (model === 'kimi') return Math.max(0, items.length - 2);
@@ -120,7 +120,7 @@ function retainedStart(
 
 async function compact(
   items: ResponseInputItem[],
-  model: ModelKey,
+  model: RegistryKey,
   config: ModelConfig,
   signal: AbortSignal,
   beforeCall: BeforePaidCall,
@@ -165,7 +165,7 @@ async function compact(
 
 export async function prepareContext(
   input: Submission,
-  model: ModelKey,
+  model: RegistryKey,
   signal: AbortSignal,
   beforeCall: BeforePaidCall,
   services: ContextServices,
@@ -228,7 +228,7 @@ export async function prepareContext(
 }
 
 export function makeCheckpoint(
-  model: ModelKey,
+  model: RegistryKey,
   throughMessageId: string,
   items: ResponseInputItem[],
 ): ContextCheckpoint {

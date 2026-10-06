@@ -1,10 +1,9 @@
 import type {
   ContextCheckpoint,
-  ModelKey,
   ResponseInputItem,
   Submission,
 } from '../../../shared/contracts';
-import type { Effort } from './models';
+import type { Effort, RegistryKey } from './models';
 
 export type PreparedContext = {
   items: ResponseInputItem[];
@@ -23,16 +22,17 @@ export interface Providers {
     input: Submission,
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
-  ): Promise<ModelKey>;
+    offered: readonly string[],
+  ): Promise<string>;
   prepare(
     input: Submission,
-    model: ModelKey,
+    model: RegistryKey,
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
   ): Promise<PreparedContext>;
   generate(
     input: Submission,
-    model: ModelKey,
+    model: RegistryKey,
     context: PreparedContext,
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,

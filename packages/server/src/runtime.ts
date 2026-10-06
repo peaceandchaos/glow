@@ -1,8 +1,10 @@
+import type { Catalog } from '../../../shared/catalog';
 import { SessionStore } from './auth';
 import { postgresDatabase, type Database } from './database';
 import { GatewayClient, type GatewayAuth } from './gateway';
 import { JobRepository } from './jobs';
 import { JevClient } from './jev';
+import { catalogFrom, menuFrom } from './models';
 import { LiveProviders } from './providers';
 import { ResponsesClient } from './responses';
 import { schemaSql } from './schema';
@@ -55,4 +57,11 @@ export function runtimeProviders(): LiveProviders {
 
 export function runtimeJev(): JevClient {
   return new JevClient(gatewayAuth());
+}
+
+let catalog: Catalog | null = null;
+
+export function runtimeCatalog(): Catalog {
+  catalog ??= catalogFrom(menuFrom(process.env.MODEL_MENU));
+  return catalog;
 }

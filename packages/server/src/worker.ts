@@ -1,15 +1,14 @@
-import {
-  isTerminal,
-  type EventPayload,
-  type ModelKey,
-} from '../../../shared/contracts';
+import { resolveChoice, type Catalog } from '../../../shared/catalog';
+import { isTerminal, type EventPayload } from '../../../shared/contracts';
 import { AttemptCancelled, ProviderFailure } from './errors';
 import type { JobRepository } from './jobs';
+import { effortFor, isRegistryKey } from './models';
 import type { ProviderChunk, Providers } from './provider';
 
 type WorkerOptions = {
   jobs: JobRepository;
   providers: Providers;
+  catalog: Catalog;
   owner: string;
   attemptId: string;
   runId: string;
@@ -65,7 +64,8 @@ function coalescingChunkWriter(write: (batch: ChunkBatch) => Promise<void>) {
 }
 
 export async function runAttempt(options: WorkerOptions): Promise<void> {
-  const { jobs, providers, owner, attemptId, runId, claimId } = options;
+  const { jobs, providers, catalog, owner, attemptId, runId, claimId } =
+    options;
   if (!(await jobs.claim(owner, attemptId, runId, claimId))) return;
   const controller = new AbortController();
   let checking = false;
@@ -98,12 +98,26 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
 
   try {
     const input = await jobs.input(owner, attemptId);
-    let model: ModelKey;
-    if (input.retryModel) model = input.retryModel;
-    else if (input.picker === 'auto') {
+    let choice = resolveChoice(
+      catalog,
+      input.retryModel ?? input.picker,
+      input.level,
+    );
+    if (choice.kind === 'auto') {
       await jobs.update(owner, attemptId, claimId, { status: 'selecting' });
-      model = await providers.select(input, controller.signal, beforeCall);
-    } else model = input.picker;
+      const pick = await providers.select(
+        input,
+        controller.signal,
+        beforeCall,
+        catalog.models.map(entry => entry.key),
+      );
+      // Jev's pick runs at that model's default level.
+      choice = resolveChoice(catalog, pick, undefined);
+    }
+    if (choice.kind === 'auto' || !isRegistryKey(choice.model))
+      throw new ProviderFailure('This model is not available.');
+    const model = choice.model;
+    const effort = effortFor(model, choice.level);
     // This write checks Stop again before compaction or generation can start.
     await jobs.update(owner, attemptId, claimId, {
       actualModel: model,
@@ -129,7 +143,7 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
       controller.signal,
       async chunk => chunks.push(chunk),
       beforeCall,
-      null,
+      effort,
     );
     controller.signal.throwIfAborted();
     const { unwritten, failure } = await chunks.close();
