@@ -50,7 +50,7 @@ export const Header = React.memo(function ({
   if (open && !shown) setOpen(false);
   const [pill, setPill] = useState({ x: 0, width: 0 });
   const fade = {
-    transitionDuration: reduceMotion ? 80 : 200,
+    transitionDuration: reduceMotion ? 80 : open ? 200 : 150,
     transitionTimingFunction: easeOut,
   };
   const quick = {
@@ -134,7 +134,9 @@ export const Header = React.memo(function ({
               }
             >
               <Glass interactive style={styles.namePill}>
-                <Text style={styles.name}>{label}</Text>
+                <Text style={styles.name} numberOfLines={1}>
+                  {label}
+                </Text>
                 <Animated.View
                   style={
                     reduceMotion
@@ -255,6 +257,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   name: {
+    flexShrink: 1,
     fontSize: 17,
     fontWeight: '600',
     color: theme.text,
