@@ -127,22 +127,22 @@ export function checkpointMethod(model: RegistryKey) {
 const menuEntrySchema = z.strictObject({
   model: z.enum(Object.keys(models).filter(isRegistryKey)),
   levels: z.array(effortSchema),
-  defaultLevel: effortSchema.nullable(),
 });
 const menuSchema = z.strictObject({
   auto: z.boolean(),
   models: z.tuple([menuEntrySchema], menuEntrySchema),
 });
-// Array order is menu order; the first model is the fallback and the first chat's model.
+// Array order is menu order; the first model is the fallback and the first chat's
+// model, and a model's first level is its default.
 type Menu = z.infer<typeof menuSchema>;
 
 export const defaultMenu: Menu = {
   auto: true,
   models: [
-    { model: 'deepseek', levels: openLevels, defaultLevel: 'low' },
-    { model: 'kimi', levels: openLevels, defaultLevel: 'low' },
-    { model: 'gpt-6.1-sol', levels: gptLevels, defaultLevel: 'medium' },
-    { model: 'gpt-6-astra', levels: gptLevels, defaultLevel: 'medium' },
+    { model: 'deepseek', levels: openLevels },
+    { model: 'kimi', levels: openLevels },
+    { model: 'gpt-6.1-sol', levels: gptLevels },
+    { model: 'gpt-6-astra', levels: gptLevels },
   ],
 };
 
@@ -155,8 +155,6 @@ function offerable(menu: Menu): Menu {
     const unsupported = entry.levels.find(level => !supported.includes(level));
     if (unsupported)
       throw new Error(`${entry.model} does not support ${unsupported}`);
-    if (entry.defaultLevel && !entry.levels.includes(entry.defaultLevel))
-      throw new Error(`${entry.model} does not offer ${entry.defaultLevel}`);
   }
   return menu;
 }
@@ -183,7 +181,6 @@ function catalogModel(entry: Menu['models'][number]): CatalogModel {
       key: level,
       label: levelLabels[level],
     })),
-    defaultLevel: entry.defaultLevel,
   };
 }
 

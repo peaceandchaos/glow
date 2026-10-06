@@ -116,7 +116,7 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
   try {
     const catalog: Catalog = catalogFrom(
       menuFrom(
-        '{"auto":false,"models":[{"model":"gpt-6-astra","levels":["high"],"defaultLevel":"high"}]}',
+        '{"auto":false,"models":[{"model":"gpt-6-astra","levels":["high"]}]}',
       ),
     );
     const services = { ...f.services, catalog };
@@ -137,7 +137,6 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
           label: 'GPT-6 Astra',
           transport: 'socket',
           levels: [{ key: 'high', label: 'High' }],
-          defaultLevel: 'high',
         },
       ],
     });
@@ -149,7 +148,7 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
 test('the server reads its model menu from MODEL_MENU', () => {
   const previous = process.env.MODEL_MENU;
   process.env.MODEL_MENU =
-    '{"auto":false,"models":[{"model":"kimi","levels":[],"defaultLevel":null}]}';
+    '{"auto":false,"models":[{"model":"kimi","levels":[]}]}';
   try {
     expect(runtimeCatalog()).toEqual({
       auto: false,
@@ -159,7 +158,6 @@ test('the server reads its model menu from MODEL_MENU', () => {
           label: 'Kimi K3',
           transport: 'http',
           levels: [],
-          defaultLevel: null,
         },
       ],
     });

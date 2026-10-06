@@ -75,8 +75,8 @@ describe('MODEL_MENU', () => {
     const menu = {
       auto: false,
       models: [
-        { model: 'gpt-6-astra', levels: ['low', 'high'], defaultLevel: null },
-        { model: 'kimi', levels: [], defaultLevel: null },
+        { model: 'gpt-6-astra', levels: ['low', 'high'] },
+        { model: 'kimi', levels: [] },
       ],
     };
     expect(menuFrom(JSON.stringify(menu))).toEqual(menu);
@@ -88,19 +88,19 @@ describe('MODEL_MENU', () => {
     ['no models', '{"auto":true,"models":[]}'],
     [
       'an unknown model',
-      '{"auto":true,"models":[{"model":"gpt-9","levels":[],"defaultLevel":null}]}',
+      '{"auto":true,"models":[{"model":"gpt-9","levels":[]}]}',
     ],
     [
       'none on Astra',
-      '{"auto":true,"models":[{"model":"gpt-6-astra","levels":["none"],"defaultLevel":null}]}',
+      '{"auto":true,"models":[{"model":"gpt-6-astra","levels":["none"]}]}',
     ],
     [
-      'a default level it does not offer',
-      '{"auto":true,"models":[{"model":"gpt-6.1-sol","levels":["low"],"defaultLevel":"medium"}]}',
+      'a defaultLevel key',
+      '{"auto":true,"models":[{"model":"gpt-6.1-sol","levels":["low"],"defaultLevel":"low"}]}',
     ],
     [
       'a duplicate model',
-      '{"auto":true,"models":[{"model":"kimi","levels":[],"defaultLevel":null},{"model":"kimi","levels":["low"],"defaultLevel":null}]}',
+      '{"auto":true,"models":[{"model":"kimi","levels":[]},{"model":"kimi","levels":["low"]}]}',
     ],
   ])('%s logs once and serves the default menu', (_name, raw) => {
     expect(menuFrom(raw)).toBe(defaultMenu);

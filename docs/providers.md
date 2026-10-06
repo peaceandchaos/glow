@@ -50,11 +50,11 @@ standalone compaction and Jev never send an effort.
 
 | Model               | Accepted efforts                                | Default effort |
 | ------------------- | ----------------------------------------------- | -------------- |
-| DeepSeek V4.1 Flash | `none`, `low`, `high`, `max`                    | none sent      |
-| Kimi K3             | `none`, `low`, `high`, `max`                    | none sent      |
-| GPT-6.1 Sol         | `low`, `medium`, `high`, `xhigh`, `max`         | `medium`       |
-| GPT-6 Astra         | `low`, `medium`, `high`, `xhigh`, `max`         | `medium`       |
-| GPT-6 Luna          | `none`, `low`, `medium`, `high`, `xhigh`, `max` | `medium`       |
+| DeepSeek V4.1 Flash | `none`, `low`, `high`, `max`                    | `none`         |
+| Kimi K3             | `none`, `low`, `high`, `max`                    | `none`         |
+| GPT-6.1 Sol         | `low`, `medium`, `high`, `xhigh`, `max`         | `low`          |
+| GPT-6 Astra         | `low`, `medium`, `high`, `xhigh`, `max`         | `low`          |
+| GPT-6 Luna          | `none`, `low`, `medium`, `high`, `xhigh`, `max` | `none`         |
 
 GPT-6 Astra does not accept `none`, so the registry does not list it.
 Gateway reasoning text is not shown. Sources:
@@ -66,12 +66,13 @@ and the Gateway endpoint pages under "Gateway hosts". No live call has checked
 an effort value yet.
 
 `GET /v1/models` serves the menu to a signed-in phone: the models in order,
-their labels, the levels each one offers, each default level, whether the app
+their labels, the levels each one offers, default first, whether the app
 sends a reply request over HTTP (Gateway models) or the socket (OpenAI models),
 and whether Auto is offered. The first model is the fallback. A stored model the
-menu does not offer runs the first model, and a stored level the model does not
-offer runs the model's default level. Under Auto, Jev chooses only among the offered models,
-and its choice runs at that model's default level.
+menu does not offer runs the first model. A model's default level is the first
+level in its list, and a stored level the model does not offer runs that default.
+Under Auto, Jev chooses only among the offered models, and its choice runs at
+that model's default level.
 
 The `MODEL_MENU` server setting replaces the whole default menu with one JSON
 value. The value below is the default menu:
@@ -82,31 +83,28 @@ value. The value below is the default menu:
   "models": [
     {
       "model": "deepseek",
-      "levels": ["none", "low", "high", "max"],
-      "defaultLevel": "low"
+      "levels": ["none", "low", "high", "max"]
     },
     {
       "model": "kimi",
-      "levels": ["none", "low", "high", "max"],
-      "defaultLevel": "low"
+      "levels": ["none", "low", "high", "max"]
     },
     {
       "model": "gpt-6.1-sol",
-      "levels": ["low", "medium", "high", "xhigh", "max"],
-      "defaultLevel": "medium"
+      "levels": ["low", "medium", "high", "xhigh", "max"]
     },
     {
       "model": "gpt-6-astra",
-      "levels": ["low", "medium", "high", "xhigh", "max"],
-      "defaultLevel": "medium"
+      "levels": ["low", "medium", "high", "xhigh", "max"]
     }
   ]
 }
 ```
 
 Each `model` must be a registry key, listed once. Each `levels` list must be a
-subset of the model's accepted efforts. `defaultLevel` is `null` (no effort
-sent) or one of the listed levels. An invalid value is logged as
+subset of the model's accepted efforts, and its first level is the default. A
+model with an empty `levels` list sends no effort. An invalid value, including
+one that still has a `defaultLevel` key, is logged as
 `MODEL_MENU ignored: <reason>`, and the server serves the default menu. A
 changed value takes effect on the next deployment.
 

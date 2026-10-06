@@ -326,7 +326,7 @@ test('a GPT model shows its levels with the chat’s level marked, and picking a
   await view.open();
   expect(view.pill().props.accessibilityLabel).toBe('GPT-6.1 Sol');
   expect(view.levels()).toEqual(['Low', 'Medium', 'High', 'Extra high', 'Max']);
-  expect(view.option('Medium').props.accessibilityState).toEqual({
+  expect(view.option('Low').props.accessibilityState).toEqual({
     selected: true,
   });
 
@@ -334,7 +334,7 @@ test('a GPT model shows its levels with the chat’s level marked, and picking a
   expect(view.option('High').props.accessibilityState).toEqual({
     selected: true,
   });
-  expect(view.option('Medium').props.accessibilityState).toEqual({
+  expect(view.option('Low').props.accessibilityState).toEqual({
     selected: false,
   });
 
