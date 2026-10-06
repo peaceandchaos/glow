@@ -148,7 +148,7 @@
         {
           "finding": "audit:check fails on main with four lines (compression high and untracked, joi and sprintf-js needing review) and exits 0 at the head. verify:commit passes every check except skill-records before this record.",
           "cites": "Script the check when you can",
-          "none": "The before and after runs are kept in the lane's log folder."
+          "none": "The before and after logs are not in the repository."
         }
       ],
       "receipts": [
