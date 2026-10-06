@@ -1,6 +1,7 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import {
   decodeJson,
+  sessionTokenSchema,
   submissionSchema,
   validateAncestry,
 } from '../../../shared/contracts';
@@ -21,6 +22,20 @@ test('network input rejects malformed JSON, unknown models and an old contract',
     ),
   ).toThrow();
 });
+
+test.each([
+  [31, false],
+  [32, true],
+  [33, false],
+])(
+  'the base64url of %i random bytes is a session token: %s',
+  (bytes, valid) => {
+    expect(
+      sessionTokenSchema.safeParse(randomBytes(bytes).toString('base64url'))
+        .success,
+    ).toBe(valid);
+  },
+);
 
 test('ancestry validation rejects context from a sibling branch', () => {
   const input = submission();

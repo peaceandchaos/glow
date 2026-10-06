@@ -250,10 +250,14 @@ export const searchRequestSchema = z.strictObject({
 });
 export type SearchRequest = z.infer<typeof searchRequestSchema>;
 
-// 32 random bytes as base64url. The server stores only their SHA-256.
+// A session token is this many random bytes as unpadded base64url, which
+// takes four characters for every three bytes. The server stores only their
+// SHA-256.
+export const sessionTokenBytes = 32;
 export const sessionTokenSchema = z
   .string()
-  .regex(/^[A-Za-z0-9_-]{43}$/u)
+  .length(Math.ceil((sessionTokenBytes * 4) / 3))
+  .regex(/^[A-Za-z0-9_-]+$/u)
   .brand<'SessionToken'>();
 export type SessionToken = z.infer<typeof sessionTokenSchema>;
 
