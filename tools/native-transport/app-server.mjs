@@ -6,8 +6,10 @@
 //        [--host <private LAN IPv4>]
 // --host adds one private address, so a phone on the same Wi-Fi can reach a
 // Debug build's server. The server still listens on loopback.
-// Every device id it sees joins the allowlist, because the app creates its id
-// in the Keychain at first launch. Logs never contain the id.
+// The app creates its device id in the Keychain at first launch and sends it
+// as X-Device-Id. Every id it sees becomes a session token for one harness
+// user, and requests reach the server with it as a bearer token. Logs never
+// contain the id.
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import http from 'node:http';
 import { createRequire } from 'node:module';
@@ -19,9 +21,11 @@ import {
   handleRequest,
   SocketConnection,
 } from '../../packages/server/src/api.ts';
+import { SessionStore } from '../../packages/server/src/auth.ts';
 import { JobRepository } from '../../packages/server/src/jobs.ts';
 import { runAttempt } from '../../packages/server/src/worker.ts';
 import { testDatabase } from '../../packages/server/tests/database.ts';
+import { sessionTokenSchema } from '../../shared/contracts.ts';
 
 const { WebSocketServer } = createRequire(
   new URL('../../packages/server/package.json', import.meta.url),
@@ -94,8 +98,13 @@ const { database } = await testDatabase();
 const jobs = new JobRepository(database);
 const dispatches = new Map();
 const owners = new Map();
+const harnessUser = 'app-harness-user';
+const sessions = new SessionStore(database);
 const services = {
-  allowlist: '',
+  allowlist: harnessUser,
+  appleKeys: () =>
+    Promise.reject(new Error('The harness never signs in with Apple.')),
+  sessions: () => Promise.resolve(sessions),
   jobs: () => Promise.resolve(jobs),
   rank: () => Promise.resolve([]),
   async dispatch(owner, attemptId) {
@@ -120,15 +129,27 @@ const services = {
   },
 };
 
+const adopted = new Map();
 function adopt(headers) {
-  const device = headers['x-device-id'];
-  if (
-    typeof device !== 'string' ||
-    services.allowlist.split(',').includes(device)
-  )
-    return;
-  services.allowlist = [services.allowlist, device].filter(Boolean).join(',');
-  record({ event: 'adopted-device' });
+  const token = sessionTokenSchema.safeParse(headers['x-device-id']);
+  if (!token.success) return Promise.resolve();
+  if (!adopted.has(token.data))
+    adopted.set(
+      token.data,
+      sessions
+        .create(token.data, harnessUser)
+        .then(() => record({ event: 'adopted-device' })),
+    );
+  return adopted.get(token.data);
+}
+
+function bearerHeaders(nodeHeaders) {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(nodeHeaders))
+    if (typeof value === 'string') headers.set(name, value);
+  const device = headers.get('X-Device-Id');
+  if (device !== null) headers.set('Authorization', `Bearer ${device}`);
+  return headers;
 }
 
 async function readBody(req) {
@@ -184,12 +205,10 @@ async function harness(url, req, res) {
 async function api(req, res) {
   const url = new URL(req.url, 'http://localhost');
   if (await harness(url, req, res)) return;
-  adopt(req.headers);
+  await adopt(req.headers);
   const controller = new AbortController();
   res.on('close', () => controller.abort());
-  const headers = new Headers();
-  for (const [name, value] of Object.entries(req.headers))
-    if (typeof value === 'string') headers.set(name, value);
+  const headers = bearerHeaders(req.headers);
   const body =
     req.method === 'GET' || req.method === 'HEAD'
       ? undefined
@@ -222,11 +241,9 @@ async function api(req, res) {
 }
 
 const sockets = new WebSocketServer({ noServer: true });
-function upgrade(req, socket, head) {
-  adopt(req.headers);
-  const headers = new Headers();
-  for (const [name, value] of Object.entries(req.headers))
-    if (typeof value === 'string') headers.set(name, value);
+async function upgrade(req, socket, head) {
+  await adopt(req.headers);
+  const headers = bearerHeaders(req.headers);
   sockets.handleUpgrade(req, socket, head, client => {
     const connection = new SocketConnection(headers, () => services, {
       isOpen: () => client.readyState === client.OPEN,
@@ -274,7 +291,10 @@ for (const host of ['127.0.0.1', '::1', ...(args.host ? [args.host] : [])]) {
       path: req.url,
       event: 'upgrade',
     });
-    upgrade(req, socket, head);
+    upgrade(req, socket, head).catch(error => {
+      record({ event: 'upgrade-error', message: error.message });
+      socket.destroy();
+    });
   });
   server.listen(Number(args.port), host);
 }

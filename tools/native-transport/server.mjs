@@ -11,9 +11,10 @@ import {
   executeCommand,
   handleRequest,
 } from '../../packages/server/src/api.ts';
-import { deviceOwner } from '../../packages/server/src/auth.ts';
+import { SessionStore } from '../../packages/server/src/auth.ts';
 import { JobRepository } from '../../packages/server/src/jobs.ts';
 import { testDatabase } from '../../packages/server/tests/database.ts';
+import { sessionTokenSchema } from '../../shared/contracts.ts';
 
 // The server package's declared ws, not the older copy Metro hoists to the root.
 const { WebSocketServer } = createRequire(
@@ -36,10 +37,17 @@ const record = (file, entry) =>
 
 const { database } = await testDatabase();
 const jobs = new JobRepository(database);
-const owner = deviceOwner(new Headers({ 'X-Device-Id': device }), device);
+// The app sends its credential as X-Device-Id. The harness stores it as the
+// session token of one fixture user and forwards it as a bearer token.
+const owner = 'native-harness-user';
+const sessions = new SessionStore(database);
+await sessions.create(sessionTokenSchema.parse(device), owner);
 const dispatches = new Map();
 const services = {
-  allowlist: device,
+  allowlist: owner,
+  appleKeys: () =>
+    Promise.reject(new Error('The harness never signs in with Apple.')),
+  sessions: () => Promise.resolve(sessions),
   jobs: () => Promise.resolve(jobs),
   dispatch: (_owner, attemptId) => {
     dispatches.set(attemptId, (dispatches.get(attemptId) ?? 0) + 1);
@@ -172,6 +180,8 @@ async function api(req, res) {
   const headers = new Headers();
   for (const [name, value] of Object.entries(req.headers))
     if (typeof value === 'string') headers.set(name, value);
+  const credential = headers.get('X-Device-Id');
+  if (credential !== null) headers.set('Authorization', `Bearer ${credential}`);
   const body =
     req.method === 'GET' || req.method === 'HEAD'
       ? undefined
