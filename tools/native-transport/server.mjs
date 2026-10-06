@@ -27,6 +27,7 @@ const device = process.env.NATIVE_HARNESS_DEVICE;
 const out = process.env.NATIVE_HARNESS_OUT;
 if (!device || !out)
   throw new Error('Set NATIVE_HARNESS_DEVICE and NATIVE_HARNESS_OUT.');
+const bearer = `Bearer ${device}`;
 
 const started = Date.now();
 const record = (file, entry) =>
@@ -178,8 +179,6 @@ async function api(req, res) {
   const headers = new Headers();
   for (const [name, value] of Object.entries(req.headers))
     if (typeof value === 'string') headers.set(name, value);
-  const credential = headers.get('X-Device-Id');
-  if (credential !== null) headers.set('Authorization', `Bearer ${credential}`);
   const body =
     req.method === 'GET' || req.method === 'HEAD'
       ? undefined
@@ -328,7 +327,7 @@ const sockets = new WebSocketServer({ noServer: true });
 
 // Real acceptance for Auto/GPT submissions; the job then completes at once.
 function acceptSocket(req, socket, head) {
-  if (req.headers['x-device-id'] !== device) {
+  if (req.headers.authorization !== bearer) {
     socket.destroy();
     return;
   }
@@ -376,14 +375,14 @@ function serve(name, port, handler) {
       method: req.method,
       path: req.url,
     };
-    const header = req.headers['x-device-id'];
+    const header = req.headers.authorization;
     record('access.log', {
       ...base,
       event: 'request',
       credential:
         header === undefined
           ? 'absent'
-          : header === device
+          : header === bearer
             ? 'fixture'
             : 'other',
     });
@@ -416,7 +415,7 @@ function serve(name, port, handler) {
     server.keepAliveTimeout = 0;
     server.on('upgrade', (req, socket, head) => {
       nextRequest += 1;
-      const header = req.headers['x-device-id'];
+      const header = req.headers.authorization;
       record('access.log', {
         server: name,
         id: nextRequest,
@@ -426,7 +425,7 @@ function serve(name, port, handler) {
         credential:
           header === undefined
             ? 'absent'
-            : header === device
+            : header === bearer
               ? 'fixture'
               : 'other',
       });
