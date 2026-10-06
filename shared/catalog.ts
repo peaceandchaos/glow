@@ -14,7 +14,6 @@ const modelEntrySchema = z.object({
   label: labelSchema,
   transport: z.enum(['http', 'socket']),
   levels: z.array(z.unknown()),
-  defaultLevel: z.unknown(),
 });
 const envelopeSchema = z.object({
   auto: z.boolean(),
@@ -25,10 +24,8 @@ export type CatalogModel = {
   key: ModelKey;
   label: string;
   transport: 'http' | 'socket';
-  // Empty means the model has no level control.
+  // Empty means the model has no level control. The first level is the default.
   levels: z.infer<typeof levelOptionSchema>[];
-  // Null means the provider default: the request omits the parameter.
-  defaultLevel: LevelKey | null;
 };
 // The first model is the fallback model and the first chat's model.
 export type Catalog = {
@@ -54,21 +51,18 @@ export function parseCatalog(text: string): Catalog | null {
       const option = levelOptionSchema.safeParse(level);
       return option.success ? [option.data] : [];
     });
-    const fallback = levels.find(
-      option => option.key === entry.data.defaultLevel,
-    );
     kept.push({
       key: entry.data.key,
       label: entry.data.label,
       transport: entry.data.transport,
       levels,
-      defaultLevel: fallback?.key ?? null,
     });
   }
   const [first, ...rest] = kept;
   return first ? { auto: envelope.data.auto, models: [first, ...rest] } : null;
 }
 
+// A null level means the provider default: the request omits the parameter.
 type Choice =
   | { kind: 'auto' }
   | { kind: 'model'; model: CatalogModel; level: LevelKey | null };
@@ -86,7 +80,11 @@ export function resolveChoice(
   const kept = found?.levels.some(option => option.key === level)
     ? level
     : undefined;
-  return { kind: 'model', model: entry, level: kept ?? entry.defaultLevel };
+  return {
+    kind: 'model',
+    model: entry,
+    level: kept ?? entry.levels[0]?.key ?? null,
+  };
 }
 
 const openLevels = [
@@ -112,28 +110,24 @@ export const bakedCatalog: Catalog = {
       label: 'DeepSeek V4.1 Flash',
       transport: 'http',
       levels: openLevels,
-      defaultLevel: 'low',
     },
     {
       key: 'kimi',
       label: 'Kimi K3',
       transport: 'http',
       levels: openLevels,
-      defaultLevel: 'low',
     },
     {
       key: 'gpt-6.1-sol',
       label: 'GPT-6.1 Sol',
       transport: 'socket',
       levels: gptLevels,
-      defaultLevel: 'medium',
     },
     {
       key: 'gpt-6-astra',
       label: 'GPT-6 Astra',
       transport: 'socket',
       levels: gptLevels,
-      defaultLevel: 'medium',
     },
   ],
 };

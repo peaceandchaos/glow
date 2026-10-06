@@ -355,9 +355,9 @@ test('a stored level reaches the provider, and no level runs the model default',
   expect(selectionCalls).toBe(0);
   expect(generated).toEqual([
     { model: 'gpt-6.1-sol', effort: 'high' },
-    { model: 'gpt-6.1-sol', effort: 'medium' },
-    { model: 'deepseek', effort: 'low' },
-    { model: 'kimi', effort: 'low' },
+    { model: 'gpt-6.1-sol', effort: 'low' },
+    { model: 'deepseek', effort: 'none' },
+    { model: 'kimi', effort: 'none' },
     { model: 'kimi', effort: 'max' },
   ]);
 });
@@ -367,14 +367,14 @@ test('with Auto off, an Auto chat runs the first model without Jev', async () =>
   await jobs.submit(owner, input, async () => 'run');
   await execute(input.attemptId, { ...bakedCatalog, auto: false });
   expect(selectionCalls).toBe(0);
-  expect(generated).toEqual([{ model: 'deepseek', effort: 'low' }]);
+  expect(generated).toEqual([{ model: 'deepseek', effort: 'none' }]);
 });
 
 test('a model the menu does not offer runs the first model instead of failing', async () => {
   const input = { ...submission(), picker: 'gpt-6-luna', level: 'high' };
   await jobs.submit(owner, input, async () => 'run');
   await execute(input.attemptId);
-  expect(generated).toEqual([{ model: 'deepseek', effort: 'low' }]);
+  expect(generated).toEqual([{ model: 'deepseek', effort: 'none' }]);
   expect((await jobs.get(owner, input.attemptId)).snapshot).toMatchObject({
     status: 'completed',
     actualModel: 'deepseek',
@@ -388,5 +388,5 @@ test('Jev chooses among the offered models, and its pick runs at its default lev
   await jobs.submit(owner, input, async () => 'run');
   await execute(input.attemptId, { auto: true, models: [sol, astra] });
   expect(offers).toEqual([['gpt-6.1-sol', 'gpt-6-astra']]);
-  expect(generated).toEqual([{ model: 'gpt-6-astra', effort: 'medium' }]);
+  expect(generated).toEqual([{ model: 'gpt-6-astra', effort: 'low' }]);
 });

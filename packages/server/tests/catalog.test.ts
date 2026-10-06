@@ -8,6 +8,8 @@ import { catalogFrom, defaultMenu, menuFrom } from '../src/models';
 
 const [deepseek, , sol] = bakedCatalog.models;
 const catalog: Catalog = { auto: true, models: [deepseek, sol] };
+const lunaMenu =
+  '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"]},{"model":"kimi","levels":["none","low","high","max"]},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"]},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"]},{"model":"gpt-6-luna","levels":["none","low","medium","high","xhigh","max"]}]}';
 
 test.each([
   ['Auto with Auto on', true, 'auto', 'max', { kind: 'auto' }],
@@ -16,7 +18,7 @@ test.each([
     false,
     'auto',
     'max',
-    { kind: 'model', model: deepseek, level: 'low' },
+    { kind: 'model', model: deepseek, level: 'none' },
   ],
   [
     'a listed model and level',
@@ -30,21 +32,21 @@ test.each([
     true,
     'gpt-6.1-sol',
     undefined,
-    { kind: 'model', model: sol, level: 'medium' },
+    { kind: 'model', model: sol, level: 'low' },
   ],
   [
     'a listed model with an unlisted level',
     true,
     'gpt-6.1-sol',
     'none',
-    { kind: 'model', model: sol, level: 'medium' },
+    { kind: 'model', model: sol, level: 'low' },
   ],
   [
     'an unlisted model',
     true,
     'gpt-6-astra',
     'high',
-    { kind: 'model', model: deepseek, level: 'low' },
+    { kind: 'model', model: deepseek, level: 'none' },
   ],
 ])(
   '%s resolves to the catalog choice',
@@ -59,13 +61,12 @@ test('the server default menu is the catalog the app bakes in', () => {
 
 test('the documented MODEL_MENU value for the default menu reproduces it', () => {
   const value =
-    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
+    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"]},{"model":"kimi","levels":["none","low","high","max"]},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"]},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"]}]}';
   expect(catalogFrom(menuFrom(value))).toEqual(bakedCatalog);
 });
 
 test('the documented MODEL_MENU value with Luna appends it to the menu', () => {
-  const value =
-    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-luna","levels":["none","low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
+  const value = lunaMenu;
   expect(catalogFrom(menuFrom(value))).toEqual({
     auto: true,
     models: [
@@ -82,7 +83,6 @@ test('the documented MODEL_MENU value with Luna appends it to the menu', () => {
           { key: 'xhigh', label: 'Extra high' },
           { key: 'max', label: 'Max' },
         ],
-        defaultLevel: 'medium',
       },
     ],
   });
@@ -151,9 +151,32 @@ test('an unreadable model or level is skipped, not fatal', () => {
           { key: 'low', label: 'Low' },
           { key: 'high', label: 'High' },
         ],
-        defaultLevel: null,
       },
     ],
+  });
+});
+
+test('every model starts at the first of its levels', () => {
+  const menu = catalogFrom(menuFrom(lunaMenu));
+  const defaults = menu.models.map(model => {
+    const choice = resolveChoice(menu, model.key, undefined);
+    return [model.key, choice.kind === 'model' ? choice.level : choice.kind];
+  });
+  expect(defaults).toEqual([
+    ['deepseek', 'none'],
+    ['kimi', 'none'],
+    ['gpt-6.1-sol', 'low'],
+    ['gpt-6-astra', 'low'],
+    ['gpt-6-luna', 'none'],
+  ]);
+});
+
+test('a model with no levels sends no level', () => {
+  const bare: Catalog = { auto: false, models: [{ ...sol, levels: [] }] };
+  expect(resolveChoice(bare, 'gpt-6.1-sol', 'high')).toEqual({
+    kind: 'model',
+    model: bare.models[0],
+    level: null,
   });
 });
 
