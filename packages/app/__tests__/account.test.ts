@@ -63,7 +63,6 @@ const random = {
 const rawNonce = `${'-_v7'.repeat(10)}-_s`;
 const token = 't'.repeat(43);
 const account = { appleUserId: 'apple-user', token };
-const retry = 'Sign-in failed. Try again.';
 
 function response(status: number, text = ''): ClientResponse {
   return {
@@ -178,55 +177,126 @@ describe('signing in', () => {
     expect(await restoreAccount()).toBeNull();
   });
 
+  const signedInByApple = () =>
+    performRequest.mockResolvedValueOnce(appleCredential('identity-token'));
+
   test.each([
     {
-      name: 'Apple fails',
+      name: 'Apple fails with an error code',
       apple: () => performRequest.mockRejectedValueOnce(appleError('1000')),
       server: () => undefined,
+      message: 'Apple sign-in failed (error 1000).',
+    },
+    {
+      name: 'Apple fails without an error code',
+      apple: () => performRequest.mockRejectedValueOnce(new Error('No code.')),
+      server: () => undefined,
+      message: 'Apple sign-in failed. Try again.',
     },
     {
       name: 'Apple returns no identity token',
       apple: () => performRequest.mockResolvedValueOnce(appleCredential(null)),
       server: () => undefined,
-    },
-    {
-      name: 'the server rejects the identity token',
-      apple: () =>
-        performRequest.mockResolvedValueOnce(appleCredential('identity-token')),
-      server: () => fetch.mockResolvedValueOnce(response(401)),
-    },
-    {
-      name: 'the server fails',
-      apple: () =>
-        performRequest.mockResolvedValueOnce(appleCredential('identity-token')),
-      server: () => fetch.mockResolvedValueOnce(response(500)),
+      message: 'Apple sign-in failed. Try again.',
     },
     {
       name: 'the network fails',
-      apple: () =>
-        performRequest.mockResolvedValueOnce(appleCredential('identity-token')),
+      apple: signedInByApple,
       server: () => fetch.mockRejectedValueOnce(new TypeError('Offline.')),
+      message: 'Couldn’t reach the server. Try again.',
+    },
+    {
+      name: 'the server rejects the identity token',
+      apple: signedInByApple,
+      server: () => fetch.mockResolvedValueOnce(response(401)),
+      message: 'Server sign-in failed (HTTP 401).',
+    },
+    {
+      name: 'the server fails',
+      apple: signedInByApple,
+      server: () => fetch.mockResolvedValueOnce(response(500)),
+      message: 'Server sign-in failed (HTTP 500).',
     },
     {
       name: 'the server answers without a token',
-      apple: () =>
-        performRequest.mockResolvedValueOnce(appleCredential('identity-token')),
+      apple: signedInByApple,
       server: () => fetch.mockResolvedValueOnce(response(200, '{}')),
+      message: 'The server’s reply was not valid.',
     },
     {
       name: 'the token cannot be sent as a bearer credential',
-      apple: () =>
-        performRequest.mockResolvedValueOnce(appleCredential('identity-token')),
+      apple: signedInByApple,
       server: () =>
         fetch.mockResolvedValueOnce(response(200, '{"token":"a\\r\\nb"}')),
+      message: 'The server’s reply was not valid.',
     },
-  ])('when $name, sign-in fails with a retry message', async scenario => {
+  ])('when $name, sign-in fails and says so', async scenario => {
     scenario.apple();
     scenario.server();
 
-    expect(await signInWithApple()).toEqual({ kind: 'failed', message: retry });
+    expect(await signInWithApple()).toEqual({
+      kind: 'failed',
+      message: scenario.message,
+    });
     expect(await restoreAccount()).toBeNull();
   });
+
+  test('when the server does not answer in 15 seconds, sign-in fails with a timeout', async () => {
+    jest.useFakeTimers();
+    try {
+      signedInByApple();
+      fetch.mockImplementationOnce(
+        (_url, init) =>
+          new Promise((_resolve, reject) =>
+            init.signal?.addEventListener('abort', () =>
+              reject(
+                Object.assign(new Error('Aborted.'), { name: 'AbortError' }),
+              ),
+            ),
+          ),
+      );
+
+      const result = signInWithApple();
+      await jest.advanceTimersByTimeAsync(14_999);
+      expect(fetch.mock.calls[0][1].signal?.aborted).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+
+      expect(await result).toEqual({
+        kind: 'failed',
+        message: 'The server timed out. Try again.',
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test.each([
+    {
+      name: 'refuses the item',
+      keychain: () =>
+        jest.mocked(Keychain.setGenericPassword).mockResolvedValueOnce(false),
+    },
+    {
+      name: 'throws',
+      keychain: () =>
+        jest
+          .mocked(Keychain.setGenericPassword)
+          .mockRejectedValueOnce(new Error('Keychain unavailable.')),
+    },
+  ])(
+    'when the Keychain $name, sign-in fails with a message about this phone',
+    async scenario => {
+      signedInByApple();
+      fetch.mockResolvedValueOnce(response(200, JSON.stringify({ token })));
+      scenario.keychain();
+
+      expect(await signInWithApple()).toEqual({
+        kind: 'failed',
+        message: 'Couldn’t save the session on this phone.',
+      });
+      expect(await restoreAccount()).toBeNull();
+    },
+  );
 });
 
 describe('launch', () => {

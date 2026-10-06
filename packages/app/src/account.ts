@@ -1,4 +1,7 @@
-import { appleAuth } from '@invertase/react-native-apple-authentication';
+import {
+  appleAuth,
+  type AppleRequestResponse,
+} from '@invertase/react-native-apple-authentication';
 import * as Keychain from 'react-native-keychain';
 import type { z } from 'zod';
 import {
@@ -15,7 +18,11 @@ import { TransportError } from './network/transport';
 const service = 'personal-chat.session.v1';
 const requestTimeoutMs = 15_000;
 const notAllowed = 'This Apple account is not allowed.';
-const retry = 'Sign-in failed. Try again.';
+const appleFailed = 'Apple sign-in failed. Try again.';
+const unreachable = 'Couldn’t reach the server. Try again.';
+const timedOut = 'The server timed out. Try again.';
+const invalidReply = 'The server’s reply was not valid.';
+const notSaved = 'Couldn’t save the session on this phone.';
 
 export type Account = { appleUserId: string; token: string };
 
@@ -66,37 +73,53 @@ async function openServerSession(
   return decodeJson(sessionResponseSchema, text).token;
 }
 
+const failed = (message: string): SignInResult => ({ kind: 'failed', message });
+
 // Pass Apple the raw nonce: the library sends Apple its SHA-256, and the
 // server compares that hash in the identity token with the raw nonce.
 export async function signInWithApple(): Promise<SignInResult> {
+  let nonce: string;
+  let credential: AppleRequestResponse;
   try {
-    const nonce = secureNonce();
-    const credential = await appleAuth.performRequest({
+    nonce = secureNonce();
+    credential = await appleAuth.performRequest({
       requestedOperation: appleAuth.Operation.LOGIN,
       requestedScopes: [],
       nonce,
     });
-    if (!credential.identityToken) return { kind: 'failed', message: retry };
-    const account = {
-      appleUserId: credential.user,
-      token: await openServerSession(credential.identityToken, nonce),
-    };
-    const saved = await Keychain.setGenericPassword(
-      account.appleUserId,
-      account.token,
-      {
-        service,
-        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-      },
-    );
-    if (!saved) return { kind: 'failed', message: retry };
-    return { kind: 'signedIn', account };
   } catch (error) {
-    if (hasCode(error) && error.code === appleAuth.Error.CANCELED)
-      return { kind: 'cancelled' };
-    const refused = error instanceof TransportError && error.status === 403;
-    return { kind: 'failed', message: refused ? notAllowed : retry };
+    if (!hasCode(error)) return failed(appleFailed);
+    if (error.code === appleAuth.Error.CANCELED) return { kind: 'cancelled' };
+    return failed(`Apple sign-in failed (error ${String(error.code)}).`);
   }
+  if (!credential.identityToken) return failed(appleFailed);
+
+  let token: string;
+  try {
+    token = await openServerSession(credential.identityToken, nonce);
+  } catch (error) {
+    if (error instanceof TransportError)
+      return failed(
+        error.status === 403
+          ? notAllowed
+          : `Server sign-in failed (HTTP ${error.status}).`,
+      );
+    if (error instanceof Error && error.name === 'AbortError')
+      return failed(timedOut);
+    if (error instanceof TypeError) return failed(unreachable);
+    return failed(invalidReply);
+  }
+
+  const account = { appleUserId: credential.user, token };
+  const saved = await Keychain.setGenericPassword(
+    account.appleUserId,
+    account.token,
+    {
+      service,
+      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    },
+  ).catch(() => false);
+  return saved ? { kind: 'signedIn', account } : failed(notSaved);
 }
 
 async function revokedByApple(appleUserId: string): Promise<boolean> {
