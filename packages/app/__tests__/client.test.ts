@@ -208,7 +208,7 @@ test.each(['kimi', 'deepseek'] as const)(
         method: 'POST',
         stream: true,
         redirect: 'error',
-        headers: { 'X-Device-Id': deviceCredential },
+        headers: { Authorization: `Bearer ${deviceCredential}` },
       },
     });
     expect(fixture.calls[0].url).not.toContain(deviceCredential);
@@ -236,7 +236,7 @@ test.each(['auto', 'gpt-6.1-sol', 'gpt-6-astra'] as const)(
     await promise;
     expect(fixture.calls).toHaveLength(0);
     expect(fixture.socketHeaders).toEqual([
-      { 'X-Device-Id': deviceCredential },
+      { Authorization: `Bearer ${deviceCredential}` },
     ]);
     fixture.transport.disconnect();
   },

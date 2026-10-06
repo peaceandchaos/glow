@@ -49,6 +49,13 @@ jest.mock('../src/screens/RootDrawer', () => {
     ),
   };
 });
+jest.mock('@invertase/react-native-apple-authentication', () => ({
+  appleAuth: {
+    State: { REVOKED: 0, AUTHORIZED: 1, NOT_FOUND: 2, TRANSFERRED: 3 },
+    getCredentialStateForUser: () => Promise.resolve(1),
+  },
+}));
+jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
 
 const deviceId = 'a'.repeat(43);
 
