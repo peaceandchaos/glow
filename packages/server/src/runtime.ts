@@ -31,14 +31,19 @@ export function runtimeJobs(): Promise<JobRepository> {
   return repository;
 }
 
+// Without AI_GATEWAY_API_KEY, both Gateway clients use the Vercel OIDC token.
+function gatewayKey(): string | undefined {
+  return process.env.AI_GATEWAY_API_KEY || undefined;
+}
+
 export function runtimeProviders(): LiveProviders {
   return new LiveProviders(
     new ResponsesClient({ apiKey: required('OPENAI_API_KEY') }),
-    new GatewayClient({ apiKey: required('AI_GATEWAY_API_KEY') }),
+    new GatewayClient({ apiKey: gatewayKey() }),
     runtimeJev(),
   );
 }
 
 export function runtimeJev(): JevClient {
-  return new JevClient(required('AI_GATEWAY_API_KEY'));
+  return new JevClient(gatewayKey());
 }

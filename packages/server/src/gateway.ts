@@ -1,3 +1,4 @@
+import { getVercelOidcToken } from '@vercel/oidc';
 import type { ModelKey, ResponseInputItem } from '../../../shared/contracts';
 import { parseGatewayEvent, SseDecoder } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
@@ -30,7 +31,7 @@ export function gatewayMessages(items: ResponseInputItem[]): GatewayMessage[] {
 }
 
 type GatewayOptions = {
-  apiKey: string;
+  apiKey?: string;
   endpoint?: string;
   fetcher?: typeof fetch;
 };
@@ -47,6 +48,7 @@ export class GatewayClient {
     maxOutput = models[model].maxOutput,
   ): Promise<string> {
     const messages = gatewayMessages(items);
+    const token = this.options.apiKey ?? (await getVercelOidcToken());
     await beforeCall();
     signal.throwIfAborted();
     let response: Response;
@@ -58,7 +60,7 @@ export class GatewayClient {
           method: 'POST',
           signal,
           headers: {
-            Authorization: `Bearer ${this.options.apiKey}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
