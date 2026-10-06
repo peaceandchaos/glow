@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createStore, type StoreApi } from 'zustand/vanilla';
+import type { ModelKey, Picker } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
 import type { ChatArchive, ChatRecord, SavedMessage } from './archive';
 import type { AttemptActivity, ChatSession } from './session';
@@ -21,6 +22,8 @@ export type Message = {
 
 export type ChatViewState = {
   chatId: string;
+  // The open chat's choice: a model, or Auto for a chat saved with Auto.
+  picker: Picker;
   // The newest part of the chat's path. loadOlder() adds earlier messages.
   messages: Message[];
   isStreaming: boolean;
@@ -29,6 +32,7 @@ export type ChatViewState = {
   // Returns the saved user turn's id, or null when nothing was saved.
   send: (text: string, attachments?: Attachment[]) => string | null;
   stop: () => void;
+  setPicker: (model: ModelKey) => void;
   newChat: () => void;
   openChat: (chatId: string) => void;
   loadOlder: () => void;
@@ -39,6 +43,9 @@ export type ChatViewState = {
 
 export const historyPage = 50;
 export const draftPauseMs = 500;
+// The first chat on a fresh install. Later chats start on the open chat's
+// choice.
+const firstChatPicker: Picker = 'deepseek';
 
 export type ChatStore = StoreApi<ChatViewState>;
 
@@ -162,11 +169,17 @@ export function createChatView(
       isStreaming: streaming(messages),
     });
 
-  const newestPage = (chatId: string): SavedMessage[] =>
-    session.path(archive.chat(chatId).leafId, historyPage);
-  const showPage = (chatId: string, path: SavedMessage[]): void => {
+  const newestPage = (chat: ChatRecord): SavedMessage[] =>
+    session.path(chat.leafId, historyPage);
+  const showPage = (chat: ChatRecord, path: SavedMessage[]): void => {
     rows.clear();
-    show(chatId, path.map(view));
+    const messages = path.map(view);
+    store.setState({
+      chatId: chat.id,
+      picker: chat.picker,
+      messages,
+      isStreaming: streaming(messages),
+    });
   };
 
   const refresh = (): void => {
@@ -184,6 +197,7 @@ export function createChatView(
 
   const store: ChatStore = createStore<ChatViewState>()(() => ({
     chatId: '',
+    picker: firstChatPicker,
     messages: [],
     isStreaming: false,
     recents: [],
@@ -217,19 +231,25 @@ export function createChatView(
       const leaf = store.getState().messages.at(-1);
       if (leaf?.status === 'streaming') attempt(() => session.stop(leaf.id));
     },
+    setPicker: model =>
+      attempt(() => {
+        archive.setPicker(store.getState().chatId, model);
+        store.setState({ picker: model });
+      }),
     newChat: () =>
       attempt(() => {
         const current = archive.chat(store.getState().chatId);
         if (current.leafId === null) return;
-        const { id } = archive.createChat();
-        showPage(id, newestPage(id));
+        const chat = archive.createChat();
+        showPage(chat, newestPage(chat));
       }),
     openChat: chatId =>
       attempt(() => {
         if (chatId === store.getState().chatId) return;
-        const path = newestPage(chatId);
+        const chat = archive.chat(chatId);
+        const path = newestPage(chat);
         archive.openChat(chatId);
-        showPage(chatId, path);
+        showPage(chat, path);
       }),
     loadOlder: () =>
       attempt(() => {
@@ -261,7 +281,10 @@ export function createChatView(
     },
   }));
 
-  const opened = archive.metadata().currentChatId ?? archive.createChat().id;
+  const currentId = archive.metadata().currentChatId;
+  const opened = currentId
+    ? archive.chat(currentId)
+    : archive.createChat(firstChatPicker);
   showPage(opened, newestPage(opened));
   store.setState({ recents: archive.recents() });
   session.subscribe(refresh);

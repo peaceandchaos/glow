@@ -199,11 +199,13 @@ export class ChatArchive {
     return chats.sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
-  createChat(): ChatRecord {
+  // A new chat starts on the open chat's picker, or on firstPicker when no
+  // chat is open.
+  createChat(firstPicker: Picker = 'auto'): ChatRecord {
     const meta = this.metadata();
     const picker = meta.currentChatId
       ? this.chat(meta.currentChatId).picker
-      : 'auto';
+      : firstPicker;
     const chat: ChatRecord = {
       version: 1,
       id: this.uuid(),

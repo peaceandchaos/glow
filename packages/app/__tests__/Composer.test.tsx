@@ -37,11 +37,13 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
   const saveDraftAfterPause = jest.fn<void, [string, string]>();
   const store = createStore<ChatViewState>()(() => ({
     chatId: 'chat',
+    picker: 'kimi',
     messages: [],
     isStreaming: false,
     recents: [],
     send: () => null,
     stop: () => undefined,
+    setPicker: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,

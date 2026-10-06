@@ -45,11 +45,13 @@ const chat: ChatRecord = {
 function renderRecents(): () => string[] {
   const store = createStore<ChatViewState>()(() => ({
     chatId: chat.id,
+    picker: 'kimi',
     messages: [],
     isStreaming: false,
     recents: [chat],
     send: () => null,
     stop: () => undefined,
+    setPicker: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,

@@ -28,11 +28,6 @@
       "file": "packages/app/src/state/chatStore.ts",
       "name": "MessageStatus",
       "reason": "src/state/chatView.ts re-exports it with no importer. Remove both when chatView.ts changes."
-    },
-    {
-      "file": "shared/contracts.ts",
-      "name": "modelLabels",
-      "reason": "Display names for the models that nothing reads yet; the UI owner decides whether the picker uses them."
     }
   ]
 }
