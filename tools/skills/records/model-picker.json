@@ -405,6 +405,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/server/tests/session-picker.test.ts",
         "tools/verification/export-entries.json"
       ],
@@ -426,6 +427,12 @@
           "cites": "Test behavior, not implementation",
           "commit": "dbb2304d40d3",
           "patch": "ef7231f710718b9ea08c5f0ff021070298abc5ff"
+        },
+        {
+          "finding": "The sign-in socket tests assumed the old Auto default, which used the chat socket; DeepSeek, the new default, sends over HTTPS. The tests now pick a GPT model before checking the socket, and restoring the DeepSeek default brings back all three failures.",
+          "cites": "Test behavior, not implementation",
+          "commit": "4f8052f",
+          "patch": "030908f7a02120de0f1cfd617cdc484996043de0"
         }
       ],
       "receipts": [
@@ -457,6 +464,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/app/src/components/Header.tsx",
         "packages/app/src/components/Icon.tsx",
         "packages/app/src/screens/ChatScreen.tsx",
@@ -502,6 +510,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/app/src/components/Header.tsx",
         "packages/app/src/components/Icon.tsx",
         "packages/app/src/screens/ChatScreen.tsx",
@@ -546,6 +555,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/app/src/components/Header.tsx",
         "packages/app/src/components/Icon.tsx",
         "packages/app/src/screens/ChatScreen.tsx",
@@ -661,6 +671,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/server/tests/session-picker.test.ts"
       ],
       "findings": [
@@ -731,6 +742,7 @@
         "packages/app/__tests__/Composer.test.tsx",
         "packages/app/__tests__/RecentsScreen.test.tsx",
         "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
         "packages/app/src/components/Header.tsx",
         "packages/app/src/components/Icon.tsx",
         "packages/app/src/screens/ChatScreen.tsx",
