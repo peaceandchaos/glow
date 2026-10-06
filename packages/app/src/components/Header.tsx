@@ -112,6 +112,7 @@ export const Header = React.memo(function ({
         <Pressable
           onLayout={measurePill}
           onPress={() => setOpen(!open)}
+          style={styles.shrink}
           accessibilityRole="button"
           accessibilityLabel={label}
           accessibilityHint="Chooses the model for this chat"
@@ -119,7 +120,8 @@ export const Header = React.memo(function ({
         >
           {({ pressed }) => (
             <Animated.View
-              style={
+              style={[
+                styles.shrink,
                 reduceMotion
                   ? {
                       opacity: pressed ? 0.7 : 1,
@@ -130,8 +132,8 @@ export const Header = React.memo(function ({
                       transform: [{ scale: pressed ? 0.97 : 1 }],
                       transitionProperty: 'transform',
                       ...quick,
-                    }
-              }
+                    },
+              ]}
             >
               <Glass interactive style={styles.namePill}>
                 <Text style={styles.name} numberOfLines={1}>
@@ -247,7 +249,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  shrink: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
   namePill: {
+    flexShrink: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -258,6 +266,7 @@ const styles = StyleSheet.create({
   },
   name: {
     flexShrink: 1,
+    minWidth: 0,
     fontSize: 17,
     fontWeight: '600',
     color: theme.text,
