@@ -40,6 +40,15 @@ test.each<[ModelKey, string[]]>([
   },
 );
 
+test.each<ModelKey>(['kimi', 'deepseek'])(
+  '%s asks for low reasoning effort',
+  async model => {
+    expect(JSON.parse(await sentBody(model)).reasoning).toEqual({
+      effort: 'low',
+    });
+  },
+);
+
 test('only Gateway models have hosts, and a GPT model never reaches the Gateway', async () => {
   expect(Object.keys(gatewayHosts)).toEqual(
     Object.entries(models).flatMap(([key, config]) =>
