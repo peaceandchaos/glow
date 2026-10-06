@@ -13,10 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { parseArgs } from 'node:util';
-import {
-  handleRequest,
-  SocketConnection,
-} from '../../packages/server/src/api.ts';
+import { handleRequest, socketRoute } from '../../packages/server/src/api.ts';
 import { SessionStore } from '../../packages/server/src/auth.ts';
 import { JobRepository } from '../../packages/server/src/jobs.ts';
 import { runAttempt } from '../../packages/server/src/worker.ts';
@@ -237,22 +234,38 @@ async function api(req, res) {
 }
 
 const sockets = new WebSocketServer({ noServer: true });
+const route = socketRoute(() => services);
 async function upgrade(req, socket, head) {
   await adopt(req.headers);
-  const headers = bearerHeaders(req.headers);
+  let admitted;
+  try {
+    admitted = await route.upgrade(
+      new Request(`http://localhost${req.url}`, {
+        headers: bearerHeaders(req.headers),
+      }),
+    );
+  } catch (error) {
+    if (!(error instanceof Response)) throw error;
+    record({ event: 'upgrade-refused', status: error.status });
+    socket.end(
+      `HTTP/1.1 ${error.status} Unauthorized\r\nConnection: close\r\n\r\n`,
+    );
+    return;
+  }
   sockets.handleUpgrade(req, socket, head, client => {
-    const connection = new SocketConnection(headers, () => services, {
-      isOpen: () => client.readyState === client.OPEN,
+    const peer = {
+      context: admitted.context,
+      websocket: client,
       send: data => client.send(data),
       close: (code, reason) => client.close(code, reason),
-    });
+    };
     client.on('message', data => {
       record({ event: 'socket-frame' });
-      void connection.message(() => data.toString());
+      void route.message(peer, { text: () => data.toString() });
     });
     client.on('close', () => {
       record({ event: 'socket-closed' });
-      connection.close();
+      route.close(peer);
     });
   });
 }

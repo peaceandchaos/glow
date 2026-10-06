@@ -130,40 +130,46 @@ export async function executeCommand(
   }
 }
 
-type SocketPeer = {
-  isOpen(): boolean;
+// The parts of a crossws peer that the socket route reads.
+export type SocketPeer = {
+  readonly context: object;
+  readonly websocket: { readonly readyState?: number };
   send(text: string): void;
-  close(code: number, reason: string): void;
+  close(code?: number, reason?: string): void;
 };
 
-// One phone WebSocket. Each accepted attempt gets its own delivery reader;
-// closing the socket detaches those readers without cancelling their jobs.
-export class SocketConnection {
+// One phone WebSocket, for an owner whose session the upgrade checked. Each
+// accepted attempt gets its own delivery reader; closing the socket detaches
+// those readers without cancelling their jobs.
+class SocketConnection {
   private readonly readers = new Map<string, AbortController>();
-  private owner: string | null = null;
 
-  constructor(
-    private readonly headers: Headers,
-    private readonly services: () => ApiServices,
-    private readonly peer: SocketPeer,
+  private constructor(
+    private readonly owner: string,
+    private readonly services: ApiServices,
   ) {}
 
-  private send(message: ServerMessage): Promise<void> {
-    this.peer.send(JSON.stringify(message));
-    return Promise.resolve();
+  static async admit(
+    headers: Headers,
+    services: ApiServices,
+  ): Promise<SocketConnection> {
+    return new SocketConnection(
+      await sessionOwner(headers, services),
+      services,
+    );
   }
 
-  private async authenticate(runtime: ApiServices): Promise<string> {
-    if (this.owner === null || !allows(runtime.allowedAppleUserIds, this.owner))
-      this.owner = await sessionOwner(this.headers, runtime);
-    return this.owner;
-  }
-
-  async message(read: () => string): Promise<void> {
+  async message(peer: SocketPeer, read: () => string): Promise<void> {
+    if (!allows(this.services.allowedAppleUserIds, this.owner)) {
+      peer.close(1008, 'Unauthorized');
+      return;
+    }
+    const send = (message: ServerMessage) => {
+      peer.send(JSON.stringify(message));
+      return Promise.resolve();
+    };
     let attemptId: string | null = null;
     try {
-      const runtime = this.services();
-      const owner = await this.authenticate(runtime);
       const raw = read();
       if (Buffer.byteLength(raw, 'utf8') > 4_000_000)
         throw new RequestError(413, 'Split large input into context parts.');
@@ -177,10 +183,10 @@ export class SocketConnection {
         command.kind === 'submit'
           ? command.submission.attemptId
           : command.attemptId;
-      const result = await executeCommand(owner, command, runtime);
-      if (!this.peer.isOpen()) return;
+      const result = await executeCommand(this.owner, command, this.services);
+      if (peer.websocket.readyState !== 1) return;
       if (result.kind !== 'accepted') {
-        await this.send(result);
+        await send(result);
         return;
       }
       this.readers.get(attemptId)?.abort();
@@ -188,18 +194,18 @@ export class SocketConnection {
       this.readers.set(attemptId, controller);
       const replyId = attemptId;
       void deliverJob(
-        await runtime.jobs(),
-        owner,
+        await this.services.jobs(),
+        this.owner,
         replyId,
         controller.signal,
-        message => this.send(message),
+        send,
       )
         .then(() => {
           if (!controller.signal.aborted)
-            return this.send({ kind: 'detached', attemptId: replyId });
+            return send({ kind: 'detached', attemptId: replyId });
         })
         .catch(() =>
-          this.send({
+          send({
             kind: 'error',
             attemptId: replyId,
             message:
@@ -211,11 +217,7 @@ export class SocketConnection {
             this.readers.delete(replyId);
         });
     } catch (error) {
-      if (error instanceof Response && error.status === 401) {
-        this.peer.close(1008, 'Unauthorized');
-        return;
-      }
-      await this.send({
+      await send({
         kind: 'error',
         attemptId,
         status:
@@ -236,6 +238,38 @@ export class SocketConnection {
     for (const reader of this.readers.values()) reader.abort();
     this.readers.clear();
   }
+}
+
+function connectionOf({ context }: SocketPeer): SocketConnection | null {
+  return 'connection' in context &&
+    context.connection instanceof SocketConnection
+    ? context.connection
+    : null;
+}
+
+// The phone socket's crossws hooks. The upgrade looks up the session once.
+// A refused credential throws sessionOwner's 401 Response, which crossws
+// sends in place of the upgrade.
+export function socketRoute(services: () => ApiServices) {
+  return {
+    async upgrade(request: Request) {
+      const connection = await SocketConnection.admit(
+        request.headers,
+        services(),
+      );
+      return { context: { connection } };
+    },
+    async message(peer: SocketPeer, message: { text(): string }) {
+      const connection = connectionOf(peer);
+      // A peer the upgrade did not admit is a server fault. The app reads
+      // 1008 as signed out, so this closes with 1011.
+      if (connection) await connection.message(peer, () => message.text());
+      else peer.close(1011, 'Server error');
+    },
+    close(peer: SocketPeer) {
+      connectionOf(peer)?.close();
+    },
+  };
 }
 
 async function handleJobRoute(
