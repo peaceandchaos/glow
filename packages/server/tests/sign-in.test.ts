@@ -375,7 +375,7 @@ test('the socket looks up its session once, at the upgrade, and then checks only
   try {
     const token = await sessionToken(server);
     const sessions = jest.spyOn(server.services, 'sessions');
-    const route = socketRoute(() => server.services);
+    const route = socketRoute(() => ({ ...server.services }));
     const { context } = await route.upgrade(
       new Request('https://fixture.example/v1/responses', {
         headers: { Authorization: `Bearer ${token}` },
