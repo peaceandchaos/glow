@@ -60,8 +60,8 @@ The Gateway then tries only these hosts, in this order:
 - DeepSeek runs only on US hosts with zero-retention terms.
 - Kimi's hosts are the only US zero-retention hosts whose Kimi K3 endpoint reads
   images. Baseten's Kimi endpoint has no vision tag. Bedrock goes first because
-  it lists no quantization and costs 10% more in the US zone. Fireworks serves
-  fp4, costs 50% more, and is the only one with file input.
+  it lists no quantization. Bedrock costs 10% more in the US zone. Fireworks
+  serves fp4, costs 50% more, and is the only one with file input.
 - `gatewayHosts` in `packages/server/src/models.ts` owns the lists. Its type
   admits only Gateway models, and `GatewayClient` refuses any other model
   before it sends a request, so a GPT request never reaches the Gateway.
