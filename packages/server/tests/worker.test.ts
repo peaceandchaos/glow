@@ -1,6 +1,5 @@
 import type { PGlite } from '@electric-sql/pglite';
-import type { JobEvent } from '../../../shared/contracts';
-import { JobRepository } from '../src/jobs';
+import { JobRepository, staleAfterMs } from '../src/jobs';
 import { ProviderFailure } from '../src/errors';
 import type { Providers } from '../src/provider';
 import { runAttempt } from '../src/worker';
@@ -14,7 +13,6 @@ let jobs: JobRepository;
 let selectionCalls: number;
 let generationCalls: number;
 let providers: Providers;
-let events: JobEvent[];
 
 beforeAll(async () => {
   const fixture = await testDatabase();
@@ -25,7 +23,6 @@ beforeEach(async () => {
   await postgres.exec('TRUNCATE chat_job_events, chat_jobs, deleted_chats');
   selectionCalls = 0;
   generationCalls = 0;
-  events = [];
   providers = {
     async select(_input, _signal, beforeCall) {
       await beforeCall();
@@ -55,9 +52,6 @@ async function execute(attemptId: string): Promise<void> {
     claimId: 'claim',
     heartbeatMs: 5,
     timeoutMs: 5_000,
-    async publish(batch) {
-      events.push(...batch);
-    },
   });
 }
 
@@ -67,6 +61,7 @@ test('one Auto submission evaluates once and saves the selected model before tok
   await execute(input.attemptId);
   expect(selectionCalls).toBe(1);
   expect(generationCalls).toBe(1);
+  const { events } = await jobs.poll(owner, input.attemptId, 0, staleAfterMs);
   const selectionIndex = events.findIndex(
     event => event.kind === 'status' && event.actualModel === 'deepseek',
   );
