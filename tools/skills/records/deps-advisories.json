@@ -341,5 +341,335 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "The change is safe because the lock moves only sharp, its @img platform packages, shell-quote and joi, and the only runtime caller of shell-quote calls parse(). A script compared the lock entries of main and the head: both have 1322 entries, none added or removed, and all 29 changed entries are in that set. node_modules/launch-editor/guess.js is the only file that loads shell-quote, and line 67 calls parse() on the REACT_EDITOR value. A probe on the installed 1.12.0 parsed six editor commands to fixed expected tokens.",
+            "cites": "How sure are you",
+            "none": "Proved at level 4 with scripts against the installed packages."
+          },
+          {
+            "finding": "The Linux sharp-libvips 1.3.4 binaries moved in the lock but every install in this review ran on macOS, so CI's npm ci is the first check that they resolve.",
+            "cites": "Steps 4",
+            "none": "Low chance and low cost. CI fails loud if a binary does not resolve."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_016ic5r242C6tpSucvv2odK8",
+            "time": "2026-10-06T16:13:23.071Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "e3uMmZ5qBxmcbZr8q4H9JQ28iEnBPtZZcatZOnvhepbNTJOuU2+4BnfTqIKGCJnFexuz3IboY2eD0GwAHeRvCw=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "The range changes lockfile, override and disposition data and adds one docs section. It adds no code, casts, guards or comments.",
+            "cites": "Focus Areas",
+            "none": "Nothing to remove."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01A9Tb54be322Ze1nYWJQwYK",
+            "time": "2026-10-06T16:13:23.341Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "Mbq9FF1lhdWSdQkfAGPlybSa1zXzW1J28IGkcLU7GYOosksiRUNrz2WskEoDzU7S7yMvV8a1mn0I0z5DzIVxCw=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "package.json, package-lock.json and dependency-dispositions.json are JSON with no comment syntax, and docs/dependencies.md is prose. No comment-sicko was spawned, because the scope has no comments and the standing orders allow only one subagent type.",
+            "cites": "Scope",
+            "none": "The range holds no comments."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01QTNVWqZN5PnwgQMrKdBtdh",
+            "time": "2026-10-06T16:13:23.640Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "/W5gV0Lam1R8aS6IoCD2tZHK5fctdnVwY/D31WEoUq6yYTjos5eedbFjENvS5A33fYBVQbb9bfyd5IIj2+EKDw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-boundary-discipline",
+        "findings": [
+          {
+            "finding": "Deleting the joi disposition leaves data that tools/audit-check.cjs already validates at its boundary. npm audit on the head lists only the braces and sprintf-js advisories, and both keep their dispositions, so audit:check needs no change.",
+            "cites": "Boundary Discipline",
+            "none": "The existing check stays the only validator."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-boundary-discipline",
+            "source": "Skill",
+            "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_0182VChL6Wwv2sYvi3D5c635",
+            "time": "2026-10-06T16:13:24.043Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "sBdZwHyBdkIyKLSBoHYhyfWR9SdSWVzIDttYa1q3zj/i7dxc4UW2ddTAccjzaCU+pyAlOwnDFPo29ydLs29DCw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-fix-root-causes",
+        "findings": [
+          {
+            "finding": "The root cause is the locked vulnerable versions. The change moves sharp, shell-quote and joi to fixed releases instead of adding dispositions. npm audit on main lists 5 advisories and on the head lists 2, and the registry integrity of joi 17.13.8, shell-quote 1.12.0 and sharp 0.35.5 equals the lock.",
+            "cites": "Fix Root Causes",
+            "none": "The fix is at the root. It adds no dispositions or overrides beyond the existing joi pins."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-fix-root-causes",
+            "source": "Skill",
+            "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01UHcaZfTj59s1QgFbEwSx9C",
+            "time": "2026-10-06T16:13:24.392Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "kZxlKTn3gH0AlDEmGot9Krx8k1s4O3lecSgLNgja6dr6OjfkFm7LqbquOoVvp/owtaQL1Tfu4zPnloqfj1X8CQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "I re-ran verify:commit on 4795210 and all 15 checks passed, dependencies included. Probes on the installed packages measured sharp rsvg 2.63.2 with an SVG render to a 4 by 4 PNG, the advisory quote() input throwing a TypeError, joi 17.13.8 rejecting a __proto__ message code, and react-native config exiting 0 with 29 dependencies and the iOS project.",
+            "cites": "Prove It Works",
+            "none": "Checked on the real packages and the real head."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_013p7smUGpraFCaQwU5bVeni",
+            "time": "2026-10-06T16:13:24.743Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "Ga3rHA3hMspVqVnbfFk1/eA1Xc5vrpKZKmafTecz2HtZmGhO48nMR8a3D8+RiRX7y2SewsKXPDK5xsDGTZEyCw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-sequence-verifiable-units",
+        "findings": [
+          {
+            "finding": "One commit carries all three fixes, because verify:staged would fail on the remaining critical advisory after a partial fix. The record follows, and 4795210 corrects one citation. Each commit is checked by the pre-commit hook.",
+            "cites": "Sequence work into verifiable units",
+            "none": "The order is sound. The citation fix commit could fold into the record commit, but no rule requires it."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-sequence-verifiable-units",
+            "source": "Skill",
+            "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_018x1GguxwBhSzyHTYK5r5dh",
+            "time": "2026-10-06T16:13:25.147Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "LvYP1xRG8ZlOneFfnLvMLV+bP+qCJ46wm3ngJq9qLYO7s7byLwHuMf+2MrGxr4yAmEeBdgh532Z+RLFYD+wMAA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-test-behavior-not-implementation",
+        "findings": [
+          {
+            "finding": "No test changes. audit:check is the check for this behavior. It fails on main with the sharp and shell-quote advisories and passes at the head, so it detects the defect that the change removes.",
+            "cites": "Test behavior, not implementation",
+            "none": "The existing check detects a reverted lock."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-test-behavior-not-implementation",
+            "source": "Skill",
+            "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01MsqP5p9nFF93yZcnwz8oXr",
+            "time": "2026-10-06T16:13:25.495Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "la3LzdcWhIcf0eFvDWkHdpRUWlvNlYASDaAIhJbCcghHV9WeGDt3sqZ19Trb+P3NXwiJ9iPBkGBxDAn7KFwLBw=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "The new docs/dependencies.md paragraphs name each advisory, its range, the parent ranges, the versions and the measured results, in the voice of the earlier entries. The three commit messages name only the change.",
+            "cites": "Voice and repo specifics",
+            "none": "No rewrite needed."
+          },
+          {
+            "finding": "The lead-in sentence 'changed only sharp and its platform packages and shell-quote' can group two ways. The bullets under it make the meaning clear.",
+            "cites": "Leave no sentence open to two readings (Global English)",
+            "none": "Minor. The list resolves the reading."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01KoxhxnYknKdSnyS3ugP24u",
+            "time": "2026-10-06T16:13:25.843Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "lllOgCf2f7e4YCLN5eeKMjnmb1hmQNJbB6bbIU6/Ruzq62IvPQNps/oCwFZDKMOVoBTLKQtHm927g/DwQnWgBg=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "The author turned one passive sentence about the joi disposition into the active 'The change deletes the joi track disposition.' That fix is in e004230.",
+            "cites": "Plain speech 29",
+            "commit": "e004230",
+            "patch": "8aebca83dd67c2a7437a9bcd7956978f7fac1c24"
+          },
+          {
+            "finding": "'the entry was set from registry metadata' stays passive. It repeats the wording of the 3 October paragraph about uuid, so the doc keeps one phrase for one method.",
+            "cites": "Plain speech 29",
+            "none": "Kept for consistency with the existing entries."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a783e2d7311080c28",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_015tLKs5fcwNrZhunVXH23kk",
+            "time": "2026-10-06T16:13:26.081Z",
+            "cwd": "5cdb1a74d39dbaeb6190582dab49a9db32898ac3d412b00f037ef88b2c141e7c",
+            "commonDir": "c28d81b24a0d9b29e9829fa3675e863016854502927038f5e6e0ec2211caf270",
+            "branch": "submission/deps-advisories",
+            "head": "4795210a979392984902ee8fc7a0f09bf86453f5",
+            "headPatch": "e65645aab16f91d8dee35bd71b04a955879fe293",
+            "sig": "wZZowiKfvB/k6JOjmaXOwIl9+30tFRNivHsyFVU8WjofPlD39MSRQe491nzTnWIbgDnEvn+/F2oPdwRRNkvyAQ=="
+          }
+        ]
+      }
+    ]
+  }
 }
