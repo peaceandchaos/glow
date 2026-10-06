@@ -1,0 +1,805 @@
+{
+  "change": "model-picker",
+  "base": {
+    "commit": "dfb5f171a9ce6c2bc1bbbf84408c42a4aed33a94",
+    "patch": "a199077e99a57a363b0222709e6c2a5db642cee2"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": ["tools/verification/export-entries.json"],
+      "findings": [
+        {
+          "finding": "The page-leave fix rests on one fact: pager-view 8.0.2 fires onPageSelected for both a swipe and setPage, so every exit from the chat page reaches RootDrawer. Proven by the library source and by the simulator check before and after the fix.",
+          "cites": "How sure are you 5",
+          "none": "Every route away from the chat page closes the menu."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01M3RLfmdAif86Mxdy1gXKL4",
+          "time": "2026-10-06T03:00:41.926Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "HC1W19s1uygxuhPIy8YjTvjdJV8m1RiVigMLccEk9DAs8mV0qY2xZEwz0YqE8NxkNfDGHjZKWlEpDxsIlhZcDQ=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The fix diffs add no casts, guards or try/catch, and RootDrawer loses an unneeded ref and useCallback.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01SktV59DKtPoAGD5Wh8hWJB",
+          "time": "2026-10-06T03:00:42.125Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "pSrxXrLn/7sa4lhwxh9dEX+SGE+MEt0Po3Y5yP3L8ROmD3XBXU0vnbebk5UxMHy1it9DVsJImRCLPwOxiD3vDw=="
+        }
+      ]
+    },
+    {
+      "skill": "expo-animation",
+      "files": ["packages/app/src/components/Header.tsx"],
+      "findings": [
+        {
+          "finding": "Under Reduce Motion the pill scaled and the chevron rotated. It now dims on press and the chevron swaps with no rotation.",
+          "cites": "9. Reduced motion and accessibility",
+          "commit": "fd7568c",
+          "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
+        },
+        {
+          "finding": "The menu closed in the same 200 ms it opened. It now closes in 150 ms and opens in 200 ms.",
+          "cites": "5. Timing or spring",
+          "commit": "343df7d",
+          "patch": "0dd2c18f9bd6125e82925576933af4453709694a"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "expo-animation",
+          "source": "Skill",
+          "sha256": "cad39a1208a5b65e496fb14588e28b684cf94c263b9a2a97bd9da994058db057",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01GnAkM9QTCPB1MGuJSHj19g",
+          "time": "2026-10-06T03:04:37.731Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "dMKsTXCgZ0G2HQitST6fF3PKgsTgc5uI8vjXgrvHrl5jOjJwOjRf4eL8H2JoQPI2+5z8/6YQm+mHoKUX4sMWBw=="
+        }
+      ]
+    },
+    {
+      "skill": "expo-ios-hig",
+      "files": [
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/RootDrawer.tsx"
+      ],
+      "findings": [
+        {
+          "finding": "Recents and New chat had no role or label, so VoiceOver read two unnamed elements beside the menu.",
+          "cites": "7. Accessibility (MEDIUM-HIGH)",
+          "commit": "d3bfc98",
+          "patch": "fc5666f08a6ec36d441d5b13ba2c590631988811"
+        },
+        {
+          "finding": "At large text sizes the pill could not shrink in the header row, so a long model name pushed the New chat button off screen. The pill chain now shrinks and the label truncates; simulator screenshots at an accessibility size show both circle buttons on screen, and the default size is unchanged.",
+          "cites": "7. Accessibility (MEDIUM-HIGH)",
+          "commit": "6026223",
+          "patch": "cdc72c88456e1f64d6fb5e7c4ce6586877be7952"
+        },
+        {
+          "finding": "Menu rows are 40 pt tall with 2 pt gaps, so each row owns 42 pt of touch area. A 44 pt row changes the look, so the owner judges it on the device.",
+          "cites": "4. Touch, Gestures & Haptics (HIGH)",
+          "none": "Left as built; the row height is a design call made on the device."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "expo-ios-hig",
+          "source": "Skill",
+          "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01RMV5mP63RFscN1NSZ941YL",
+          "time": "2026-10-06T03:04:37.812Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "4+Qd+IrStXa7pE0K4UrBXEuKiNvlO72DJN4lXIb7IMB2KvhASDu4fQCR6+o52QQJlBB2//BoeYedRe/VbZaMBw=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Five comments restated types or names, and one about the menu color was wrong about blur on iOS 26. They are deleted.",
+          "cites": "Steps 2",
+          "commit": "113f38d",
+          "patch": "e905cc25bb81e98bfcb1422998e3c7df65d9e6da"
+        },
+        {
+          "finding": "The ChatScreen comment said Header renders last, but ReasoningSheet renders after it. It now says the scrim covers the composer.",
+          "cites": "Steps 2",
+          "commit": "404ccfd",
+          "patch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01V2Xb1X28ibBkxjkZgLB4dU",
+          "time": "2026-10-06T03:00:42.221Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "CNAxuvCMjFuVetw1w/wUG+CjwOQ0L1OOx9booWSB5ulG++WGeMCb+lRc11BEF+p/YxfZ1J8zl78f0lruDsAtCw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-fix-root-causes",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Header held the menu's open state, and nothing told it the pager had left the chat page. The fix passes the page state down instead of adding another close call on each control.",
+          "cites": "Fix Root Causes",
+          "commit": "325803b",
+          "patch": "89390cef2f26992fc4823754b243d9e611e9fc4f"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-fix-root-causes",
+          "source": "Skill",
+          "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01BX36DuWQixfFJcMxYjt6Ck",
+          "time": "2026-10-06T03:04:39.330Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "Sh4EJe1ZoTLyplM3jM18r40EhTDPNMKDj9hIxxIl1X0XNazNyjDemVCHgT+LG3J04JGkzegkgKGuE9+4GOLYAA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-make-operations-idempotent",
+      "files": [
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The picker saves the chat's model through setPicker, which converges after a repeat or a crash. The menu fixes touch no saved state.",
+          "cites": "Make Operations Idempotent 1",
+          "none": "No saved state changes in the fixes."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-make-operations-idempotent",
+          "source": "Skill",
+          "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01QcEony6qtNuziUYhaL3c4g",
+          "time": "2026-10-06T03:04:40.047Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "8CyshoMtdL9fI9NCU2KpQz5vsP160V5Kye/Ol3JJIaM+R1aC6W3Q51qLIjzqYa0XD/WH9n50W2rCbWuSO/z/BQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-minimize-reader-load",
+      "files": [
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/server/tests/session-picker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The fix adds one prop on an existing event and no new layer. The menu panel inside Header is a candidate for its own component later.",
+          "cites": "Minimize Reader Load 1",
+          "none": "No change in this branch; extracting the panel is a later refactor."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-minimize-reader-load",
+          "source": "Skill",
+          "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Mn2ppTgDwEqPXwG1Riavkp",
+          "time": "2026-10-06T03:04:40.128Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "YWxmL9mAeA7fg35El4mztQPZbURao9H8bG5yMYqVbizvBEKvrIRpkBxiIwUAvUgWTEVyA2u1HJUcd5/YYc6VDw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Each fix has a test that failed first, planted defects each fail a test, and the page-leave close, the header-row tap and the large-text layout were checked on the iPhone 15 Pro simulator.",
+          "cites": "Prove It Works",
+          "none": "The checks ran on the real code and the device."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01SV2xr9bGtFLEX6inPX8crS",
+          "time": "2026-10-06T03:00:42.363Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "/a97VW+NRWRjNkrPAbveInP1B5BgjIUJmR3AzuuG5F2aEqq5h26PwmR4YOf+vnZ4EHedoQzBr4Y5mbWKMu5qCA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-sequence-verifiable-units",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Each failing test commit lands before its fix, and every commit passed its pre-commit hook.",
+          "cites": "Sequence work into verifiable units",
+          "none": "The order proves each fix."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-sequence-verifiable-units",
+          "source": "Skill",
+          "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_011qQdB2LuAkPaofkN6hxe9M",
+          "time": "2026-10-06T03:00:42.466Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "RE10PtLgh2aK1U5wLgXCuIm5CDjlT8Vsq39vP3Vd1/7wNM6fiquC/IRYb8nBRkAc6gcKz89TuRAluobnXyHZAg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-subtract-before-you-add",
+      "files": [
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/server/tests/session-picker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "RootDrawer replaces a ref and a useCallback with one piece of state. The fixes add no new module.",
+          "cites": "Subtract Before You Add",
+          "none": "Nothing left to remove in the fixes."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-subtract-before-you-add",
+          "source": "Skill",
+          "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_018RCuGG3xcatk2p5hU7beWB",
+          "time": "2026-10-06T03:04:41.703Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "nO6v2NK0crkh5Zc8j0Jk7ZhvNhG3sZIc75UWEGMyTbuM2Q4Xf+ofp3g3DTd42bMTSUb17DY8CyNKLcNjum8vDw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-test-behavior-not-implementation",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/server/tests/session-picker.test.ts",
+        "tools/verification/export-entries.json"
+      ],
+      "findings": [
+        {
+          "finding": "No test covered picking a model or the scrim, Recents and New chat closes. The new tests press each control and assert the saved pick and the closed menu.",
+          "cites": "Test behavior, not implementation",
+          "commit": "f51fb6d",
+          "patch": "ca9ee876461ea9f7987b0fd4e78dab8d1069bf3c"
+        },
+        {
+          "finding": "A tap on the header row background never reached the scrim. The fix lets taps through while the menu is open, with a test that failed first.",
+          "cites": "Test behavior, not implementation",
+          "commit": "e728b42",
+          "patch": "f22aa27dc90d114def2e0e8bf2587845a2922992"
+        },
+        {
+          "finding": "No test checked that the closed scrim passes touches or that the modal flag is off while the menu is closed. The header-row test now asserts both, and each assertion fails under its mutation.",
+          "cites": "Test behavior, not implementation",
+          "commit": "eea1db0",
+          "patch": "ef7231f710718b9ea08c5f0ff021070298abc5ff"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-test-behavior-not-implementation",
+          "source": "Skill",
+          "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01CWokimN2fVTLtBXUiFTL5H",
+          "time": "2026-10-06T03:00:42.567Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "osk1WAWViKW/j+KUxKglN7VvKiFZmPk6GTQz26x9DksW8JK9GAkG4NigCRaUqfGk5j8kAx/G0h6Jvfq/3ZwGCQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-type-system-discipline",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/RootDrawer.tsx",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts",
+        "packages/server/tests/session-picker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "shown is a required boolean, so the compiler makes every ChatScreen render site pass it. createChat keeps an optional picker default that the test harness reaches; making it required is a later change.",
+          "cites": "Type System Discipline",
+          "none": "No new optional parameter; the createChat signature is a later change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-type-system-discipline",
+          "source": "Skill",
+          "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01982AowmATpCrc8yNh34yus",
+          "time": "2026-10-06T03:04:42.504Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "GvH8vRZB2DQEnl7oPn3GZzXOlrsb3KrVfzLG+P3ZB3+eOfv17Po6b5dOSJwdPqyNMjoILC0I6YFEV3ZkDY2qCA=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/RootDrawer.tsx",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts"
+      ],
+      "findings": [
+        {
+          "finding": "A page change re-renders RootDrawer once and Header stays memoized. No measured performance problem, so no memoization change.",
+          "cites": "Review Guardrails",
+          "none": "No change without a measured problem."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices",
+          "source": "Skill",
+          "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_014FJFRis7YCLhhr2Fm8PnQy",
+          "time": "2026-10-06T03:04:37.965Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "H0W69UpolNOuBizV4qxb9QL3YbQE1xgZKiZM4I/nm06/NPP2iElWgJX/T7Z8vgH7L8bJJkeIzlX9DojcrXN5BQ=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices-sm",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/RootDrawer.tsx",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The fixes touch no worklets, shared values or gesture code. The menu fades use Reanimated CSS transitions.",
+          "cites": "Sub-skills",
+          "none": "No Reanimated API change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices-sm",
+          "source": "Skill",
+          "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01ESJXuvhkecY9fbWpKhMkPx",
+          "time": "2026-10-06T03:04:37.888Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "E68hXpiTPEUqP2j6JmF3CB0jQmSveAGAi5lOi+RQt+kVAiBRVQMGpAj6y4VdPTl/NEanXQKSd+a4vfsZN1oyAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "review-animations",
+      "files": ["packages/app/src/components/Header.tsx"],
+      "findings": [
+        {
+          "finding": "Reduce Motion still moved the pill and the chevron. Gentler-not-zero now holds.",
+          "cites": "The Ten Non-Negotiable Standards 8",
+          "commit": "fd7568c",
+          "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
+        },
+        {
+          "finding": "Close and open used the same timing. The close is now the faster system response.",
+          "cites": "The Ten Non-Negotiable Standards 9",
+          "commit": "343df7d",
+          "patch": "0dd2c18f9bd6125e82925576933af4453709694a"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "review-animations",
+          "source": "Read",
+          "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01MmhYRCBJYwAJRmhSy8ied9",
+          "time": "2026-10-06T03:04:45.084Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "Dbj0XZSTowzp2dsM5fTDO9aofhDMXHCpzobpoPvVXYXKB8Pm2Kso6/wJyK77RgxMMtivj65K8fRoltHFG9mdCg=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The commit that adds the button labels states that its test passes only after the next commit's pager-mock change, and the next commit's message matches.",
+          "cites": "Voice and repo specifics",
+          "none": "Commit messages describe what each commit does."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01WNnEF7D1Gk38vs9CWWiX7A",
+          "time": "2026-10-06T02:57:13.329Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "ogceKOWOJ9Tw/SWp69iFlwFRZIQgZwcsNvp0lIoxmT15SNGDFLbPwUD5Xe7opBWewyTrD9lABdRm1+vQTzfBDg=="
+        }
+      ]
+    },
+    {
+      "skill": "test-prune",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/server/tests/session-picker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "One integration test file covers the menu through RootDrawer, ChatScreen and Header. A server picker test repeats two other checks and can be merged later.",
+          "cites": "Review questions",
+          "none": "Nothing pruned in this branch."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "test-prune",
+          "source": "Read",
+          "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01DkC5DripfvgKR77zmhdrfe",
+          "time": "2026-10-06T03:04:45.679Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "MWIx6OKw6u9uH2QEfI6lcQOuTpLTLu8TN4FHwaOMTfnArBJTjfkKvjDLsrKxQ7/+ZLMRix8zzI9bvKymlZj1Bg=="
+        }
+      ]
+    },
+    {
+      "skill": "thermo-nuclear-code-quality-review",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "No structural regression or file over 1000 lines. Header grew with the menu panel, and the first-chat picker rule sits in two layers; both are later refactors. A native menu would delete most of this code but changes the chosen look.",
+          "cites": "Approval Bar",
+          "none": "Approved with follow-ups outside this change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "thermo-nuclear-code-quality-review",
+          "source": "Skill",
+          "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Lzk2QJ5KtQQJfKf23fBkaG",
+          "time": "2026-10-06T03:04:44.049Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "kkXcZX3NAAjL3X9CT7+F4i5TJItXDWFt1raTfs2C8L1Rmsuuk8EFlmeLGds6LZd2yB/KKhN9T+l9oVeauVqiBA=="
+        }
+      ]
+    },
+    {
+      "skill": "typescript-best-practices",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/RootDrawer.tsx",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts",
+        "packages/server/tests/session-picker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "No casts or optional props were added in the fixes, and the Picker type keeps Auto unpickable.",
+          "cites": "TypeScript best practices",
+          "none": "No finding."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "typescript-best-practices",
+          "source": "Skill",
+          "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01TcAJnDjNR7oLi4BP4au7aB",
+          "time": "2026-10-06T03:04:44.129Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "bon9kJoQmmH29tNe6lQWvLHXWcpeq/fkSoHuLsExH1/SOIq82aIV5+MzrRziE1A1LnAgOKvu8ltZjdCzfukmAA=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The commit messages name the real components and behavior and hold no planning words.",
+          "cites": "Plain speech",
+          "none": "No AI patterns found."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "adb2e3798d37ebfe6",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_015TCrdsY7vGQ2yMfqKNd1Fe",
+          "time": "2026-10-06T02:57:13.581Z",
+          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/dev-tool-advisories",
+          "head": "7eb3a38792395118099417de4077cbff30691983",
+          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
+          "sig": "djpHXEYXwVGsm0yIRzVCEMH2fQvMyPOhBfjTQ9/UCCDqMbaRKp9w97FLkdbsrTs7caSEFxyKPcLYK2tP+ERqAw=="
+        }
+      ]
+    }
+  ]
+}
