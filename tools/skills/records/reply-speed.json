@@ -603,5 +603,520 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "Reviewer close of the author's open finding: claim() waits for the submit commit. submit takes lockAttempt (jobs.ts:200) before dispatch (jobs.ts:259), and pg_advisory_xact_lock holds until COMMIT (database.ts:29), so the workflow cannot exist before the lock is held. claim() takes the same lock first (jobs.ts:287). Its next statement, SELECT ... FOR UPDATE (jobs.ts:288), runs under READ COMMITTED: database.ts:23 issues a bare BEGIN and nothing in packages, shared or tools sets an isolation level, so that statement takes a fresh snapshot after the lock is granted and sees the committed row. If submit rolls back after dispatch, claim reads no row and throws 404, and the run fails without paid work, the same end state as the old wait step after its retries.",
+            "cites": "How sure are you 3",
+            "none": "Sound by walkthrough. A two-connection Postgres test stays a follow-up because PGlite has one connection."
+          },
+          {
+            "finding": "No lock cycle and no pool starvation. Every path that takes the attempt advisory lock (submit, claim, requestCancellation) takes it before any row lock on that attempt. update, heartbeat, markProviderStarted, acknowledge and reconcile take only the row lock. A claim waiting on the lock waits on a submit that already holds its own pooled connection, so the max-4 pool cannot deadlock.",
+            "cites": "Steps 3",
+            "none": "Walked every lockAttempt and lockStateWithoutCheckpoint caller in jobs.ts."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_015YH47qfYqQrUpqn644EnwL",
+            "time": "2026-10-06T23:48:35.854Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "CpYkTi0nTvsjoykMv35bFapBGQrsS/N/n5Y1I13vIqmtpYUZoJNxJzrrSs8qLOgZ4xvCo5xlF+u9OzNYzcyWAA=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "The one new try/catch, in coalescingChunkWriter's drain, is load-bearing: it records the failure and puts the batch back for the terminal write. No casts, no defensive guards.",
+            "cites": "Focus Areas",
+            "none": "Nothing to remove."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Sevjwuy4tFKV7e4NDM3Csp",
+            "time": "2026-10-06T23:48:36.341Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "kPbK8SGrvQlNsEm/QU23MnfKoxC0TzPjQL3hv5omRDUEb7+T0eR8a7BmavJ88Hvc0LlkEjeY6ovdlRrXJNu7Dw=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "The diff adds one comment, the PGlite delay note in reply-speed.bench.ts:20. It states a constraint of a dependency that the code cannot show. The removed comments in reply.ts went with the code they described.",
+            "cites": "Steps 5",
+            "none": "Keep; it is about a library we cannot change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_013Qnq42zoV3EcJeVaVh9w3s",
+            "time": "2026-10-06T23:48:36.519Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "ruVYH8v6F9Bdo3S5sQQ/VP8wxObn1CBo/Cy/lb70LHdO7TEjCuOX1Ytl11y6VkK/KfGcGjczcntLkrgobon2CA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-make-operations-idempotent",
+        "findings": [
+          {
+            "finding": "Crash and retry stay convergent with one step. Workflow re-runs a step with the same stepId (node_modules/workflow/docs/foundations/idempotency.mdx: stable across retries), and claimId is that stepId, so a re-run or a second dispatch finds job.claimId set and claim() returns false. reconcile marks a stale reply interrupted once. The worker.test.ts crash test covers the convergence.",
+            "cites": "Make Operations Idempotent 2",
+            "none": "Converges."
+          },
+          {
+            "finding": "If a chunk write's COMMIT succeeds but the client sees an error (connection lost after COMMIT), the writer puts the batch back and the failed or interrupted write appends it again, so that text and its provider events appear twice. The old code lost the text in the same case instead. Rare, and the terminal write on a dead connection usually fails too.",
+            "cites": "Make Operations Idempotent 2",
+            "none": "Minor, not blocking. Accepting duplication over loss on an ambiguous commit is a reasonable trade."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-make-operations-idempotent",
+            "source": "Skill",
+            "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Uh3cTAVxaR5FauZY5Djfhu",
+            "time": "2026-10-06T23:48:36.933Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "+ORV48oQl0CUwVMDpRFktN4VhiNUcCPxg9sLwPlq6d+7Io1ySs0Z81DhWFTgJYbTV0HDrI+cfpk1zpp+28IBCw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-minimize-reader-load",
+        "findings": [
+          {
+            "finding": "coalescingChunkWriter keeps its four pieces of mutable state in one closure with two methods, push and close. runAttempt reads top to bottom, and the workflow file drops to one step.",
+            "cites": "Minimize Reader Load 2",
+            "none": "No new layer."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-minimize-reader-load",
+            "source": "Skill",
+            "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01WLEy68qQc6BNirviRLECT2",
+            "time": "2026-10-06T23:48:37.319Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "uoTHn1MXGVzmILuk90jz9jp6h+9RbVAg5axx3oCGvPmm35v6xtkzFn7kFLSqMVVoAk/4YIsYG3DDzmbONLOzDg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "Reran the bench twice on e9bbcf6 (6 replies). Worker statements per reply were 113 to 124 against the author's 119, because the batch count depends on timing. Time to the final snapshot was 1.64 to 1.97 s against the author's 1.82 to 1.84 s, and time to the first event was 401 to 526 ms against 428 to 432 ms. Reran verify:commit on e9bbcf6 and on the review commit. Read the Gateway endpoints JSON for both models.",
+            "cites": "Script the check when you can",
+            "none": "Claims confirmed; the statement count is a range, not a fixed 119."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01AACRXSHWvwKaGSDFp2GK3p",
+            "time": "2026-10-06T23:48:37.754Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "ovhpIcsTR2JxIMYWHY3ElnXiIbiz0D6kO0uCRNEIfPul1I21ID40lfkx4SEjUALphFd3r/QOgijAr/CbPqXKBw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-sequence-verifiable-units",
+        "findings": [
+          {
+            "finding": "The bench and baseline land first, then subtraction (stream), then the writer, then the step merge, then the Gateway line. The effort value is two commits (low, then none) because of a mid-task order; each lands on its own.",
+            "cites": "Sequence work into verifiable units",
+            "none": "Order proves the work."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-sequence-verifiable-units",
+            "source": "Skill",
+            "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01AziD2LoDWQmCH3LJQskPr2",
+            "time": "2026-10-06T23:48:38.117Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "7LWtpwkasjsge2BYngADYW15dZLfCus6c8VUmNLWwDLwJKHGwktUjHaEIXySylr8QADHJWaEmo9Hv6Hjqux9DQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-subtract-before-you-add",
+        "findings": [
+          {
+            "finding": "d504a3b removes the unread workflow stream and the publish option before 65c0ed3 adds the writer. git grep finds no getReadable or getRun caller.",
+            "cites": "Subtract Before You Add",
+            "none": "Removal came first."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-subtract-before-you-add",
+            "source": "Skill",
+            "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01F3eyQ22rhowny6ntUotP6t",
+            "time": "2026-10-06T23:48:38.445Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "RsugNOevjSwCL7yUxRgrQZpdXRIIJS5mrowI47lqC3+QHMulCAuCmyzK030yd3noGFBHBWnzKLi+TmqxO/irAw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-test-behavior-not-implementation",
+        "findings": [
+          {
+            "finding": "The coalescing test asserts the saved text, ordered provider events, contiguous sequences and exactly two transactions, so dropping ...unwritten from either terminal write fails it. The Stop test asserts the absence of late provider events.",
+            "cites": "Test behavior, not implementation",
+            "none": "Detects the named defects."
+          },
+          {
+            "finding": "No test covers a non-Stop write failure: if drain's catch (worker.ts:37-42) dropped the failed batch instead of putting it back, every test still passes, because the Stop test discards the unwritten batch anyway. A transient write failure with the full text in the failed snapshot would pin it.",
+            "cites": "Test behavior, not implementation",
+            "none": "Minor, not blocking; the code is correct by walkthrough. Follow-up test."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-test-behavior-not-implementation",
+            "source": "Skill",
+            "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01HSsjDe3dCoAcmEkwmVXaBK",
+            "time": "2026-10-06T23:48:40.429Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "pcMtsM/kWO/f18gwW+CuSQ8e/JdOYCaDYpzfUrswICUHz9N48IDaYDkgdeW6oq4DI9iDxUo3dDCroILcXSNXBg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-type-system-discipline",
+        "findings": [
+          {
+            "finding": "ChunkBatch is a typed record over the shared EventPayload type, and failure is boxed as { error } so a thrown undefined still counts. No casts.",
+            "cites": "Type System Discipline",
+            "none": "Nothing to change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-type-system-discipline",
+            "source": "Skill",
+            "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01E3L18e9YzdCAA1sDhZm9aZ",
+            "time": "2026-10-06T23:48:40.813Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "8oCRMzF/Ht9EckKwIJ4MDmCcOR1/V6P8iDNtXjnnLoJ9aj4VWC5P0Fzxko4cHhzcHh64sgEWWhnjVamBtHvADw=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "Commit messages state each change in plain sentences. docs/providers.md shows only the providerOptions part of the Gateway body and does not list reasoning effort; it makes no wrong claim.",
+            "cites": "Voice and repo specifics",
+            "none": "Adding the effort line to docs/providers.md is a follow-up for the lead."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01EMMxveMWbgvYafhaxiHVHD",
+            "time": "2026-10-06T23:48:40.949Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "ePMz3sf9COM9IbtlG4yLs3hjZMtR3wp7u1AYMlAcBMXAJw+B4jFduS+9Lwy42u+NGi8sfNM4PZBdgkT0LaxaAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "test-prune",
+        "findings": [
+          {
+            "finding": "The changed ordering test now reads events from SQL with jobs.poll, the record the phone reads, so it checks the durable result instead of a callback. images.test.ts and session-harness.ts lose only the removed option. The bench is outside jest testMatch, so the suite does not run it.",
+            "cites": "Review questions",
+            "none": "No protection lost."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "test-prune",
+            "source": "Read",
+            "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Qrm9wf8Gswp8kzj4poFddm",
+            "time": "2026-10-06T23:48:42.586Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "+gpfUeIc3EohuhUjADIIxaB5FMiU5pY2pQJikKSwOHdiriayaUDkGNS127FapFokWf3Mey9PhpgBKzoDpcAjAA=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "No file passes 1000 lines (jobs.ts 520, worker.ts 171). runAttempt loses the publish wrapping on every write and gains no special-case branch. lockAttempt replaces two copies of the same query.",
+            "cites": "Approval Bar",
+            "none": "No structural regression."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01MPst7RJD2zA7sppdVuN3ng",
+            "time": "2026-10-06T23:48:41.434Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "//rrClCP9xYI9Oc7OQzvWVQwfgtN8p8Jp74d/z48fPyPeIHRjjcpNppCwVhUbLvJehkSeXpquuOcOdvwXgj4Bg=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "No as casts, any or non-null assertions added. The bench Database wrapper implements the interface directly.",
+            "cites": "TypeScript best practices",
+            "none": "Nothing to change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Lsdm7v4vdTkHNBQA8rzN7o",
+            "time": "2026-10-06T23:48:41.761Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "iCBoWG3aBtMRf4Rwuqp5kaFLC3UgabZNTrwCpLfOTnjKtYLJbcDxDBI3OXjE1PtC1GJzXJV9xD3aOg7dFIPnBA=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "Commit messages and the record findings use plain statements without AI patterns.",
+            "cites": "Process 1",
+            "none": "Nothing to change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Ha2VmDrMMvs6sSiUuumoHW",
+            "time": "2026-10-06T23:48:41.995Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "bJDYu4VT9nnD6pfb2JPsNbDa59ov9q/5Mtcapc2oxdeVdrBgl2QQR3MoHj1FcvkmXQKqJF/uTMhWgbIrEUkdCw=="
+          }
+        ]
+      },
+      {
+        "skill": "workflow",
+        "findings": [
+          {
+            "finding": "Removing getWritable is safe: nothing calls getReadable or getRun, and delivery reads chat_job_events. Removing waitForCommittedInput is safe because claim() now waits on the attempt lock. In-flight runs keep the old two-step code because runs stay on their deployment (node_modules/workflow/docs/foundations/versioning.mdx). maxRetries = 0 means one run with no retry (errors-and-retries.mdx); a transient error in claim now fails the run, and reconcile marks it interrupted after the stale window.",
+            "cites": "*CRITICAL*: Always Use Correct `workflow` Documentation 2",
+            "none": "Crash and retry stay safe; the retry policy is the owner's call."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "workflow",
+            "source": "Skill",
+            "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a2f5c416111357470",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Ma7V6wP8o5L5PESznpoRiU",
+            "time": "2026-10-06T23:46:22.018Z",
+            "cwd": "63ff1a62e47dc31523692136bf26288b3b6f1e917c01c36cc0c97cc1487e85b9",
+            "commonDir": "d42b7097d79c00d852487221e66d31e3aa392705b888acab7f4cee052e37e97a",
+            "branch": "submission/reply-speed",
+            "head": "e9bbcf6c37baed0959d480eb0981d59e104c9f67",
+            "headPatch": "6f8804fbef46f632a5f5beca4cf51cc49e422a2b",
+            "sig": "wDawJc7iDbtzcFkrZg2BNKYSxmNvoN0rkm4XLW3FDxuVFEWMPfxAghgxx1Mvdgr1K0uiW08bn7rDupF6ireeCA=="
+          }
+        ]
+      }
+    ]
+  }
 }
