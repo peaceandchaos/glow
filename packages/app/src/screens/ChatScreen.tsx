@@ -64,9 +64,7 @@ export function ChatScreen({
   const newChat = useChatStore(state => state.newChat);
   const catalog = useChatStore(state => state.catalog);
   const picker = useChatStore(state => state.picker);
-  const level = useChatStore(state => state.level);
   const setPicker = useChatStore(state => state.setPicker);
-  const setLevel = useChatStore(state => state.setLevel);
   const loadOlder = useChatStore(state => state.loadOlder);
   const chatId = useChatStore(state => state.chatId);
   const messagesLength = useChatStore(state => state.messages.length);
@@ -271,9 +269,7 @@ export function ChatScreen({
         shown={shown}
         catalog={catalog}
         picker={picker}
-        level={level}
         onPickModel={setPicker}
-        onPickLevel={setLevel}
         onNewChat={newChat}
         onOpenRecents={onOpenRecents}
       />

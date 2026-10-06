@@ -6,7 +6,6 @@ import {
   Text,
   useWindowDimensions,
   View,
-  type ViewStyle,
 } from 'react-native';
 import Animated, {
   cubicBezier,
@@ -14,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { resolveChoice, type Catalog } from '../../../../shared/catalog';
-import type { LevelKey, Picker } from '../../../../shared/contracts';
+import type { Picker } from '../../../../shared/contracts';
 import { Glass } from './Glass';
 import { Icon } from './Icon';
 import { theme } from '../theme';
@@ -30,29 +29,18 @@ const optionSlop = {
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
 const SIDE = 16;
 
-const optionStyle =
-  (selected: boolean, base: ViewStyle) =>
-  ({ pressed }: { pressed: boolean }) => [
-    base,
-    selected ? styles.optionSelected : pressed ? styles.optionPressed : null,
-  ];
-
 export const Header = React.memo(function ({
   shown,
   catalog,
   picker,
-  level,
   onPickModel,
-  onPickLevel,
   onNewChat,
   onOpenRecents,
 }: {
   shown: boolean;
   catalog: Catalog;
   picker: Picker;
-  level: LevelKey | undefined;
   onPickModel: (picker: Picker) => void;
-  onPickLevel: (level: LevelKey) => void;
   onNewChat: () => void;
   onOpenRecents: () => void;
 }) {
@@ -71,7 +59,7 @@ export const Header = React.memo(function ({
     transitionTimingFunction: easeOut,
   };
 
-  const choice = resolveChoice(catalog, picker, level);
+  const choice = resolveChoice(catalog, picker, undefined);
   const chosen = choice.kind === 'auto' ? null : choice.model;
   const label = chosen?.label ?? 'Auto';
   const models: { key: Picker; label: string }[] = catalog.auto
@@ -79,10 +67,6 @@ export const Header = React.memo(function ({
     : catalog.models;
   const pick = (option: Picker) => {
     onPickModel(option);
-    setOpen(false);
-  };
-  const pickLevel = (option: LevelKey) => {
-    onPickLevel(option);
     setOpen(false);
   };
   const measurePill = (event: LayoutChangeEvent) => {
@@ -229,34 +213,20 @@ export const Header = React.memo(function ({
               accessibilityRole="button"
               accessibilityLabel={optionLabel}
               accessibilityState={{ selected }}
-              style={optionStyle(selected, styles.option)}
+              style={({ pressed }) => [
+                styles.option,
+                selected
+                  ? styles.optionSelected
+                  : pressed
+                    ? styles.optionPressed
+                    : null,
+              ]}
             >
               <Text style={styles.check}>{selected ? '✓' : ''}</Text>
               <Text style={styles.optionLabel}>{optionLabel}</Text>
             </Pressable>
           );
         })}
-        {choice.kind === 'model' && choice.model.levels.length > 0 ? (
-          <View style={styles.levels}>
-            {choice.model.levels.map(({ key: option, label: optionLabel }) => {
-              const selected = option === choice.level;
-              return (
-                <Pressable
-                  key={option}
-                  onPress={() => pickLevel(option)}
-                  hitSlop={optionSlop}
-                  accessibilityRole="button"
-                  accessibilityLabel={optionLabel}
-                  accessibilityHint="Sets the reasoning level for this chat"
-                  accessibilityState={{ selected }}
-                  style={optionStyle(selected, styles.level)}
-                >
-                  <Text style={styles.optionLabel}>{optionLabel}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
       </Animated.View>
     </View>
   );
@@ -330,21 +300,6 @@ const styles = StyleSheet.create({
     minHeight: OPTION_HEIGHT,
     paddingLeft: 10,
     paddingRight: 12,
-    borderRadius: 12,
-  },
-  levels: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 2,
-    marginTop: 4,
-    paddingTop: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  level: {
-    justifyContent: 'center',
-    minHeight: OPTION_HEIGHT,
-    paddingHorizontal: 10,
     borderRadius: 12,
   },
   optionSelected: {

@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
 import { bakedCatalog } from '../../../shared/catalog';
-import type { LevelKey, Picker } from '../../../shared/contracts';
+import type { Picker } from '../../../shared/contracts';
 import { Icon } from '../src/components/Icon';
 import { RootDrawer } from '../src/screens/RootDrawer';
 import { ChatStoreContext } from '../src/state/chatStore';
@@ -75,7 +75,6 @@ jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
 const recents = 0;
 const chat = 1;
 const setPicker = jest.fn<void, [Picker]>();
-const setLevel = jest.fn<void, [LevelKey]>();
 const newChat = jest.fn<void, []>();
 let mockReduceMotion = false;
 
@@ -96,7 +95,7 @@ function chatState(): ChatViewState {
     send: () => null,
     stop: () => undefined,
     setPicker,
-    setLevel,
+    setLevel: () => undefined,
     newChat,
     openChat: () => undefined,
     loadOlder: () => undefined,
@@ -124,13 +123,12 @@ async function renderDrawer() {
   const pill = () =>
     root.findByProps({ accessibilityHint: 'Chooses the model for this chat' });
   const menu = () => root.findByProps({ accessibilityRole: 'menu' });
-  const buttons = (hint?: string) =>
+  const models = () =>
     menu()
       .findAll(
         node =>
           node.props.accessibilityRole === 'button' &&
-          typeof node.props.onPress === 'function' &&
-          node.props.accessibilityHint === hint,
+          typeof node.props.onPress === 'function',
       )
       .map(node => node.props.accessibilityLabel);
   return {
@@ -138,8 +136,7 @@ async function renderDrawer() {
     root,
     pill,
     menu,
-    models: () => buttons(),
-    levels: () => buttons('Sets the reasoning level for this chat'),
+    models,
     expanded: (): boolean => pill().props.accessibilityState.expanded,
     option: (label: string) =>
       menu().findByProps({ accessibilityLabel: label }),
@@ -320,44 +317,18 @@ test('without Auto in the catalog, the menu lists only its models and a chat sav
   });
 });
 
-test('a GPT model shows its levels with the chat’s level marked, and picking a level hands it to the chat and closes the menu', async () => {
+test('the menu lists only the models, with no level row, for a model with levels', async () => {
   const view = await renderDrawer();
-  await act(async () => view.store.setState({ picker: 'gpt-6.1-sol' }));
+  await act(async () =>
+    view.store.setState({ picker: 'gpt-6.1-sol', level: 'high' }),
+  );
   await view.open();
   expect(view.pill().props.accessibilityLabel).toBe('GPT-6.1 Sol');
-  expect(view.levels()).toEqual(['Low', 'Medium', 'High', 'Extra high', 'Max']);
-  expect(view.option('Low').props.accessibilityState).toEqual({
-    selected: true,
-  });
-
-  await act(async () => view.store.setState({ level: 'high' }));
-  expect(view.option('High').props.accessibilityState).toEqual({
-    selected: true,
-  });
-  expect(view.option('Low').props.accessibilityState).toEqual({
-    selected: false,
-  });
-
-  await act(async () => view.option('Extra high').props.onPress());
-  expect(setLevel.mock.calls).toEqual([['xhigh']]);
-  expect(setPicker).not.toHaveBeenCalled();
-  expect(view.expanded()).toBe(false);
-});
-
-test('the level row is hidden under Auto and for a model without levels', async () => {
-  const view = await renderDrawer();
-  await act(async () => view.store.setState({ picker: 'auto' }));
-  await view.open();
-  expect(view.pill().props.accessibilityLabel).toBe('Auto');
-  expect(view.levels()).toEqual([]);
-
-  const [deepseek, ...rest] = bakedCatalog.models;
-  await act(async () =>
-    view.store.setState({
-      picker: 'deepseek',
-      catalog: { auto: true, models: [{ ...deepseek, levels: [] }, ...rest] },
-    }),
-  );
-  expect(view.pill().props.accessibilityLabel).toBe('DeepSeek V4.1 Flash');
-  expect(view.levels()).toEqual([]);
+  expect(view.models()).toEqual([
+    'Auto',
+    'DeepSeek V4.1 Flash',
+    'Kimi K3',
+    'GPT-6.1 Sol',
+    'GPT-6 Astra',
+  ]);
 });
