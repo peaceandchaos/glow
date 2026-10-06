@@ -12,7 +12,7 @@ import {
   handleRequest,
 } from '../../packages/server/src/api.ts';
 import { SessionStore } from '../../packages/server/src/auth.ts';
-import { JobRepository } from '../../packages/server/src/jobs.ts';
+import { JobRepository, staleAfterMs } from '../../packages/server/src/jobs.ts';
 import { testDatabase } from '../../packages/server/tests/database.ts';
 import { sessionTokenSchema } from '../../shared/contracts.ts';
 
@@ -347,7 +347,13 @@ function acceptSocket(req, socket, head) {
         status: 'completed',
         actualModel: 'gpt-6.1-sol',
       });
-      for (const event of await jobs.events(owner, attemptId, sequence))
+      const { events } = await jobs.poll(
+        owner,
+        attemptId,
+        sequence,
+        staleAfterMs,
+      );
+      for (const event of events)
         client.send(JSON.stringify({ kind: 'event', event }));
     });
   });
