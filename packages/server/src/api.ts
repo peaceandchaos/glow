@@ -1,5 +1,6 @@
 import type { JWTVerifyGetKey } from 'jose';
 import { z } from 'zod';
+import type { Catalog } from '../../../shared/catalog';
 import {
   decode,
   decodeJson,
@@ -32,6 +33,7 @@ export type ApiServices = {
   jobs: () => Promise<JobRepository>;
   dispatch: Dispatcher;
   rank: (input: SearchRequest, signal: AbortSignal) => Promise<string[]>;
+  catalog: Catalog;
 };
 
 // Reads the attempt a frame names, even when the frame fails strict
@@ -370,6 +372,10 @@ export async function handleRequest(
     if (path.join('/') === 'v1/session' && request.method === 'POST')
       return await signIn(request, services);
     const owner = await sessionOwner(request.headers, services);
+    if (path.join('/') === 'v1/models' && request.method === 'GET')
+      return Response.json(services.catalog, {
+        headers: { 'Cache-Control': 'no-store' },
+      });
     return await handleSignedInRoute(request, owner, path, services);
   } catch (error) {
     return errorResponse(

@@ -308,6 +308,7 @@ export async function startServer(): Promise<Server> {
     ...auth,
     jobs: () => Promise.resolve(jobs),
     rank: () => Promise.resolve([]),
+    catalog: bakedCatalog,
     // Durable dispatch starts the real worker asynchronously, as Workflow does.
     async dispatch(dispatchOwner, attemptId) {
       dispatched.push(attemptId);

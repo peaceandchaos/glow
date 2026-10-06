@@ -1,5 +1,6 @@
 import type { JWTPayload, JWTVerifyGetKey } from 'jose';
 import { createHash, randomUUID } from 'node:crypto';
+import { bakedCatalog } from '../../../shared/catalog';
 import { decodeJson, sessionResponseSchema } from '../../../shared/contracts';
 import {
   handleRequest,
@@ -154,6 +155,7 @@ async function startServer(allowedAppleUserIds = appleUserId): Promise<Server> {
       jobs: () => Promise.resolve(jobs),
       dispatch: () => Promise.reject(new Error('Must not dispatch')),
       rank: () => Promise.resolve([]),
+      catalog: bakedCatalog,
     },
     database,
     close: () => postgres.close(),

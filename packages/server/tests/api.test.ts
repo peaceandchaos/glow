@@ -1,4 +1,9 @@
 import {
+  bakedCatalog,
+  parseCatalog,
+  type Catalog,
+} from '../../../shared/catalog';
+import {
   decodeJson,
   serverMessageSchema,
   submissionCommands,
@@ -10,6 +15,8 @@ import { deliverJob } from '../src/delivery';
 import { newSessionToken } from '../src/auth';
 import { InputParts } from '../src/input-parts';
 import { JobRepository, staleAfterMs } from '../src/jobs';
+import { catalogFrom, menuFrom } from '../src/models';
+import { runtimeCatalog } from '../src/runtime';
 import { testDatabase } from './database';
 import { submission } from './fixtures';
 import { signedIn, withoutDatabase } from './sessions';
@@ -49,6 +56,7 @@ async function fixture() {
     jobs: () => Promise.resolve(jobs),
     dispatch,
     rank,
+    catalog: bakedCatalog,
   };
   return { jobs, postgres, services, dispatch, rank };
 }
@@ -64,6 +72,7 @@ test('unauthorized requests are rejected before body decoding, database access, 
     jobs,
     dispatch,
     rank,
+    catalog: bakedCatalog,
   };
   const response = await handleRequest(
     request('chat', 'POST', 'invalid JSON', 'unknown'),
@@ -92,12 +101,64 @@ test('a body that is not UTF-8 is a client error, not a server failure', async (
         jobs,
         dispatch: jest.fn(),
         rank: jest.fn(),
+        catalog: bakedCatalog,
       },
     );
     expect(response.status).toBe(400);
     expect(jobs).not.toHaveBeenCalled();
   } finally {
     await postgres.close();
+  }
+});
+
+test('the model catalog is served only to a signed-in phone, uncached', async () => {
+  const f = await fixture();
+  try {
+    const catalog: Catalog = catalogFrom(
+      menuFrom(
+        '{"auto":false,"models":[{"model":"gpt-6-astra","levels":["high"],"defaultLevel":"high"}]}',
+      ),
+    );
+    const services = { ...f.services, catalog };
+    const refused = await handleRequest(
+      request('models', 'GET', undefined, newSessionToken()),
+      services,
+    );
+    expect(refused.status).toBe(401);
+    const response = await handleRequest(request('models'), services);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(parseCatalog(await response.text())).toEqual(catalog);
+    expect(catalog).toEqual({
+      auto: false,
+      models: [
+        {
+          key: 'gpt-6-astra',
+          label: 'GPT-6 Astra',
+          levels: [{ key: 'high', label: 'High' }],
+          defaultLevel: 'high',
+        },
+      ],
+    });
+  } finally {
+    await f.postgres.close();
+  }
+});
+
+test('the server reads its model menu from MODEL_MENU', () => {
+  const previous = process.env.MODEL_MENU;
+  process.env.MODEL_MENU =
+    '{"auto":false,"models":[{"model":"kimi","levels":[],"defaultLevel":null}]}';
+  try {
+    expect(runtimeCatalog()).toEqual({
+      auto: false,
+      models: [
+        { key: 'kimi', label: 'Kimi K3', levels: [], defaultLevel: null },
+      ],
+    });
+  } finally {
+    if (previous === undefined) delete process.env.MODEL_MENU;
+    else process.env.MODEL_MENU = previous;
   }
 });
 
