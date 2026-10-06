@@ -119,25 +119,35 @@ export const Header = React.memo(function ({
         >
           {({ pressed }) => (
             <Animated.View
-              style={{
-                transform: [
-                  { scale: pressed ? (reduceMotion ? 0.99 : 0.97) : 1 },
-                ],
-                transitionProperty: 'transform',
-                ...quick,
-              }}
+              style={
+                reduceMotion
+                  ? {
+                      opacity: pressed ? 0.7 : 1,
+                      transitionProperty: 'opacity',
+                      ...quick,
+                    }
+                  : {
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
+                      transitionProperty: 'transform',
+                      ...quick,
+                    }
+              }
             >
               <Glass interactive style={styles.namePill}>
                 <Text style={styles.name}>{label}</Text>
                 <Animated.View
-                  style={{
-                    transform: [{ rotate: open ? '180deg' : '0deg' }],
-                    transitionProperty: 'transform',
-                    ...quick,
-                  }}
+                  style={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          transform: [{ rotate: open ? '180deg' : '0deg' }],
+                          transitionProperty: 'transform',
+                          ...quick,
+                        }
+                  }
                 >
                   <Icon
-                    name="chevron.down"
+                    name={reduceMotion && open ? 'chevron.up' : 'chevron.down'}
                     size={13}
                     color={theme.textSecondary}
                   />

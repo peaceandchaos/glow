@@ -12,6 +12,7 @@ const SF_TO_MDI: Record<string, string> = {
   'line.3.horizontal': 'menu',
   'square.and.pencil': 'square-edit-outline',
   'chevron.down': 'chevron-down',
+  'chevron.up': 'chevron-up',
   'chevron.right': 'chevron-right',
   'chevron.up.chevron.down': 'unfold-more-horizontal',
   plus: 'plus',
