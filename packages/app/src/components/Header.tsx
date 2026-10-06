@@ -4,15 +4,17 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
+  type ViewStyle,
 } from 'react-native';
 import Animated, {
   cubicBezier,
   useReducedMotion,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { bakedCatalog } from '../../../../shared/catalog';
-import type { Picker } from '../../../../shared/contracts';
+import { resolveChoice, type Catalog } from '../../../../shared/catalog';
+import type { LevelKey, Picker } from '../../../../shared/contracts';
 import { Glass } from './Glass';
 import { Icon } from './Icon';
 import { theme } from '../theme';
@@ -26,26 +28,36 @@ const optionSlop = {
   bottom: (TOUCH_TARGET - OPTION_HEIGHT) / 2,
 };
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
+const SIDE = 16;
 
-const menuOptions: { key: Picker; label: string }[] = [
-  { key: 'auto', label: 'Auto' },
-  ...bakedCatalog.models,
-];
+const optionStyle =
+  (selected: boolean, base: ViewStyle) =>
+  ({ pressed }: { pressed: boolean }) => [
+    base,
+    selected ? styles.optionSelected : pressed ? styles.optionPressed : null,
+  ];
 
 export const Header = React.memo(function ({
   shown,
+  catalog,
   picker,
+  level,
   onPickModel,
+  onPickLevel,
   onNewChat,
   onOpenRecents,
 }: {
   shown: boolean;
+  catalog: Catalog;
   picker: Picker;
+  level: LevelKey | undefined;
   onPickModel: (picker: Picker) => void;
+  onPickLevel: (level: LevelKey) => void;
   onNewChat: () => void;
   onOpenRecents: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   if (open && !shown) setOpen(false);
@@ -59,15 +71,18 @@ export const Header = React.memo(function ({
     transitionTimingFunction: easeOut,
   };
 
-  const label =
-    picker === 'auto'
-      ? 'Auto'
-      : (
-          bakedCatalog.models.find(entry => entry.key === picker) ??
-          bakedCatalog.models[0]
-        ).label;
+  const choice = resolveChoice(catalog, picker, level);
+  const chosen = choice.kind === 'auto' ? null : choice.model;
+  const label = chosen?.label ?? 'Auto';
+  const models: { key: Picker; label: string }[] = catalog.auto
+    ? [{ key: 'auto', label: 'Auto' }, ...catalog.models]
+    : catalog.models;
   const pick = (option: Picker) => {
     onPickModel(option);
+    setOpen(false);
+  };
+  const pickLevel = (option: LevelKey) => {
+    onPickLevel(option);
     setOpen(false);
   };
   const measurePill = (event: LayoutChangeEvent) => {
@@ -190,6 +205,7 @@ export const Header = React.memo(function ({
             top: insets.top + 6 + CIRCLE + MENU_GAP,
             left: pill.x,
             minWidth: pill.width,
+            maxWidth: windowWidth - pill.x - SIDE,
             opacity: open ? 1 : 0,
             transform: reduceMotion
               ? []
@@ -203,8 +219,8 @@ export const Header = React.memo(function ({
         accessibilityElementsHidden={!open}
         importantForAccessibility={open ? 'auto' : 'no-hide-descendants'}
       >
-        {menuOptions.map(({ key: option, label: optionLabel }) => {
-          const selected = option === picker;
+        {models.map(({ key: option, label: optionLabel }) => {
+          const selected = option === (chosen?.key ?? 'auto');
           return (
             <Pressable
               key={option}
@@ -213,20 +229,34 @@ export const Header = React.memo(function ({
               accessibilityRole="button"
               accessibilityLabel={optionLabel}
               accessibilityState={{ selected }}
-              style={({ pressed }) => [
-                styles.option,
-                selected
-                  ? styles.optionSelected
-                  : pressed
-                    ? styles.optionPressed
-                    : null,
-              ]}
+              style={optionStyle(selected, styles.option)}
             >
               <Text style={styles.check}>{selected ? '✓' : ''}</Text>
               <Text style={styles.optionLabel}>{optionLabel}</Text>
             </Pressable>
           );
         })}
+        {choice.kind === 'model' && choice.model.levels.length > 0 ? (
+          <View style={styles.levels}>
+            {choice.model.levels.map(({ key: option, label: optionLabel }) => {
+              const selected = option === choice.level;
+              return (
+                <Pressable
+                  key={option}
+                  onPress={() => pickLevel(option)}
+                  hitSlop={optionSlop}
+                  accessibilityRole="button"
+                  accessibilityLabel={optionLabel}
+                  accessibilityHint="Sets the reasoning level for this chat"
+                  accessibilityState={{ selected }}
+                  style={optionStyle(selected, styles.level)}
+                >
+                  <Text style={styles.optionLabel}>{optionLabel}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -244,7 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: SIDE,
     paddingBottom: 8,
   },
   circle: {
@@ -300,6 +330,21 @@ const styles = StyleSheet.create({
     minHeight: OPTION_HEIGHT,
     paddingLeft: 10,
     paddingRight: 12,
+    borderRadius: 12,
+  },
+  levels: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 2,
+    marginTop: 4,
+    paddingTop: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  level: {
+    justifyContent: 'center',
+    minHeight: OPTION_HEIGHT,
+    paddingHorizontal: 10,
     borderRadius: 12,
   },
   optionSelected: {

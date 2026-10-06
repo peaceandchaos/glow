@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { parseCatalog, type Catalog } from '../../../../shared/catalog';
-import type { Picker } from '../../../../shared/contracts';
+import type { LevelKey, Picker } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
 import type { ChatArchive, ChatRecord, SavedMessage } from './archive';
 import type { AttemptActivity, ChatSession } from './session';
@@ -24,6 +24,7 @@ export type Message = {
 export type ChatViewState = {
   chatId: string;
   picker: Picker;
+  level: LevelKey | undefined;
   catalog: Catalog;
   // The newest part of the chat's path. loadOlder() adds earlier messages.
   messages: Message[];
@@ -34,6 +35,7 @@ export type ChatViewState = {
   send: (text: string, attachments?: Attachment[]) => string | null;
   stop: () => void;
   setPicker: (picker: Picker) => void;
+  setLevel: (level: LevelKey) => void;
   newChat: () => void;
   openChat: (chatId: string) => void;
   loadOlder: () => void;
@@ -177,6 +179,7 @@ export function createChatView(
     store.setState({
       chatId: chat.id,
       picker: chat.picker,
+      level: chat.level,
       messages,
       isStreaming: streaming(messages),
     });
@@ -199,6 +202,7 @@ export function createChatView(
   const store: ChatStore = createStore<ChatViewState>()(() => ({
     chatId: '',
     picker: catalog.models[0].key,
+    level: undefined,
     catalog,
     messages: [],
     isStreaming: false,
@@ -236,7 +240,12 @@ export function createChatView(
     setPicker: picker =>
       attempt(() => {
         archive.setPicker(store.getState().chatId, picker);
-        store.setState({ picker });
+        store.setState({ picker, level: undefined });
+      }),
+    setLevel: level =>
+      attempt(() => {
+        archive.setLevel(store.getState().chatId, level);
+        store.setState({ level });
       }),
     newChat: () =>
       attempt(() => {

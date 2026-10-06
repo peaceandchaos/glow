@@ -78,6 +78,7 @@ function chatState(isStreaming: boolean): ChatViewState {
   return {
     chatId: 'chat',
     picker: 'kimi',
+    level: undefined,
     catalog: bakedCatalog,
     messages: [
       { id: 'question', role: 'user', text: 'Question', status: 'done' },
@@ -93,6 +94,7 @@ function chatState(isStreaming: boolean): ChatViewState {
     send: () => null,
     stop: () => undefined,
     setPicker: () => undefined,
+    setLevel: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,

@@ -47,6 +47,7 @@ function renderRecents(): () => string[] {
   const store = createStore<ChatViewState>()(() => ({
     chatId: chat.id,
     picker: 'kimi',
+    level: undefined,
     catalog: bakedCatalog,
     messages: [],
     isStreaming: false,
@@ -54,6 +55,7 @@ function renderRecents(): () => string[] {
     send: () => null,
     stop: () => undefined,
     setPicker: () => undefined,
+    setLevel: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,

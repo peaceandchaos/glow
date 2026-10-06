@@ -168,3 +168,32 @@ test('a fetched catalog replaces the cache, and a failed fetch or an unreadable 
   expect(reopen(phone.storage).catalog()).toEqual(served);
   expect(errors).toEqual([]);
 });
+
+test('a level picked for the chat is saved, shown again on reopen, and reaches the provider as the effort', async () => {
+  const phone = openPhone(server);
+  const chat = createChat(phone, 'gpt-6.1-sol');
+  const { errors, state } = openView(phone);
+  expect(state().level).toBeUndefined();
+
+  state().setLevel('high');
+  expect(state().level).toBe('high');
+  expect(reopen(phone.storage).chat(chat.id).level).toBe('high');
+  expect(
+    openView(openPhone(server, phone.storage.snapshot())).state(),
+  ).toMatchObject({
+    picker: 'gpt-6.1-sol',
+    level: 'high',
+  });
+
+  state().send('Question');
+  const reply = state().messages[1];
+  await answer(phone, reply.id);
+  expect(phone.archive.message(reply.id)).toMatchObject({ level: 'high' });
+  expect(server.providers.generations).toMatchObject([
+    { model: 'gpt-6.1-sol', input: { level: 'high' }, effort: 'high' },
+  ]);
+
+  state().setPicker('gpt-6-astra');
+  expect(state().level).toBeUndefined();
+  expect(errors).toEqual([]);
+});
