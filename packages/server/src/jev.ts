@@ -8,7 +8,7 @@ import type { BeforePaidCall } from './provider';
 
 export class JevClient {
   constructor(
-    private readonly apiKey: string,
+    private readonly apiKey: string | undefined,
     private readonly fetcher?: typeof fetch,
   ) {}
 
