@@ -270,10 +270,7 @@ const styles = StyleSheet.create({
     padding: 6,
     gap: 2,
     borderRadius: 16,
-    // Opaque, because React Native has no backdrop blur on iOS and text would
-    // show through a translucent panel. This is rgba(28, 28, 30, 0.92) over
-    // the black background.
-    backgroundColor: '#1A1A1C',
+    backgroundColor: theme.menuBackground,
     boxShadow: [
       'inset 0 0 0 0.5px rgba(255, 255, 255, 0.1)',
       '0 12px 32px rgba(0, 0, 0, 0.36)',
@@ -298,14 +295,14 @@ const styles = StyleSheet.create({
   },
   check: {
     width: 16,
-    color: '#FFFFFF',
+    color: theme.text,
     fontSize: 13,
     fontWeight: '500',
     lineHeight: 16,
     textAlign: 'center',
   },
   optionLabel: {
-    color: '#EAEAEA',
+    color: theme.menuText,
     fontSize: 15,
     fontWeight: '500',
     lineHeight: 18,

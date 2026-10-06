@@ -263,7 +263,7 @@ export function ChatScreen({
         />
       </KeyboardStickyView>
 
-      {/* Last, so the open model menu's scrim covers the composer too. */}
+      {/* After the composer, so the scrim covers it. */}
       <Header
         shown={shown}
         picker={picker}
