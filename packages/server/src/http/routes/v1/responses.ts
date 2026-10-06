@@ -6,11 +6,14 @@ import { services } from '../../../services';
 const connections = new Map<string, SocketConnection>();
 
 export default defineWebSocketHandler({
-  // crossws awaits this hook and answers a thrown Response, here 401, in
-  // place of the upgrade.
+  // crossws awaits this hook and sends a thrown Response instead of upgrading.
   async upgrade(request) {
     const runtime = services();
-    await sessionOwner(request.headers, runtime.allowlist, runtime.sessions);
+    await sessionOwner(
+      request.headers,
+      runtime.allowedAppleUserIds,
+      runtime.sessions,
+    );
   },
   async message(peer, message) {
     let connection = connections.get(peer.id);

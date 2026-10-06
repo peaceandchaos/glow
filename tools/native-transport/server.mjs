@@ -37,14 +37,12 @@ const record = (file, entry) =>
 
 const { database } = await testDatabase();
 const jobs = new JobRepository(database);
-// The app sends its credential as X-Device-Id. The harness stores it as the
-// session token of one fixture user and forwards it as a bearer token.
 const owner = 'native-harness-user';
 const sessions = new SessionStore(database);
 await sessions.create(sessionTokenSchema.parse(device), owner);
 const dispatches = new Map();
 const services = {
-  allowlist: owner,
+  allowedAppleUserIds: owner,
   appleKeys: () =>
     Promise.reject(new Error('The harness never signs in with Apple.')),
   sessions: () => Promise.resolve(sessions),

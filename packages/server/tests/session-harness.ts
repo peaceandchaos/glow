@@ -347,8 +347,6 @@ export async function startServer(): Promise<Server> {
   };
 }
 
-// The app still sends its credential as X-Device-Id. The server now reads a
-// bearer token, so the harness moves the value to the Authorization header.
 function asBearer(init: HeadersInit | undefined): Headers {
   const headers = new Headers(init);
   const token = headers.get('X-Device-Id');
@@ -444,7 +442,7 @@ class InProcessSocket implements ClientSocket {
       }
       void sessionOwner(
         asBearer(headers),
-        server.services.allowlist,
+        server.services.allowedAppleUserIds,
         server.sessions,
       ).then(
         () => {

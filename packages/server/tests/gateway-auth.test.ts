@@ -3,9 +3,8 @@ import { textItem } from '../src/compaction/context';
 import { runtimeJev, runtimeProviders } from '../src/runtime';
 import { submission } from './fixtures';
 
-// On Vercel the server has no AI_GATEWAY_API_KEY. @vercel/oidc reads the
-// token from the request context or VERCEL_OIDC_TOKEN, and refreshes it over
-// the network only when it is expired, so this token stays valid for an hour.
+// @vercel/oidc reads exp without checking the signature, and refreshes a
+// missing or expired token over the network.
 const encode = (json: string) => Buffer.from(json).toString('base64url');
 const oidcToken = [
   encode('{"alg":"RS256","typ":"JWT"}'),
