@@ -1,0 +1,1084 @@
+{
+  "change": "sign-in",
+  "base": {
+    "commit": "dfb5f171a9ce6c2bc1bbbf84408c42a4aed33a94",
+    "patch": "a199077e99a57a363b0222709e6c2a5db642cee2"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": [
+        "packages/app/src/device.ts",
+        "packages/server/.env.example",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "tools/__tests__/credentials.test.js",
+        "tools/check-credentials.cjs",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/run.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "The socket check on each frame compared the owner with a services object built once at upgrade. Each frame now reads the allowlist from the services factory, and a test with fresh services per call fails without the fix.",
+          "cites": "How sure are you 4",
+          "commit": "317a78f",
+          "patch": "cb1a838215c5f534077940aacbcf6a1a1f355d9a"
+        },
+        {
+          "finding": "In Debug builds the native fetch patch reported credentialed requests without an Authorization header, such as the sign-in POST, to DevTools. The patch now reports no native request; an instrumented simulator run counted 1 report before and 0 after.",
+          "cites": "How sure are you 5",
+          "commit": "a4c2e9b",
+          "patch": "e98ec50c13d122beb5e850111afe1670ed692a53"
+        },
+        {
+          "finding": "Every HTTP route except the sign-in POST runs sessionOwner, and a mutation that skips it fails 3 tests. Release and TestFlight builds never call the DevTools reporter.",
+          "cites": "Steps 3",
+          "none": "The safety facts are proven by runs and source."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01FUVSyzHZ8tZ3UTMv1P3NPb",
+          "time": "2026-10-05T02:05:22.528Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "nEcVRE397kWlTPPSu1DawV5HKqZK1AfPvA4lsgQgvlJBzg8+UiT57hVSOAr8JOTpf3X/oeVwzD2qzjMyPi4yCg=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Four server comments only pointed at other files.",
+          "cites": "Focus Areas",
+          "commit": "47363b0",
+          "patch": "2ad6487a9ed881cd7a4f7b3d55d282e2e5cb586c"
+        },
+        {
+          "finding": "Sign-in comments restated the code.",
+          "cites": "Focus Areas",
+          "commit": "23bef6c",
+          "patch": "93494970a91f37cdc38d65d8beea19b8d940a38c"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_011K4AeTRH2uWST4u6SrYpMz",
+          "time": "2026-10-05T02:05:22.800Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "nN0a+sHbH8CdiG63acpX+aLgA02JMSkCStG5370L7CNBF24NopkbyCbc1H2z9TXQ14Vyk7rfO1UkBRPQtfUXBg=="
+        }
+      ]
+    },
+    {
+      "skill": "expo-ios-hig",
+      "files": [
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/screens/RecentsScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx"
+      ],
+      "findings": [
+        {
+          "finding": "The sign-in screen's button has a 44 pt target, the button role and a label. It is hand-built in black with a 1 pt border, which the owner judges on the device; the native AppleButton and the sign-in error announcement are later changes.",
+          "cites": "7. Accessibility (MEDIUM-HIGH)",
+          "none": "No change in this branch; the button design is judged on the device."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "expo-ios-hig",
+          "source": "Skill",
+          "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "ac5ba58c4d28c8e12",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01FpGrJWGcW4oFp9M9vjYH5d",
+          "time": "2026-10-06T02:47:37.470Z",
+          "cwd": "ef25796383cdc9875e8f00142d0a11f1ae159e20100136ff628ab49b4d59eb84",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": null,
+          "head": "6f8f9f302878467658267fe3c53bd6d117c22eff",
+          "headPatch": "93494970a91f37cdc38d65d8beea19b8d940a38c",
+          "sig": "TgHkCnxzT4cDCCoYcoM97TQPEkVmiV8PDDxMFbuI4TziTmNYZRZh3hrdSebBL0sYBi8fKefcskl3yc1Qw6teAw=="
+        }
+      ]
+    },
+    {
+      "skill": "ios-debugger-agent",
+      "files": [
+        "packages/app/ios/MargeloChat.xcodeproj/project.pbxproj",
+        "packages/app/ios/MargeloChat/MargeloChat.entitlements",
+        "packages/app/patches/react-native-nitro-fetch+1.4.2.patch",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/run.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "The simulator build launched to the sign-in screen on the iPhone 15 Pro, and the native transport harness passed 22 of 24 instrumented checks with the 2 failures main also has.",
+          "cites": "Core Workflow",
+          "none": "Checked on the simulator."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "ios-debugger-agent",
+          "source": "Skill",
+          "sha256": "bb8ad932ec473cee097c9c8d106051134e9ab6cf9dc85d6a8e62ce80ad24c385",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01AfBzXzh8B3SYYLq2kzF8eS",
+          "time": "2026-10-05T02:05:23.164Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "ssq6zPXcHzFPAhpMACBUIKnqjFIAHtLuln9PodzGsQ2dXMBzmxTTOlpUzoXmRYBiLpU3A4CsYW966uSsIct3DA=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "comment-sicko found server comments that restated names or pointed elsewhere; comments about code outside the repo stay.",
+          "cites": "Steps 2",
+          "commit": "47363b0",
+          "patch": "2ad6487a9ed881cd7a4f7b3d55d282e2e5cb586c"
+        },
+        {
+          "finding": "comment-sicko found app comments that restated the sign-in code.",
+          "cites": "Steps 2",
+          "commit": "23bef6c",
+          "patch": "93494970a91f37cdc38d65d8beea19b8d940a38c"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01FqFRDvhNon91TJ6hbAiVHa",
+          "time": "2026-10-05T02:05:23.516Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "OC/W7NZ1BBSMJ2Z9qmx5SoW+CxQMFdo/UBqPUSWvaah157kwFtDHFFqXKuRXchhuSb1vV3MneVHCjMyC4uL2BA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-boundary-discipline",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/src/account.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/network/nativeDrivers.ts",
+        "packages/server/.env.example",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/http/routes/v1/responses.ts",
+        "packages/server/src/jev.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/schema.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/fixtures.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "shared/contracts.ts",
+        "tools/check-credentials.cjs",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "The Apple identity token, the sign-in reply and the bearer token are parsed once at the boundary with the shared schemas, and gatewayAuth() is the only reader of the Gateway environment. The Keychain read is a later parse.",
+          "cites": "Boundary Discipline",
+          "none": "Validation sits at the network boundaries; the Keychain parse is a later change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-boundary-discipline",
+          "source": "Skill",
+          "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_012DSNR5ZrfFLXGUiadrH3Pu",
+          "time": "2026-10-05T02:05:23.872Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "iidleKg5NRDuVu+0fs7yyLq/Pwa4XQgHWySw5x2EythRbyghhzzbERf9zq9xtrS5zD1HZb2VLwtqHAdCoZzLAg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-fix-root-causes",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Harness servers translated the old device header, so the bearer path was not exercised. They now run on bearer sessions.",
+          "cites": "Fix Root Causes",
+          "commit": "de21055",
+          "patch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876"
+        },
+        {
+          "finding": "The transport harnesses still sent the old device header after the app moved to bearer sessions. They now read the app's bearer token, and the old bridge is deleted.",
+          "cites": "Fix Root Causes",
+          "commit": "94a0395",
+          "patch": "2e949388014218c57d9a45b29fa8e43ec9808586"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-fix-root-causes",
+          "source": "Skill",
+          "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01BS131BHNpCBRPvqj4an74u",
+          "time": "2026-10-05T02:05:24.208Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "owR/KYIlUjI3I3Q/v1xIU6GjihwkK147Mwmx5l2YCG/AiDDm/6ycCymFBlBBFxg2ITNEUIR/2XRimf2uzcrwAg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-make-operations-idempotent",
+      "files": [
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/attempt.ts",
+        "packages/app/src/state/nativeSession.ts",
+        "packages/app/src/state/signOut.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/services.ts"
+      ],
+      "findings": [
+        {
+          "finding": "A repeated sign-in makes a new session and changes no other. Sign-out is not atomic; a failure leaves a dead token that a second sign-out clears, which is a later change.",
+          "cites": "Make Operations Idempotent 1",
+          "none": "No reconciliation needed for first use; atomic sign-out is a later change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-make-operations-idempotent",
+          "source": "Skill",
+          "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Q5nRrcBWNNqZo9hoXnLqcK",
+          "time": "2026-10-05T02:05:24.631Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "zoy+f7dF2s1whsi/mOnQQNasrgayfF7sDCEbJ7LkazmHPUgVr91W/F186bzrP6wE2OG+1ikXJqFty6s/SGdTBA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-migrate-callers-then-delete-legacy-apis",
+      "files": [
+        "packages/app/src/device.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts"
+      ],
+      "findings": [
+        {
+          "finding": "authenticate, the connections map, handleSessionRoute and gatewayKey are removed in the same commits that move their callers.",
+          "cites": "Migrate Callers Then Delete Legacy APIs",
+          "commit": "cb87f65",
+          "patch": "ac6c2f35f52f9cfb61d4e711429e29c46d2d20d5"
+        },
+        {
+          "finding": "The device-ID bridge in the harnesses is deleted in the commit that moves its last readers to the bearer token.",
+          "cites": "Migrate Callers Then Delete Legacy APIs",
+          "commit": "94a0395",
+          "patch": "2e949388014218c57d9a45b29fa8e43ec9808586"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-migrate-callers-then-delete-legacy-apis",
+          "source": "Skill",
+          "sha256": "8014f4eb04fe50474f7e3f9286bce2de276116b8b669cd2fe7b2100972efb68a",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_013P1khnLVEJ8uVKQx4cYqre",
+          "time": "2026-10-05T02:05:25.074Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "yM++3us8RgSxhW1biCS024Qa8xNHzfGT0O6Xfsb4NKH7xaCb2i3CAnbN5bnMXGr7mYubsEMHG27WiVYJSEseBg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-minimize-reader-load",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/ios/MargeloChat/MargeloChat.entitlements",
+        "packages/app/src/account.ts",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/signOut.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The socket route has one entry point, and responses.ts is one line that hands crossws the production hooks.",
+          "cites": "Minimize Reader Load 1",
+          "commit": "cb87f65",
+          "patch": "ac6c2f35f52f9cfb61d4e711429e29c46d2d20d5"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-minimize-reader-load",
+          "source": "Skill",
+          "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01CmqYt4D5mLzQzDECba4BoV",
+          "time": "2026-10-05T02:05:25.430Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "OdxBoj89xbgMdd47gOLf+gAUB3MZO/UMKsT75kR1LQWLzbbBGVPG1z5v6ScLe+EsotaQpPK1UC8hVnmSrKZVBQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Server tests pass 145 of 145, app tests 122 of 122 and tool tests 288 of 288. New tests fail under mutations of the code they check, the app launches to the sign-in screen on the simulator, and DeepSeek and Kimi answer through the Gateway.",
+          "cites": "Prove It Works",
+          "none": "Checked on the real code, the simulator and the Gateway."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01JKcaaanLtD1NXzrUsUnCfg",
+          "time": "2026-10-05T02:05:25.775Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "+cPUg2Y1aZDi7tBaPPm5QYQk4Ax1aQGIyu3x/giQ0OPhsbviziph8vBgroR4r52uDplRGyOhrtrDXZA+/kPICg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-sequence-verifiable-units",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Each structural commit keeps the suites green, each failing test lands before its fix, and every commit passed its pre-commit hook.",
+          "cites": "Sequence work into verifiable units",
+          "none": "The order proves each change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-sequence-verifiable-units",
+          "source": "Skill",
+          "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01QPNuhfpK2PSRxaaG1naJMv",
+          "time": "2026-10-05T02:05:26.182Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "tCNwcySXhby9aWjsVmZpz5KoXUyc/OCAS26EXmBCcHhoiA+vIJq/jEVH50/IvaKNuwXHunDwol9c7C81Yd0XCw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-subtract-before-you-add",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/ios/MargeloChat/MargeloChat.entitlements",
+        "packages/app/src/account.ts",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/signOut.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The socket rewrite deletes the mutable cached owner and the async authenticate step instead of adding checks around them.",
+          "cites": "Subtract Before You Add",
+          "commit": "cb87f65",
+          "patch": "ac6c2f35f52f9cfb61d4e711429e29c46d2d20d5"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-subtract-before-you-add",
+          "source": "Skill",
+          "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01XSxhz1pST2wi7dDuaXhh6U",
+          "time": "2026-10-05T02:05:26.544Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "ucluXVuv2Xia7CX40QGN+pJS4zwWfZex5vYmNyj+1tjs2ONuzl/D0veRr62nRYn41qwlCvDcDhUolkir/LPiDA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-test-behavior-not-implementation",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/fixtures.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "tools/__tests__/credentials.test.js",
+        "tools/check-credentials.cjs",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/run.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "The allowlist test's factory returned one shared object, so it passed only because of how it was built. It now returns a fresh object per call, as production does.",
+          "cites": "Test behavior, not implementation",
+          "commit": "8e41b52",
+          "patch": "35be49ead8513db4529d48d3755cfecf01ddc15c"
+        },
+        {
+          "finding": "The harness reported a refused upgrade as close 1008, while production answers with an HTTP 401 handshake. It now reports onerror and close 1006.",
+          "cites": "Test behavior, not implementation",
+          "commit": "e7cd641",
+          "patch": "faea2a1da37ba8c97a58dae4589847405e159bcb"
+        },
+        {
+          "finding": "boot.test seeded the old device-id Keychain item and passed only because the mock ignored the service name. It now seeds the session item and checks the service each launch reads.",
+          "cites": "Test behavior, not implementation",
+          "commit": "cf0a2df",
+          "patch": "e48cd0147c413e2f8c9435eba652ae7650495a8f"
+        },
+        {
+          "finding": "The credential check did not know the new allowlist variable, so a committed Apple user ID would pass. A new case fails on the old pattern and passes on the new one.",
+          "cites": "Test behavior, not implementation",
+          "commit": "ee40c5b",
+          "patch": "b0e54e1d5f54a1e9a7d5fd037a5b6ed661b74fe4"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-test-behavior-not-implementation",
+          "source": "Skill",
+          "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Hk7t3fVKEtSXZmCiqVJ2x1",
+          "time": "2026-10-05T02:05:26.966Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "9TGq6hZIJ7pPF3pFz7fzhOvH6K75lhjcIvgaFDKKMlVKiC3Sx2KeLhaSX9JONzPj1150rRH3vBFnCTh3PiGDBA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-type-system-discipline",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/device.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/network/nativeDrivers.ts",
+        "packages/app/src/screens/RecentsScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/attempt.ts",
+        "packages/app/src/state/nativeSession.ts",
+        "packages/app/src/state/signOut.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/http/routes/v1/responses.ts",
+        "packages/server/src/jev.ts",
+        "packages/server/src/models.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/schema.ts",
+        "packages/server/src/services.ts",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/fixtures.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "shared/contracts.ts"
+      ],
+      "findings": [
+        {
+          "finding": "gatewayKey returned string or undefined, and undefined silently meant the OIDC token. GatewayAuth is now an explicit union.",
+          "cites": "Type System Discipline",
+          "commit": "b74ef7b",
+          "patch": "432987c71fe9cf61c77aab84f456086d34deac06"
+        },
+        {
+          "finding": "The session token length was hard-coded twice. It now comes from one byte count.",
+          "cites": "Type System Discipline",
+          "commit": "a5cb8e9",
+          "patch": "a70aefacb8e48a7a141f97912de0bd5bafd46c9e"
+        },
+        {
+          "finding": "The app builds its sign-in body with satisfies against the shared request schema, so a renamed field fails typecheck. Account.token is still an unbranded string, which is a later change.",
+          "cites": "Type System Discipline",
+          "none": "Branding the stored token is a later change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-type-system-discipline",
+          "source": "Skill",
+          "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Aai9JWZEhL1Bfn6TaDupbV",
+          "time": "2026-10-05T02:05:27.276Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "6qt+t1pqYv4XhtXRFerDsxMsbUwAHv3r5DI6LpLQI3PM0ZKJcCpLntdRC5XI8omUTL4vWRPssUhTii7MIyILBw=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/ios/MargeloChat.xcodeproj/project.pbxproj",
+        "packages/app/ios/MargeloChat/MargeloChat.entitlements",
+        "packages/app/patches/react-native-nitro-fetch+1.4.2.patch",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/device.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/network/nativeDrivers.ts",
+        "packages/app/src/screens/RecentsScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/attempt.ts",
+        "packages/app/src/state/nativeSession.ts",
+        "packages/app/src/state/signOut.ts",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/run.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "Apple's credential check runs on the cold-start path before the first screen. It is measured on the TestFlight build before any change.",
+          "cites": "Review Guardrails",
+          "none": "No change without a measurement."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices",
+          "source": "Skill",
+          "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01K9gUhSnDHHqBmZyahmPneQ",
+          "time": "2026-10-05T02:05:27.674Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "i7DlcGzRsWGs/EXA4dsA3gIV+EV1b+TXzYHgDR+9CvnBIDZoLsnRDGakexmWSuLgq9entn3cJTMKy8AdTxdTBA=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices-sm",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/device.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/network/nativeDrivers.ts",
+        "packages/app/src/screens/RecentsScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/attempt.ts",
+        "packages/app/src/state/nativeSession.ts",
+        "packages/app/src/state/signOut.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The range changes no Reanimated, gesture or worklet code.",
+          "cites": "Sub-skills",
+          "none": "No Software Mansion API change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices-sm",
+          "source": "Skill",
+          "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "ac5ba58c4d28c8e12",
+          "agentType": "pstack:poteto-agent-xhigh",
+          "toolUseId": "toolu_01TcoYus6PkcrVxfRuxLhTnU",
+          "time": "2026-10-06T02:47:36.527Z",
+          "cwd": "ef25796383cdc9875e8f00142d0a11f1ae159e20100136ff628ab49b4d59eb84",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": null,
+          "head": "6f8f9f302878467658267fe3c53bd6d117c22eff",
+          "headPatch": "93494970a91f37cdc38d65d8beea19b8d940a38c",
+          "sig": "3CGIVw3jmAWT2KyC0zRvpg49K3fLWtCOOcxVnUEVn2LU1JzKJkBA0ADNy+A1fcXdLCOm7AQlpk3c+Ybu1HDIDQ=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": ["<change>", "README.md", "docs/providers.md"],
+      "findings": [
+        {
+          "finding": "The providers doc sentence about Bedrock could read as if its higher cost were a reason to put it first.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "f646648",
+          "patch": "d3e65c3064f1e92cc74cc16204edbec9adcff0c1"
+        },
+        {
+          "finding": "The example environment still named the old allowlist variable, so a setup that follows it refuses every sign-in.",
+          "cites": "Voice and repo specifics",
+          "commit": "de1895c",
+          "patch": "7ed1744d2a39bae3e2c50eab2fd57a0daecb3f22"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Fi4raTvtBmwiqbVARTd9vG",
+          "time": "2026-10-05T02:05:27.994Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "XGDR1/xMLVhP3nfn8HH4w5Vk9HHLhNNGxzfrn8cyATq9OKFUEMqcqF+cNA/5UClVW/hxibRR+agEsduVrVujDQ=="
+        }
+      ]
+    },
+    {
+      "skill": "test-prune",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/fixtures.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "tools/__tests__/credentials.test.js"
+      ],
+      "findings": [
+        {
+          "finding": "Socket tests sit at the upgrade and route boundary, and the harness drives the production hooks, so no test checks a private helper.",
+          "cites": "Review questions",
+          "none": "Nothing pruned."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "test-prune",
+          "source": "Read",
+          "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01WxLff4XmRhDR2waPyzuKPV",
+          "time": "2026-10-05T02:05:28.526Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "CJCqgfCes3YfgkdmuDHXowrqlVY2r/4vPIePGLIxQrTUxRQ2ndHvJGPbzJTHCL+lO0JSls/N4L240oY7fh6mBA=="
+        }
+      ]
+    },
+    {
+      "skill": "thermo-nuclear-code-quality-review",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "No file crosses 1000 lines. handleSignedInRoute exists because the complexity lint caps handleRequest at 20.",
+          "cites": "Approval Bar",
+          "none": "No structural regression."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "thermo-nuclear-code-quality-review",
+          "source": "Skill",
+          "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Uvn2LQmmfjQrYnMRg5dYmZ",
+          "time": "2026-10-05T02:05:28.924Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "eC0szbD3KoHjiDubYUz8nkaX2leenz1K6OMQlvFFlFgRPRoNnNXEsgyjgcA5sa9YeJrZAgWskc+qzc7jM+I4BQ=="
+        }
+      ]
+    },
+    {
+      "skill": "typescript-best-practices",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/boot.test.tsx",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/device.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/network/nativeDrivers.ts",
+        "packages/app/src/screens/RecentsScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/attempt.ts",
+        "packages/app/src/state/nativeSession.ts",
+        "packages/app/src/state/signOut.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/http/routes/v1/responses.ts",
+        "packages/server/src/jev.ts",
+        "packages/server/src/models.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/schema.ts",
+        "packages/server/src/services.ts",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/fixtures.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "shared/contracts.ts"
+      ],
+      "findings": [
+        {
+          "finding": "No casts or any. The crossws context is narrowed with in and instanceof on a private class, and the app parses the sign-in reply with the shared schema.",
+          "cites": "TypeScript best practices",
+          "none": "No finding."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "typescript-best-practices",
+          "source": "Skill",
+          "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_019RYwj2nxQuX3cN5Kdd3ntW",
+          "time": "2026-10-05T02:05:29.268Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "PqBjJD00/Cp/Ge9OJUeRy7AUkzosLPbvCZIYcUePtvKiBs2keeOh/59N8a0DqOwp6mM3HGS+KmLxHmqXvH2lCw=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": ["<change>", "README.md", "docs/providers.md"],
+      "findings": [
+        {
+          "finding": "The commit messages name the real functions and behavior.",
+          "cites": "Plain speech",
+          "none": "No AI patterns found."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01MY3AphH5BXJyuB1FvkH4ga",
+          "time": "2026-10-05T02:05:29.618Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "vHFJIC3VX1KhwnPasQ6ZFNLi2VDBDr/D8e70XJDawvfowWNMtx6LrAe4AESyT9ujOe2KYABCpQKYVlOl0RXzCg=="
+        }
+      ]
+    },
+    {
+      "skill": "workflow",
+      "files": [
+        "packages/server/src/runtime.ts",
+        "packages/server/src/services.ts"
+      ],
+      "findings": [
+        {
+          "finding": "No workflow step or directive changed. The workflow callback routes depend on the platform for request checks, which this change leaves as it was.",
+          "cites": "Prefer Step Functions to Avoid Sandbox Errors",
+          "none": "No workflow code in the range."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "workflow",
+          "source": "Skill",
+          "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+          "partial": false,
+          "session": "20265c8a-fbf4-4054-80c3-0dd40a9bdc00",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01B9HBTJPqYwuU2hE5BfdqcV",
+          "time": "2026-10-05T02:05:29.821Z",
+          "cwd": "bf2978f73401bd7af83215f7e6d475fd6842eb5cdcdcb418dd5d3a0d1e4e97f3",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "submission/server-auth",
+          "head": "116a2c976acf84941acd9923aa5e684b65ddf2fa",
+          "headPatch": "2cc6025ae1e9e8da5c45f8f5920b81f8e1f44876",
+          "sig": "BUqNsQfnFETo2zbpzs9MuM+IeNZhOaW3l2yAk6SeJ7+Laeg+l0FsrsD1hU9qKdbnBxn0rWBDiSvgnil1yg6ICQ=="
+        }
+      ]
+    }
+  ]
+}
