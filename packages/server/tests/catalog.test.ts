@@ -63,6 +63,30 @@ test('the documented MODEL_MENU value for the default menu reproduces it', () =>
   expect(catalogFrom(menuFrom(value))).toEqual(bakedCatalog);
 });
 
+test('the documented MODEL_MENU value with Luna appends it to the menu', () => {
+  const value =
+    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":null},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":null},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-luna","levels":["none","low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
+  expect(catalogFrom(menuFrom(value))).toEqual({
+    auto: true,
+    models: [
+      ...bakedCatalog.models,
+      {
+        key: 'gpt-6-luna',
+        label: 'GPT-6 Luna',
+        levels: [
+          { key: 'none', label: 'None' },
+          { key: 'low', label: 'Low' },
+          { key: 'medium', label: 'Medium' },
+          { key: 'high', label: 'High' },
+          { key: 'xhigh', label: 'Extra high' },
+          { key: 'max', label: 'Max' },
+        ],
+        defaultLevel: 'medium',
+      },
+    ],
+  });
+});
+
 test('a catalog body reads back unchanged', () => {
   expect(parseCatalog(JSON.stringify(bakedCatalog))).toEqual(bakedCatalog);
 });

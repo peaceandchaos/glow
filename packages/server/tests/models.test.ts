@@ -41,7 +41,14 @@ test('each model lists the reasoning efforts its provider accepts', () => {
     deepseek: ['none', 'low', 'high', 'max'],
     'gpt-6.1-sol': ['low', 'medium', 'high', 'xhigh', 'max'],
     'gpt-6-astra': ['low', 'medium', 'high', 'xhigh', 'max'],
+    'gpt-6-luna': ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
   });
+});
+
+test('GPT-6 Luna is registered but not offered, so Auto cannot pick it either', () => {
+  expect(defaultMenu.models.map(entry => entry.model)).not.toContain(
+    'gpt-6-luna',
+  );
 });
 
 test('an effort the model does not accept is omitted', () => {
