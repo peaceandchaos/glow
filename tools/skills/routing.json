@@ -182,13 +182,20 @@
         "tools/**",
         ".github/**",
         ".husky/**",
-        ".oxlintrc.json",
-        ".oxfmtrc.json",
+        "**/.oxlintrc*",
+        "**/.oxfmtrc*",
+        "**/.rnsec*",
         "package.json",
         "package-lock.json",
         "packages/*/package.json",
         "packages/*/tsconfig.json",
-        "packages/*/jest.config.*"
+        "packages/*/jest.config.*",
+        "**/metro.config.*",
+        "**/Podfile",
+        "**/Podfile.lock",
+        "**/Gemfile",
+        "**/Gemfile.lock",
+        "**/.bundle/config"
       ],
       "excludePaths": ["tools/skills/records/**"],
       "skills": ["blast-radius"]

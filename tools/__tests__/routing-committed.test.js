@@ -157,7 +157,7 @@ describe('the committed routing', () => {
       'a native iOS change',
       [{ path: 'packages/app/ios/Podfile', added: plain(30) }],
       null,
-      [everyChange, quality, native],
+      [everyChange, quality, native, controls],
     ],
   ])('routes %s', (_, files, tier, groups) => {
     expect(routed(range(files))).toEqual({ tier, skills: skillsOf(...groups) });
