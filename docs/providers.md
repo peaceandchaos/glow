@@ -66,10 +66,11 @@ and the Gateway endpoint pages under "Gateway hosts". No live call has checked
 an effort value yet.
 
 `GET /v1/models` serves the menu to a signed-in phone: the models in order,
-their labels, the levels each one offers, each default level, and whether Auto
-is offered. The first model is the fallback. A stored model the menu does not
-offer runs the first model, and a stored level the model does not offer runs the
-model's default level. Under Auto, Jev chooses only among the offered models,
+their labels, the levels each one offers, each default level, whether the app
+sends a reply request over HTTP (Gateway models) or the socket (OpenAI models),
+and whether Auto is offered. The first model is the fallback. A stored model the
+menu does not offer runs the first model, and a stored level the model does not
+offer runs the model's default level. Under Auto, Jev chooses only among the offered models,
 and its choice runs at that model's default level.
 
 The `MODEL_MENU` server setting replaces the whole default menu with one JSON

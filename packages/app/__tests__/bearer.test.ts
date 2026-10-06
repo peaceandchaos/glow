@@ -1,3 +1,4 @@
+import { bakedCatalog } from '../../../shared/catalog';
 import { ServerTransport, type ClientDrivers } from '../src/network/client';
 
 test('server requests carry the session token as a bearer credential and nothing else', async () => {
@@ -23,6 +24,7 @@ test('server requests carry the session token as a bearer credential and nothing
     'https://glow.example',
     'session-token',
     drivers,
+    () => bakedCatalog,
   );
 
   await transport.deleteChat(

@@ -6,8 +6,8 @@ import {
 } from '../../../shared/catalog';
 import { catalogFrom, defaultMenu, menuFrom } from '../src/models';
 
-const sol = bakedCatalog.models[2];
-const catalog: Catalog = { auto: true, models: [bakedCatalog.models[0], sol] };
+const [deepseek, , sol] = bakedCatalog.models;
+const catalog: Catalog = { auto: true, models: [deepseek, sol] };
 
 test.each([
   ['Auto with Auto on', true, 'auto', 'max', { kind: 'auto' }],
@@ -16,35 +16,35 @@ test.each([
     false,
     'auto',
     'max',
-    { kind: 'model', model: 'deepseek', level: null },
+    { kind: 'model', model: deepseek, level: null },
   ],
   [
     'a listed model and level',
     true,
     'gpt-6.1-sol',
     'high',
-    { kind: 'model', model: 'gpt-6.1-sol', level: 'high' },
+    { kind: 'model', model: sol, level: 'high' },
   ],
   [
     'a listed model with no level',
     true,
     'gpt-6.1-sol',
     undefined,
-    { kind: 'model', model: 'gpt-6.1-sol', level: 'medium' },
+    { kind: 'model', model: sol, level: 'medium' },
   ],
   [
     'a listed model with an unlisted level',
     true,
     'gpt-6.1-sol',
     'none',
-    { kind: 'model', model: 'gpt-6.1-sol', level: 'medium' },
+    { kind: 'model', model: sol, level: 'medium' },
   ],
   [
     'an unlisted model',
     true,
     'gpt-6-astra',
     'high',
-    { kind: 'model', model: 'deepseek', level: null },
+    { kind: 'model', model: deepseek, level: null },
   ],
 ])(
   '%s resolves to the catalog choice',
@@ -73,6 +73,7 @@ test('the documented MODEL_MENU value with Luna appends it to the menu', () => {
       {
         key: 'gpt-6-luna',
         label: 'GPT-6 Luna',
+        transport: 'socket',
         levels: [
           { key: 'none', label: 'None' },
           { key: 'low', label: 'Low' },
@@ -96,10 +97,24 @@ test('an unreadable model or level is skipped, not fatal', () => {
     auto: false,
     future: 'ignored',
     models: [
-      { key: 'Bad Key', label: 'Bad', levels: [], defaultLevel: null },
+      {
+        key: 'Bad Key',
+        label: 'Bad',
+        transport: 'http',
+        levels: [],
+        defaultLevel: null,
+      },
+      {
+        key: 'gpt-6-luna',
+        label: 'GPT-6 Luna',
+        transport: 'pigeon',
+        levels: [],
+        defaultLevel: null,
+      },
       {
         key: 'gpt-7',
         label: 'GPT-7',
+        transport: 'socket',
         badge: 'new',
         levels: [
           { key: 'low', label: 'Low' },
@@ -109,8 +124,20 @@ test('an unreadable model or level is skipped, not fatal', () => {
         ],
         defaultLevel: 'max',
       },
-      { key: 'gpt-7', label: 'Duplicate', levels: [], defaultLevel: null },
-      { key: 'kimi', label: 'Kimi K3', levels: 'none', defaultLevel: null },
+      {
+        key: 'gpt-7',
+        label: 'Duplicate',
+        transport: 'http',
+        levels: [],
+        defaultLevel: null,
+      },
+      {
+        key: 'kimi',
+        label: 'Kimi K3',
+        transport: 'http',
+        levels: 'none',
+        defaultLevel: null,
+      },
     ],
   };
   expect(parseCatalog(JSON.stringify(body))).toEqual({
@@ -119,6 +146,7 @@ test('an unreadable model or level is skipped, not fatal', () => {
       {
         key: 'gpt-7',
         label: 'GPT-7',
+        transport: 'socket',
         levels: [
           { key: 'low', label: 'Low' },
           { key: 'high', label: 'High' },

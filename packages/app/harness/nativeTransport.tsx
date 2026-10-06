@@ -12,6 +12,7 @@ import type {
   ServerMessage,
   Submission,
 } from '../../../shared/contracts';
+import { bakedCatalog } from '../../../shared/catalog';
 import faults from '../../../tools/native-transport/faults.json';
 import { ServerTransport, type ClientDrivers } from '../src/network/client';
 import { nativeDrivers } from '../src/network/nativeDrivers';
@@ -175,8 +176,15 @@ async function run(
   show: (text: string) => void,
 ) {
   const drivers = driver === 'draft' ? publicNitroFetchDrivers : nativeDrivers;
-  const server = new ServerTransport(api, device, drivers, true);
-  const fault = new ServerTransport(faultServer, device, drivers, true);
+  const catalog = () => bakedCatalog;
+  const server = new ServerTransport(api, device, drivers, catalog, true);
+  const fault = new ServerTransport(
+    faultServer,
+    device,
+    drivers,
+    catalog,
+    true,
+  );
   const scenario = async (name: string, body: () => Promise<object>) => {
     show(name);
     try {
@@ -291,7 +299,13 @@ async function run(
         fault.get(id, new AbortController().signal),
         5000,
       );
-    const stranger = new ServerTransport(api, 'x'.repeat(43), drivers, true);
+    const stranger = new ServerTransport(
+      api,
+      'x'.repeat(43),
+      drivers,
+      catalog,
+      true,
+    );
     results.real401 = await settle(
       stranger.get(uuid(), new AbortController().signal),
       5000,

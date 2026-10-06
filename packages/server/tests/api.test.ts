@@ -135,6 +135,7 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
         {
           key: 'gpt-6-astra',
           label: 'GPT-6 Astra',
+          transport: 'socket',
           levels: [{ key: 'high', label: 'High' }],
           defaultLevel: 'high',
         },
@@ -153,7 +154,13 @@ test('the server reads its model menu from MODEL_MENU', () => {
     expect(runtimeCatalog()).toEqual({
       auto: false,
       models: [
-        { key: 'kimi', label: 'Kimi K3', levels: [], defaultLevel: null },
+        {
+          key: 'kimi',
+          label: 'Kimi K3',
+          transport: 'http',
+          levels: [],
+          defaultLevel: null,
+        },
       ],
     });
   } finally {
