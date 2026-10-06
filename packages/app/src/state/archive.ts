@@ -6,9 +6,11 @@ import {
   idSchema,
   imageSchema,
   isTerminal,
+  levelKeySchema,
   modelKeySchema,
   pickerSchema,
   type HistoryEntry,
+  type LevelKey,
   type ModelKey,
   type Picker,
   type Submission,
@@ -33,6 +35,7 @@ const chatSchema = z.strictObject({
   id: idSchema,
   title: z.string(),
   picker: pickerSchema,
+  level: levelKeySchema.optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
   basePathId: idSchema,
@@ -50,6 +53,7 @@ const messageSchema = z.strictObject({
   createdAt: z.number(),
   status: z.enum(['pending', ...attemptStatusSchema.options]),
   picker: pickerSchema,
+  level: levelKeySchema.optional(),
   retryModel: modelKeySchema.nullable(),
   actualModel: modelKeySchema.nullable(),
   accepted: z.boolean(),
@@ -201,14 +205,13 @@ export class ChatArchive {
 
   createChat(firstPicker: Picker): ChatRecord {
     const meta = this.metadata();
-    const picker = meta.currentChatId
-      ? this.chat(meta.currentChatId).picker
-      : firstPicker;
+    const current = meta.currentChatId ? this.chat(meta.currentChatId) : null;
     const chat: ChatRecord = {
       version: 1,
       id: this.uuid(),
       title: 'New chat',
-      picker,
+      picker: current?.picker ?? firstPicker,
+      level: current?.level,
       createdAt: this.now(),
       updatedAt: this.now(),
       basePathId: this.uuid(),
@@ -229,8 +232,14 @@ export class ChatArchive {
     this.chat(id);
     this.commit([write(metaKey, { ...this.metadata(), currentChatId: id })]);
   }
+  // A level means something different on each model, so a new pick drops it.
   setPicker(id: string, picker: Picker): void {
-    this.commit([write(chatKey(id), { ...this.chat(id), picker })]);
+    this.commit([
+      write(chatKey(id), { ...this.chat(id), picker, level: undefined }),
+    ]);
+  }
+  setLevel(id: string, level: LevelKey): void {
+    this.commit([write(chatKey(id), { ...this.chat(id), level })]);
   }
   rename(id: string, title: string): void {
     const trimmed = title.trim();
@@ -279,6 +288,7 @@ export class ChatArchive {
       createdAt: this.now(),
       status: role === 'user' ? 'completed' : 'pending',
       picker: chat.picker,
+      level: chat.level,
       retryModel: null,
       actualModel: null,
       accepted: false,
@@ -375,6 +385,7 @@ export class ChatArchive {
       this.uuid(),
     );
     reply.picker = previous.picker;
+    reply.level = previous.level;
     reply.retryModel = known;
     const meta = this.metadata();
     this.commit([
@@ -444,6 +455,7 @@ export class ChatArchive {
       pathId: reply.pathId,
       userTurnId: reply.parentId,
       picker: reply.picker,
+      ...(reply.level === undefined ? {} : { level: reply.level }),
       retryModel: reply.retryModel,
       history,
       checkpoints: [...checkpoints.values()],
