@@ -34,6 +34,52 @@ Jev operations set `maxRetries: 0`. The pinned Gateway adapter passes `abortSign
 to its HTTP call. A local fixture checks that cancellation reaches that call and
 that HTTP 500 does not cause a second evaluation. Billing cessation is unverified.
 
+## Gateway hosts for Kimi and DeepSeek
+
+Every Gateway chat-completions request sends this, with `order` and `only` set
+to the same list:
+
+```json
+"providerOptions": {
+  "gateway": {
+    "order": ["<host>", "<host>"],
+    "only": ["<host>", "<host>"],
+    "disallowPromptTraining": true,
+    "inferenceRegion": { "scope": "zone", "geoRegion": "us" }
+  }
+}
+```
+
+The Gateway then tries only these hosts, in this order:
+
+| Model               | Hosts                  |
+| ------------------- | ---------------------- |
+| DeepSeek V4.1 Flash | `fireworks`, `baseten` |
+| Kimi K3             | `bedrock`, `fireworks` |
+
+- DeepSeek runs only on US hosts with zero-retention terms.
+- Kimi's hosts are the only US zero-retention hosts whose Kimi K3 endpoint reads
+  images. Baseten's Kimi endpoint has no vision tag. Bedrock goes first because
+  it lists no quantization and costs 10% more in the US zone. Fireworks serves
+  fp4, costs 50% more, and is the only one with file input.
+- `gatewayHosts` in `packages/server/src/models.ts` owns the lists. Its type
+  admits only Gateway models, and `GatewayClient` refuses any other model
+  before it sends a request, so a GPT request never reaches the Gateway.
+- The request does not send `zeroDataRetention`, because per-request ZDR needs
+  a Pro or Enterprise plan. The `only` lists already keep requests on hosts with
+  Vercel ZDR agreements.
+- `disallowPromptTraining` works on every plan.
+- No live request has checked `inferenceRegion` yet. A region the Gateway
+  cannot honor fails with HTTP 400 and does not reroute.
+
+Sources, read 4 October 2026:
+[DeepSeek V4.1 Flash endpoints](https://ai-gateway.vercel.sh/v1/models/deepseek/deepseek-v4.1-flash/endpoints),
+[Kimi K3 endpoints](https://ai-gateway.vercel.sh/v1/models/moonshotai/kimi-k3/endpoints),
+[provider filtering and ordering](https://vercel.com/docs/ai-gateway/models-and-providers/provider-filtering-and-ordering),
+[disallow prompt training](https://vercel.com/docs/ai-gateway/security-and-compliance/disallow-prompt-training),
+[regional inference](https://vercel.com/docs/ai-gateway/security-and-compliance/regional-inference),
+[ZDR](https://vercel.com/docs/ai-gateway/security-and-compliance/zdr).
+
 ## Context methods and provenance
 
 OpenAI uses [Responses compaction](https://developers.openai.com/api/docs/guides/compaction),

@@ -51,6 +51,25 @@ export const models = {
   },
 } satisfies Record<ModelKey, ModelConfig>;
 
+type GatewayModelKey = {
+  [K in ModelKey]: (typeof models)[K]['wire'] extends 'gateway' ? K : never;
+}[ModelKey];
+type GatewayHost = 'bedrock' | 'baseten' | 'fireworks';
+
+// The only AI Gateway hosts each model may use, in the order tried.
+// docs/providers.md records the sources and reasons.
+export const gatewayHosts: Record<
+  GatewayModelKey,
+  [GatewayHost, ...GatewayHost[]]
+> = {
+  kimi: ['bedrock', 'fireworks'],
+  deepseek: ['fireworks', 'baseten'],
+};
+
+export function isGatewayModel(model: ModelKey): model is GatewayModelKey {
+  return models[model].wire === 'gateway';
+}
+
 export function checkpointMethod(model: ModelKey) {
   if (model === 'kimi') return 'kimi-summary';
   if (model === 'deepseek') return 'deepseek-summary';
