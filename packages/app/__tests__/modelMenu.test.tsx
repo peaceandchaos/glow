@@ -1,7 +1,9 @@
 import React from 'react';
+import { StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
 import type { ModelKey } from '../../../shared/contracts';
+import { Icon } from '../src/components/Icon';
 import { RootDrawer } from '../src/screens/RootDrawer';
 import { ChatStoreContext } from '../src/state/chatStore';
 import type { ChatViewState } from '../src/state/chatView';
@@ -36,7 +38,7 @@ jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   default: { View: require('react-native').View },
   cubicBezier: () => undefined,
-  useReducedMotion: () => false,
+  useReducedMotion: () => mockReduceMotion,
 }));
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
@@ -73,9 +75,11 @@ const recents = 0;
 const chat = 1;
 const setPicker = jest.fn<void, [ModelKey]>();
 const newChat = jest.fn<void, []>();
+let mockReduceMotion = false;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockReduceMotion = false;
 });
 
 function chatState(): ChatViewState {
@@ -116,6 +120,7 @@ async function renderDrawer() {
   const menu = () => root.findByProps({ accessibilityRole: 'menu' });
   return {
     root,
+    pill,
     menu,
     expanded: (): boolean => pill().props.accessibilityState.expanded,
     option: (label: string) =>
@@ -205,4 +210,26 @@ test('while the menu is open, a tap on the header row between its buttons reache
   );
   expect(view.expanded()).toBe(false);
   expect(row()?.props.pointerEvents ?? 'auto').toBe('auto');
+});
+
+test('with Reduce Motion, the pill dims on press instead of shrinking, and the open chevron points up without turning', async () => {
+  mockReduceMotion = true;
+  const view = await renderDrawer();
+  const pressed = StyleSheet.flatten(
+    view.pill().props.children({ pressed: true }).props.style,
+  );
+  expect(pressed.transform).toBeUndefined();
+  expect(pressed.opacity).toBeLessThan(1);
+
+  await view.open();
+  const chevron = view.pill().findByType(Icon);
+  expect(chevron.props.name).toBe('chevron.up');
+  expect(
+    StyleSheet.flatten(chevron.parent?.props.style)?.transform,
+  ).toBeUndefined();
+});
+
+test('the pill shows the model name on one line', async () => {
+  const view = await renderDrawer();
+  expect(view.pill().findByType(Text).props.numberOfLines).toBe(1);
 });
