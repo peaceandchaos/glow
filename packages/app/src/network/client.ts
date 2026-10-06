@@ -112,7 +112,7 @@ export class ServerTransport implements ChatTransport {
 
   constructor(
     baseUrl: string,
-    private readonly deviceId: string,
+    private readonly token: string,
     private readonly drivers: ClientDrivers,
     allowLocal = false,
   ) {
@@ -133,7 +133,7 @@ export class ServerTransport implements ChatTransport {
       stream,
       redirect: 'error',
       headers: {
-        'X-Device-Id': this.deviceId,
+        Authorization: `Bearer ${this.token}`,
         'Content-Type': 'application/json',
       },
       ...(body === undefined ? {} : { body }),
@@ -302,7 +302,7 @@ export class ServerTransport implements ChatTransport {
     if (this.opening) return this.opening;
     const socket = this.drivers.socket(
       `${this.baseUrl.replace(/^http/u, 'ws')}/v1/responses`,
-      { 'X-Device-Id': this.deviceId },
+      { Authorization: `Bearer ${this.token}` },
     );
     this.socket = socket;
     this.opening = new Promise<ClientSocket>((resolve, reject) => {

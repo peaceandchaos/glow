@@ -167,7 +167,7 @@ export function planFailure(
     return {
       kind: 'retry',
       error:
-        'This phone is not allowed by the server. Add its device ID to the server allowlist.',
+        'The server did not accept your sign-in. Sign out and sign in again.',
     };
   if (operation === 'stop')
     return {

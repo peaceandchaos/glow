@@ -1,11 +1,13 @@
 import React, {
   useCallback,
+  useContext,
   useDeferredValue,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import {
+  Alert,
   AppState,
   Pressable,
   StyleSheet,
@@ -20,9 +22,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glass } from '../components/Glass';
 import { Icon } from '../components/Icon';
-import { showNotImplemented } from '../notImplemented';
 import { useChatStore } from '../state/chatStore';
 import { filterRecents, recentTime, type Recent } from '../state/recents';
+import { SignOutContext } from '../state/signOut';
 import { theme } from '../theme';
 
 // The time the day labels count from. It moves at the next midnight and when
@@ -57,6 +59,12 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
   // Typing stays responsive while a long list filters.
   const deferredQuery = useDeferredValue(query);
   const now = useNow();
+  const signOut = useContext(SignOutContext);
+  const confirmSignOut = () =>
+    Alert.alert('Sign out?', undefined, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign Out', style: 'destructive', onPress: signOut },
+    ]);
   const recents = useMemo(
     () =>
       filterRecents(chats, deferredQuery).map((chat): Recent => ({
@@ -115,7 +123,12 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
             <Text style={styles.newChatText}>New Chat</Text>
           </Glass>
         </Pressable>
-        <Pressable onPress={showNotImplemented} hitSlop={8}>
+        <Pressable
+          onPress={confirmSignOut}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
+        >
           <Glass interactive style={styles.circle}>
             <Icon name="gearshape" size={20} />
           </Glass>

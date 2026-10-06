@@ -33,6 +33,7 @@ const SF_TO_MDI: Record<string, string> = {
   camera: 'camera',
   photo: 'image',
   paperclip: 'paperclip',
+  applelogo: 'apple',
 };
 
 type MdiName = ComponentProps<typeof MaterialDesignIcons>['name'];
