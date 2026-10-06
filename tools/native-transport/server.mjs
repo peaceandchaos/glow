@@ -2,6 +2,7 @@
 // Run: node --experimental-transform-types --no-warnings
 //        --import ./tools/native-transport/hooks.mjs tools/native-transport/server.mjs
 // It never logs the device credential, only whether a request carried it.
+import { randomUUID } from 'node:crypto';
 import { appendFileSync, readFileSync } from 'node:fs';
 import http from 'node:http';
 import { createRequire } from 'node:module';
@@ -40,7 +41,11 @@ const { database } = await testDatabase();
 const jobs = new JobRepository(database);
 const owner = 'native-harness-user';
 const sessions = new SessionStore(database);
-await sessions.create(sessionTokenSchema.parse(device), owner);
+await sessions.create(sessionTokenSchema.parse(device), {
+  user: owner,
+  nonce: randomUUID(),
+  expiresAt: Date.now() / 1000 + 600,
+});
 const dispatches = new Map();
 const services = {
   allowedAppleUserIds: owner,

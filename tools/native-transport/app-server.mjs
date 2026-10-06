@@ -16,6 +16,7 @@ import { parseArgs } from 'node:util';
 import { handleRequest, socketRoute } from '../../packages/server/src/api.ts';
 import { SessionStore } from '../../packages/server/src/auth.ts';
 import { JobRepository } from '../../packages/server/src/jobs.ts';
+import { catalogFrom, defaultMenu } from '../../packages/server/src/models.ts';
 import { runAttempt } from '../../packages/server/src/worker.ts';
 import { testDatabase } from '../../packages/server/tests/database.ts';
 import { sessionTokenSchema } from '../../shared/contracts.ts';
@@ -60,10 +61,10 @@ const providers = {
   async prepare() {
     return { items: [], checkpoint: null };
   },
-  async generate(input, model, _context, signal, onChunk, beforeCall) {
+  async generate(input, model, _context, signal, onChunk, beforeCall, effort) {
     await beforeCall();
     generations.push({ attemptId: input.attemptId, model });
-    record({ event: 'generate', attemptId: input.attemptId, model });
+    record({ event: 'generate', attemptId: input.attemptId, model, effort });
     const pieces = reply.match(/\S+\s*/gu) ?? [];
     for (const [index, text] of pieces.entries()) {
       if (control.holdAfter !== null && index >= control.holdAfter)
@@ -93,7 +94,9 @@ const dispatches = new Map();
 const owners = new Map();
 const harnessUser = 'app-harness-user';
 const sessions = new SessionStore(database);
+const catalog = catalogFrom(defaultMenu);
 const services = {
+  catalog,
   allowedAppleUserIds: harnessUser,
   appleKeys: () =>
     Promise.reject(new Error('The harness never signs in with Apple.')),
@@ -108,6 +111,7 @@ const services = {
     void runAttempt({
       jobs,
       providers,
+      catalog,
       owner,
       attemptId,
       runId,
@@ -132,7 +136,11 @@ function adopt(headers) {
     adopted.set(
       token.data,
       sessions
-        .create(token.data, harnessUser)
+        .create(token.data, {
+          user: harnessUser,
+          nonce: randomUUID(),
+          expiresAt: Date.now() / 1000 + 600,
+        })
         .then(() => record({ event: 'adopted-session' })),
     );
   return adopted.get(token.data);
