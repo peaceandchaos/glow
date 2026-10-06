@@ -155,11 +155,7 @@ export class SocketConnection {
 
   private async authenticate(runtime: ApiServices): Promise<string> {
     if (this.owner === null || !allows(runtime.allowedAppleUserIds, this.owner))
-      this.owner = await sessionOwner(
-        this.headers,
-        runtime.allowedAppleUserIds,
-        runtime.sessions,
-      );
+      this.owner = await sessionOwner(this.headers, runtime);
     return this.owner;
   }
 
@@ -302,11 +298,7 @@ async function handleSessionRoute(
   services: ApiServices,
 ): Promise<Response> {
   if (request.method === 'POST') return signIn(request, services);
-  await sessionOwner(
-    request.headers,
-    services.allowedAppleUserIds,
-    services.sessions,
-  );
+  await sessionOwner(request.headers, services);
   if (request.method !== 'DELETE')
     throw new RequestError(404, 'Route not found.');
   await (await services.sessions()).revoke(bearerToken(request.headers));
@@ -321,11 +313,7 @@ export async function handleRequest(
     const path = new URL(request.url).pathname.split('/').filter(Boolean);
     if (path.join('/') === 'v1/session')
       return await handleSessionRoute(request, services);
-    const owner = await sessionOwner(
-      request.headers,
-      services.allowedAppleUserIds,
-      services.sessions,
-    );
+    const owner = await sessionOwner(request.headers, services);
     if (path[0] !== 'v1') throw new RequestError(404, 'Route not found.');
     if (path[1] === 'chat' && path.length === 2 && request.method === 'POST') {
       const command = decodeJson(socketCommandSchema, await readBody(request));

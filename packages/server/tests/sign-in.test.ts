@@ -109,9 +109,7 @@ test('the database keeps only a hash of each session token', async () => {
       createHash('sha256').update(token).digest('hex'),
     );
     const headers = new Headers({ Authorization: `Bearer ${token}` });
-    expect(
-      await sessionOwner(headers, auth.allowedAppleUserIds, auth.sessions),
-    ).toBe(appleUserId);
+    expect(await sessionOwner(headers, auth)).toBe(appleUserId);
   } finally {
     await postgres.close();
   }
@@ -128,7 +126,7 @@ test.each([
 ])('%s is rejected before any session lookup', async (_name, headers) => {
   const sessions = jest.fn(() => Promise.reject(new Error('Must not load')));
   await expect(
-    sessionOwner(headers, appleUserId, sessions),
+    sessionOwner(headers, { allowedAppleUserIds: appleUserId, sessions }),
   ).rejects.toHaveProperty('status', 401);
   expect(sessions).not.toHaveBeenCalled();
 });

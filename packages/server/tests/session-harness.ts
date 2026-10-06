@@ -18,7 +18,7 @@ import {
 } from '../../app/src/network/client';
 import { ChatSession } from '../../app/src/state/session';
 import { handleRequest, SocketConnection, type ApiServices } from '../src/api';
-import { newSessionToken, sessionOwner, type SessionStore } from '../src/auth';
+import { newSessionToken, sessionOwner } from '../src/auth';
 import { ProviderFailure } from '../src/errors';
 import { JobRepository } from '../src/jobs';
 import type {
@@ -277,7 +277,6 @@ export type Server = {
   services: ApiServices;
   owner: string;
   token: SessionToken;
-  sessions: () => Promise<SessionStore>;
   providers: FakeProviders;
   dispatched: string[];
   duplicateDelivery: boolean;
@@ -329,7 +328,6 @@ export async function startServer(): Promise<Server> {
     services,
     owner,
     token,
-    sessions: auth.sessions,
     providers,
     dispatched,
     duplicateDelivery: false,
@@ -440,11 +438,7 @@ class InProcessSocket implements ClientSocket {
         this.onerror?.('offline');
         return;
       }
-      void sessionOwner(
-        asBearer(headers),
-        server.services.allowedAppleUserIds,
-        server.sessions,
-      ).then(
+      void sessionOwner(asBearer(headers), server.services).then(
         () => {
           this.readyState = 'OPEN';
           this.onopen?.();
