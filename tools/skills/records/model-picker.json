@@ -1,8 +1,8 @@
 {
   "change": "model-picker",
   "base": {
-    "commit": "dfb5f171a9ce6c2bc1bbbf84408c42a4aed33a94",
-    "patch": "a199077e99a57a363b0222709e6c2a5db642cee2"
+    "commit": "799e8fa43df9085a137b164dab229497548e9282",
+    "patch": "acfdf9e5ad27f6a1793788bf938991467a491701"
   },
   "skills": [
     {
@@ -24,16 +24,16 @@
           "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01M3RLfmdAif86Mxdy1gXKL4",
-          "time": "2026-10-06T03:00:41.926Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Jsgzy6vJfCckaZs2ELozXq",
+          "time": "2026-10-06T03:04:38.051Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "HC1W19s1uygxuhPIy8YjTvjdJV8m1RiVigMLccEk9DAs8mV0qY2xZEwz0YqE8NxkNfDGHjZKWlEpDxsIlhZcDQ=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "owSPMWUM2G31M3TUbFC82J/Z4Vkx1mE/ihosA5jtU06BgmzJEmAzrqXJIog2plvyaOhK71E39mQ+5XN0DE71CQ=="
         }
       ]
     },
@@ -56,16 +56,16 @@
           "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01SktV59DKtPoAGD5Wh8hWJB",
-          "time": "2026-10-06T03:00:42.125Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01E2RKDgKHAtruRzMvaHbwyT",
+          "time": "2026-10-06T03:04:38.459Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "pSrxXrLn/7sa4lhwxh9dEX+SGE+MEt0Po3Y5yP3L8ROmD3XBXU0vnbebk5UxMHy1it9DVsJImRCLPwOxiD3vDw=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "Dkx9uJO0vLOfq6+Qx/1imKtuxabMK1GmXah2An1BJBdltryLzJr6s2plgCEb230rpzScR9nwbhX4jfzsaIJeCQ=="
         }
       ]
     },
@@ -76,13 +76,13 @@
         {
           "finding": "Under Reduce Motion the pill scaled and the chevron rotated. It now dims on press and the chevron swaps with no rotation.",
           "cites": "9. Reduced motion and accessibility",
-          "commit": "fd7568c",
+          "commit": "b5ff1b5a8a83",
           "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
         },
         {
           "finding": "The menu closed in the same 200 ms it opened. It now closes in 150 ms and opens in 200 ms.",
           "cites": "5. Timing or spring",
-          "commit": "343df7d",
+          "commit": "a9fcff35e4f7",
           "patch": "0dd2c18f9bd6125e82925576933af4453709694a"
         }
       ],
@@ -120,13 +120,13 @@
         {
           "finding": "Recents and New chat had no role or label, so VoiceOver read two unnamed elements beside the menu.",
           "cites": "7. Accessibility (MEDIUM-HIGH)",
-          "commit": "d3bfc98",
+          "commit": "edf8ebb7f163",
           "patch": "fc5666f08a6ec36d441d5b13ba2c590631988811"
         },
         {
           "finding": "At large text sizes the pill could not shrink in the header row, so a long model name pushed the New chat button off screen. The pill chain now shrinks and the label truncates; simulator screenshots at an accessibility size show both circle buttons on screen, and the default size is unchanged.",
           "cites": "7. Accessibility (MEDIUM-HIGH)",
-          "commit": "6026223",
+          "commit": "89c9b00f5903",
           "patch": "cdc72c88456e1f64d6fb5e7c4ce6586877be7952"
         },
         {
@@ -164,13 +164,13 @@
         {
           "finding": "Five comments restated types or names, and one about the menu color was wrong about blur on iOS 26. They are deleted.",
           "cites": "Steps 2",
-          "commit": "113f38d",
+          "commit": "dbb1c34b5e62",
           "patch": "e905cc25bb81e98bfcb1422998e3c7df65d9e6da"
         },
         {
           "finding": "The ChatScreen comment said Header renders last, but ReasoningSheet renders after it. It now says the scrim covers the composer.",
           "cites": "Steps 2",
-          "commit": "404ccfd",
+          "commit": "01f7eaaa0110",
           "patch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238"
         }
       ],
@@ -183,16 +183,16 @@
           "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01V2Xb1X28ibBkxjkZgLB4dU",
-          "time": "2026-10-06T03:00:42.221Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01DHxwfzSXv1aHLqE5BrRy5R",
+          "time": "2026-10-06T03:04:39.251Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "CNAxuvCMjFuVetw1w/wUG+CjwOQ0L1OOx9booWSB5ulG++WGeMCb+lRc11BEF+p/YxfZ1J8zl78f0lruDsAtCw=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "wVkvqWsGWo2MZad9r7BAeOLgdrcxQbEt0bvbXiUWRd0WJ5w6pNTbUuqHSgnsmiVWJfYtPhcrjECMKeCwRX39Dg=="
         }
       ]
     },
@@ -203,7 +203,7 @@
         {
           "finding": "Header held the menu's open state, and nothing told it the pager had left the chat page. The fix passes the page state down instead of adding another close call on each control.",
           "cites": "Fix Root Causes",
-          "commit": "325803b",
+          "commit": "86acf2462e06",
           "patch": "89390cef2f26992fc4823754b243d9e611e9fc4f"
         }
       ],
@@ -318,16 +318,16 @@
           "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01SV2xr9bGtFLEX6inPX8crS",
-          "time": "2026-10-06T03:00:42.363Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01CpDs6BiC19PYJhPQ1Wtr3A",
+          "time": "2026-10-06T03:04:40.854Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "/a97VW+NRWRjNkrPAbveInP1B5BgjIUJmR3AzuuG5F2aEqq5h26PwmR4YOf+vnZ4EHedoQzBr4Y5mbWKMu5qCA=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "2k89WDmDeCzMs1cDKRkOP0ofSgeXZUSa9J//BL0t54RznR2MGPnIwJ9KdoG+0KO1HSN3H/OVC5fcNB1ELob0Dw=="
         }
       ]
     },
@@ -350,16 +350,16 @@
           "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_011qQdB2LuAkPaofkN6hxe9M",
-          "time": "2026-10-06T03:00:42.466Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01PqU4Ae68au5oJZfEYVEnrb",
+          "time": "2026-10-06T03:04:41.624Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "RE10PtLgh2aK1U5wLgXCuIm5CDjlT8Vsq39vP3Vd1/7wNM6fiquC/IRYb8nBRkAc6gcKz89TuRAluobnXyHZAg=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "DIo4Y+lKWO0KF3QUmsyqP+xJaMhze3eAoFiWWCS0qJ56ixqPXRhZdrOE/zV2ec3u7fh0KaSgUJC2RrfAEf1iAA=="
         }
       ]
     },
@@ -412,19 +412,19 @@
         {
           "finding": "No test covered picking a model or the scrim, Recents and New chat closes. The new tests press each control and assert the saved pick and the closed menu.",
           "cites": "Test behavior, not implementation",
-          "commit": "f51fb6d",
+          "commit": "7051aded9dbe",
           "patch": "ca9ee876461ea9f7987b0fd4e78dab8d1069bf3c"
         },
         {
           "finding": "A tap on the header row background never reached the scrim. The fix lets taps through while the menu is open, with a test that failed first.",
           "cites": "Test behavior, not implementation",
-          "commit": "e728b42",
+          "commit": "0f529342c164",
           "patch": "f22aa27dc90d114def2e0e8bf2587845a2922992"
         },
         {
           "finding": "No test checked that the closed scrim passes touches or that the modal flag is off while the menu is closed. The header-row test now asserts both, and each assertion fails under its mutation.",
           "cites": "Test behavior, not implementation",
-          "commit": "eea1db0",
+          "commit": "dbb2304d40d3",
           "patch": "ef7231f710718b9ea08c5f0ff021070298abc5ff"
         }
       ],
@@ -437,16 +437,16 @@
           "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01CWokimN2fVTLtBXUiFTL5H",
-          "time": "2026-10-06T03:00:42.567Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Lv67fYTAnBpy9RLboA7VtJ",
+          "time": "2026-10-06T03:04:42.425Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "osk1WAWViKW/j+KUxKglN7VvKiFZmPk6GTQz26x9DksW8JK9GAkG4NigCRaUqfGk5j8kAx/G0h6Jvfq/3ZwGCQ=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "ggQyAoAcaGX4WwzW94D8t2hQBz2SZ4gpH3rskM7Eie292W6R9aJWuCmxspjXayRKFxtNMATlwWpbkIycUzzcDg=="
         }
       ]
     },
@@ -590,13 +590,13 @@
         {
           "finding": "Reduce Motion still moved the pill and the chevron. Gentler-not-zero now holds.",
           "cites": "The Ten Non-Negotiable Standards 8",
-          "commit": "fd7568c",
+          "commit": "b5ff1b5a8a83",
           "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
         },
         {
           "finding": "Close and open used the same timing. The close is now the faster system response.",
           "cites": "The Ten Non-Negotiable Standards 9",
-          "commit": "343df7d",
+          "commit": "a9fcff35e4f7",
           "patch": "0dd2c18f9bd6125e82925576933af4453709694a"
         }
       ],
@@ -641,16 +641,16 @@
           "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_01WNnEF7D1Gk38vs9CWWiX7A",
-          "time": "2026-10-06T02:57:13.329Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Hsy4sftPK9QyofPPrSpFii",
+          "time": "2026-10-06T03:04:43.337Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "ogceKOWOJ9Tw/SWp69iFlwFRZIQgZwcsNvp0lIoxmT15SNGDFLbPwUD5Xe7opBWewyTrD9lABdRm1+vQTzfBDg=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "C4aHFABVC7sp8y9sZHr2HAg/N6C/NDWUAYkr9oUJv95FvpkgJ2Nt23vrGCBcqQ1LT8ZF7jMwK9+KplU+sDGJAA=="
         }
       ]
     },
@@ -788,16 +788,16 @@
           "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "adb2e3798d37ebfe6",
-          "agentType": "pstack:poteto-agent-xhigh",
-          "toolUseId": "toolu_015TCrdsY7vGQ2yMfqKNd1Fe",
-          "time": "2026-10-06T02:57:13.581Z",
-          "cwd": "65dc10040a5cc89d0a2691ba741db676437dd2191d4942d45d46b1367653bf14",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_0153cCraz3kZwLDKMSrjP4vc",
+          "time": "2026-10-06T03:04:45.006Z",
+          "cwd": "e1e38e55503ddf7514abdef066e683aa66573878e9eb614fa6ee0e81bbf6b35f",
           "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
-          "branch": "submission/dev-tool-advisories",
-          "head": "7eb3a38792395118099417de4077cbff30691983",
-          "headPatch": "a199077e99a57a363b0222709e6c2a5db642cee2",
-          "sig": "djpHXEYXwVGsm0yIRzVCEMH2fQvMyPOhBfjTQ9/UCCDqMbaRKp9w97FLkdbsrTs7caSEFxyKPcLYK2tP+ERqAw=="
+          "branch": "submission/model-picker-2",
+          "head": "842fa893a8c84677ce59b9359d1b6a301a1beff1",
+          "headPatch": "cc623b041261bb223f6e3c744fc6a1ab9c81d238",
+          "sig": "frqrxmMeW5H5A6fZPciKOkobK2ov2a85Fukwjk1nQHvcKuG6Ung4ovnTSuhv3Rd8AEFGvmaiRC6Jf/YjWFivCA=="
         }
       ]
     }
