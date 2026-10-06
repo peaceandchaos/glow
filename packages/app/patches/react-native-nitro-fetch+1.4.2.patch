@@ -41,8 +41,8 @@ index 310efae..d494473 100644
    }
  
    func build() throws -> any HybridUrlRequestSpec {
-+    // DevTools would show the device credential, request body, and reply text.
-+    let reportsToDevTools = urlRequest.value(forHTTPHeaderField: "X-Device-Id") == nil
++    // DevTools would show the session token, request body, and reply text.
++    let reportsToDevTools = urlRequest.value(forHTTPHeaderField: "Authorization") == nil
      let delegate = URLSessionDelegateAdapter(
        onRedirectReceived: onRedirectReceivedCallback,
        onResponseStarted: onResponseStartedCallback,

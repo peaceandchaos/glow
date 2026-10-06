@@ -16,6 +16,7 @@ import BootSplash from 'react-native-bootsplash';
 import { KeyboardEvents } from 'react-native-keyboard-controller';
 import performance from 'react-native-performance';
 import '../index';
+import { restoreAccount } from '../src/account';
 import { startAppSession } from '../src/state/appSession';
 import type { ChatStore } from '../src/state/chatView';
 import { openArchive } from '../src/state/nativeArchive';
@@ -167,7 +168,13 @@ function frame(time: number) {
   if (!launchReported && !BootSplash.isVisible()) {
     launchReported = true;
     post({ kind: 'launch' });
-    startAppSession().then(watchReplies, () => undefined);
+    // The app's own session, shared once the probe's account is signed in.
+    restoreAccount()
+      .then(account => account && startAppSession(account.token))
+      .then(
+        store => store && watchReplies(store),
+        () => undefined,
+      );
   }
   if (last) intervals.push(time - last);
   last = time;

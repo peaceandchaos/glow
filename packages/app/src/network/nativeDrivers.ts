@@ -198,7 +198,7 @@ function nativeFetch(
 }
 
 // Uses the Nitro WebSocket object directly: the NitroWebSocket wrapper records
-// connection headers, including the device credential, in NetworkInspector.
+// connection headers, including the session token, in NetworkInspector.
 function nativeSocket(
   url: string,
   headers: Record<string, string>,

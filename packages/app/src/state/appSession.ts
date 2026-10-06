@@ -1,6 +1,5 @@
 import { Alert, AppState } from 'react-native';
 import { PROXY_BASE_URL } from '../config';
-import { loadDeviceId } from '../device';
 import { ServerTransport } from '../network/client';
 import { nativeDrivers } from '../network/nativeDrivers';
 import { createChatView, type ChatStore } from './chatView';
@@ -8,15 +7,18 @@ import { openArchive } from './nativeArchive';
 import { followAppState } from './nativeSession';
 import { ChatSession } from './session';
 
-let started: Promise<ChatStore> | null = null;
+type Running = { store: ChatStore; stop: () => void };
 
-export async function startAppSession(): Promise<ChatStore> {
+let started: Promise<Running> | null = null;
+
+// Starts the chat session for a signed-in account. Later calls share it until
+// stopAppSession.
+export async function startAppSession(token: string): Promise<ChatStore> {
   started ??= (async () => {
     const archive = openArchive();
-    const deviceId = await loadDeviceId();
     const transport = new ServerTransport(
       PROXY_BASE_URL,
-      deviceId,
+      token,
       nativeDrivers,
       __DEV__,
     );
@@ -28,16 +30,31 @@ export async function startAppSession(): Promise<ChatStore> {
     const store = createChatView(archive, session, message =>
       Alert.alert('Something went wrong', message),
     );
-    followAppState(session);
-    AppState.addEventListener('change', state => {
+    const lifecycle = followAppState(session);
+    const drafts = AppState.addEventListener('change', state => {
       if (state !== 'active') store.getState().saveDraftsNow();
     });
-    return store;
+    const stop = () => {
+      lifecycle.remove();
+      drafts.remove();
+      store.getState().saveDraftsNow();
+      // Background saves partial replies and detaches every reader.
+      session.setLifecycle('background');
+    };
+    return { store, stop };
   })();
   try {
-    return await started;
+    return (await started).store;
   } catch (error) {
     started = null;
     throw error;
   }
+}
+
+// Ends the chat session at sign-out, so the next sign-in starts one with its
+// own token.
+export async function stopAppSession(): Promise<void> {
+  const running = started;
+  started = null;
+  (await running)?.stop();
 }

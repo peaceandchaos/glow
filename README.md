@@ -96,7 +96,7 @@ scrolling to the top loads the 50 before them.
 uses the Nitro request builder and WebSocket objects directly, so nothing reaches the
 nitro-fetch network inspector. The `react-native-nitro-fetch` patch holds a redirect
 until JavaScript follows or cancels it, releases each request's URL session, and keeps
-requests carrying `X-Device-Id` out of the React Native DevTools network reporter.
+requests carrying an `Authorization` header out of the React Native DevTools network reporter.
 The `react-native-nitro-websockets` patch makes a WebSocket handshake refuse redirects.
 
 `node tools/native-transport/run.mjs` runs the binding on an iOS simulator against a

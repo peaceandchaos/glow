@@ -1,12 +1,10 @@
 import { TurboModuleRegistry, type TurboModule } from 'react-native';
-import * as Keychain from 'react-native-keychain';
 
 interface NativeRandom extends TurboModule {
   getRandomBase64(byteLength: number): string;
 }
 const alphabet =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-const service = 'personal-chat.device-id.v1';
 
 function randomBase64(bytes: number): string {
   // Call the native CSPRNG directly. The package's JS debug fallback can use Math.random.
@@ -46,25 +44,4 @@ export function secureNonce(): string {
     .replace(/\+/gu, '-')
     .replace(/\//gu, '_')
     .replace(/=+$/u, '');
-}
-
-export async function loadDeviceId(): Promise<string> {
-  const stored = await Keychain.getGenericPassword({ service });
-  if (stored) {
-    if (!/^[A-Za-z0-9_-]{43}$/u.test(stored.password))
-      throw new Error(
-        'The saved device identity is invalid. It was preserved.',
-      );
-    return stored.password;
-  }
-  const id = randomBase64(32)
-    .replace(/\+/gu, '-')
-    .replace(/\//gu, '_')
-    .replace(/=+$/u, '');
-  const saved = await Keychain.setGenericPassword('device', id, {
-    service,
-    accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-  });
-  if (!saved) throw new Error('Secure storage is unavailable.');
-  return id;
 }
