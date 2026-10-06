@@ -22,7 +22,6 @@ export type Message = {
 
 export type ChatViewState = {
   chatId: string;
-  // The open chat's choice: a model, or Auto for a chat saved with Auto.
   picker: Picker;
   // The newest part of the chat's path. loadOlder() adds earlier messages.
   messages: Message[];
@@ -43,8 +42,6 @@ export type ChatViewState = {
 
 export const historyPage = 50;
 export const draftPauseMs = 500;
-// The first chat on a fresh install. Later chats start on the open chat's
-// choice.
 const firstChatPicker: Picker = 'deepseek';
 
 export type ChatStore = StoreApi<ChatViewState>;
