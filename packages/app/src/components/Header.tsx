@@ -91,7 +91,10 @@ export const Header = React.memo(function ({
         />
       </Animated.View>
 
-      <View style={[styles.row, { paddingTop: insets.top + 6 }]}>
+      <View
+        style={[styles.row, { paddingTop: insets.top + 6 }]}
+        pointerEvents={open ? 'box-none' : 'auto'}
+      >
         <Pressable
           onPress={() => {
             setOpen(false);
