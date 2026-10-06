@@ -2,7 +2,7 @@
 // of index.js. It hides development toasts so screenshots show only app screens
 // and reports to the local app server:
 // - launch: the moment the boot splash is gone, which happens when the
-//   sign-in screen or ChatScreen first draws (the driver compares it with its own launch time);
+//   chat screen first draws (the driver compares it with its own launch time);
 // - reply: from the user turn appearing to the first reply text, and the
 //   interval between text commits while the reply streams;
 // - frames: JS frame intervals, every two seconds.
@@ -11,18 +11,29 @@
 // The launch argument `-harnessStallOnHide <ms>` blocks the JS thread for
 // <ms> on the first keyboard hide after launch, which is the first send, and
 // reports how long it blocked.
-import { LogBox, Settings } from 'react-native';
+import React from 'react';
+import { AppRegistry, LogBox, Settings } from 'react-native';
 import BootSplash from 'react-native-bootsplash';
 import { KeyboardEvents } from 'react-native-keyboard-controller';
 import performance from 'react-native-performance';
-import '../index';
-import { restoreAccount } from '../src/account';
+import { sessionTokenSchema } from '../../../shared/contracts';
+import App from '../App';
+import { name as appName } from '../app.json';
+import type { Account } from '../src/account';
 import { startAppSession } from '../src/state/appSession';
 import type { ChatStore } from '../src/state/chatView';
 import { openArchive } from '../src/state/nativeArchive';
 import { longTurns, seedChat } from './seed';
 
 LogBox.ignoreAllLogs();
+
+const harnessAccount: Account = {
+  appleUserId: 'app-harness-user',
+  token: sessionTokenSchema.parse('app-harness-session'.padEnd(43, '0')),
+};
+AppRegistry.registerComponent(appName, () => () => (
+  <App harnessAccount={harnessAccount} />
+));
 
 function mockedRecents(): [string, Date][] {
   const today = new Date();
@@ -168,12 +179,7 @@ function frame(time: number) {
   if (!launchReported && !BootSplash.isVisible()) {
     launchReported = true;
     post({ kind: 'launch' });
-    restoreAccount()
-      .then(account => account && startAppSession(account.token))
-      .then(
-        store => store && watchReplies(store),
-        () => undefined,
-      );
+    startAppSession(harnessAccount.token).then(watchReplies, () => undefined);
   }
   if (last) intervals.push(time - last);
   last = time;
