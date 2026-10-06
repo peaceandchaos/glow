@@ -17,7 +17,7 @@ import {
   type JobEvent,
   type Submission,
 } from '../../../shared/contracts';
-import { purgeChat } from './chats';
+import { purgeChat, storeReply } from './chats';
 import type { Database, SqlConnection } from './database';
 import { AttemptCancelled, RequestError } from './errors';
 import type { RegistryKey } from './models';
@@ -172,6 +172,8 @@ async function appendEvents(
     );
   }
   await writeJob(db, owner, job);
+  if (isTerminal(job.snapshot.status) && job.snapshot.status !== 'deleted')
+    await storeReply(db, owner, job.snapshot);
   return events;
 }
 

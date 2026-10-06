@@ -4,6 +4,7 @@ import { bakedCatalog } from '../../../shared/catalog';
 import {
   decodeJson,
   syncPageSchema,
+  type Submission,
   type SyncPage,
   type SyncPush,
 } from '../../../shared/contracts';
@@ -11,9 +12,11 @@ import { handleRequest, type ApiServices } from '../src/api';
 import { newSessionToken } from '../src/auth';
 import { ChatRows } from '../src/chats';
 import type { Database } from '../src/database';
-import { JobRepository } from '../src/jobs';
+import { AttemptCancelled } from '../src/errors';
+import { JobRepository, staleAfterMs } from '../src/jobs';
 import { schemaSql } from '../src/schema';
 import { testDatabase } from './database';
+import { submission } from './fixtures';
 import { signedIn } from './sessions';
 
 jest.setTimeout(60_000);
@@ -26,15 +29,18 @@ const owner = 'apple-user-1';
 let postgres: PGlite;
 let database: Database;
 let services: ApiServices;
+let jobs: JobRepository;
+let now = 1_000;
 
 beforeAll(async () => {
   ({ postgres, database } = await testDatabase());
+  jobs = new JobRepository(database, () => now);
   services = {
     ...(await signedIn(database, [
       [token, owner],
       [otherToken, 'apple-user-2'],
     ])),
-    jobs: () => Promise.resolve(new JobRepository(database)),
+    jobs: () => Promise.resolve(jobs),
     chats: () => Promise.resolve(new ChatRows(database)),
     dispatch: () => Promise.reject(new Error('Must not dispatch')),
     catalog: bakedCatalog,
@@ -42,7 +48,8 @@ beforeAll(async () => {
 });
 beforeEach(async () => {
   await postgres.exec(
-    'TRUNCATE chat_owners, chats, chat_messages, deleted_chats',
+    `TRUNCATE chat_owners, chats, chat_messages, deleted_chats,
+       chat_job_events, chat_jobs, cancelled_attempts`,
   );
 });
 afterAll(async () => postgres.close());
@@ -246,4 +253,111 @@ test('an owner never pulls rows another owner pushed', async () => {
 
 test('a pull without a cursor is a client error', async () => {
   expect((await send('sync', 'GET')).status).toBe(400);
+});
+
+async function running(fields: Partial<Submission> = {}) {
+  const input = { ...submission(), ...fields };
+  await jobs.submit(owner, input, () => Promise.resolve('run'));
+  await jobs.claim(owner, input.attemptId, 'run', 'claim');
+  await jobs.update(owner, input.attemptId, 'claim', {
+    text: 'Partial answer',
+    reasoning: 'Thinking',
+    actualModel: 'deepseek',
+  });
+  return input;
+}
+
+test('every terminal path stores the reply once, with its input choices', async () => {
+  const completed = await running({
+    picker: 'gpt-6.1-sol',
+    level: 'high',
+    retryModel: 'deepseek',
+  });
+  await jobs.update(owner, completed.attemptId, 'claim', {
+    text: ' done',
+    status: 'completed',
+  });
+  const stopped = await running();
+  await jobs.requestCancellation(owner, stopped.attemptId);
+  await jobs.requestCancellation(owner, stopped.attemptId);
+  const stale = await running();
+  now += staleAfterMs + 1;
+  await jobs.reconcile(owner, stale.attemptId, staleAfterMs);
+  await jobs.reconcile(owner, stale.attemptId, staleAfterMs);
+  const { messages } = await pull(0);
+  expect(messages).toEqual([
+    {
+      id: completed.attemptId,
+      chatId: completed.chatId,
+      parentId: completed.userTurnId,
+      pathId: completed.pathId,
+      role: 'assistant',
+      status: 'completed',
+      text: 'Partial answer done',
+      reasoning: 'Thinking',
+      imageCount: 0,
+      picker: 'gpt-6.1-sol',
+      level: 'high',
+      retryModel: 'deepseek',
+      actualModel: 'deepseek',
+      error: null,
+      createdAt: expect.any(Number),
+    },
+    expect.objectContaining({
+      id: stopped.attemptId,
+      status: 'stopped',
+      text: 'Partial answer',
+    }),
+    expect.objectContaining({
+      id: stale.attemptId,
+      status: 'interrupted',
+      text: 'Partial answer',
+      error: expect.stringContaining('Retry creates a new answer'),
+    }),
+  ]);
+});
+
+test('acknowledging a reply keeps its stored text', async () => {
+  const input = await running();
+  await jobs.update(owner, input.attemptId, 'claim', { status: 'completed' });
+  const { snapshot } = await jobs.get(owner, input.attemptId);
+  await jobs.acknowledge(owner, input.attemptId, snapshot.sequence);
+  expect((await jobs.get(owner, input.attemptId)).snapshot.text).toBe('');
+  expect((await pull(0)).messages).toMatchObject([
+    { id: input.attemptId, text: 'Partial answer' },
+  ]);
+});
+
+test('a phone push of a stored reply cannot overwrite it', async () => {
+  const input = await running();
+  await jobs.update(owner, input.attemptId, 'claim', { status: 'completed' });
+  const first = await pull(0);
+  await push({
+    messages: [
+      {
+        ...first.messages[0],
+        status: 'interrupted',
+        text: 'Local copy',
+      },
+    ],
+  });
+  expect(await pull(0)).toEqual(first);
+});
+
+test('a chat deleted while its reply runs keeps no message rows', async () => {
+  const input = await running();
+  expect((await send(`chats/${input.chatId}`, 'DELETE')).status).toBe(204);
+  await expect(
+    jobs.update(owner, input.attemptId, 'claim', { status: 'completed' }),
+  ).rejects.toThrow(AttemptCancelled);
+  expect(await storedRows(input.chatId)).toBe(0);
+  expect(await pull(0)).toMatchObject({
+    messages: [],
+    deletedChatIds: [input.chatId],
+  });
+});
+
+test('a stop before acceptance stores no reply', async () => {
+  expect(await jobs.requestCancellation(owner, randomUUID())).toBeNull();
+  expect((await pull(0)).messages).toEqual([]);
 });

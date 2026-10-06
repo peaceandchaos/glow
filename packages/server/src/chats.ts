@@ -1,6 +1,7 @@
 import {
   decodeJson,
   syncPageSchema,
+  type AttemptSnapshot,
   type SyncPage,
   type SyncPush,
 } from '../../../shared/contracts';
@@ -122,6 +123,38 @@ export class ChatRows {
     );
     return decodeJson(syncPageSchema, result.rows[0].data);
   }
+}
+
+// The stored job row supplies the reply's place and model choice. The terminal
+// text exists only in the snapshot here, before acknowledge purges the job.
+export async function storeReply(
+  db: SqlConnection,
+  owner: string,
+  snapshot: AttemptSnapshot,
+): Promise<void> {
+  const seq = (await stamp(db, owner, 1)) + 1;
+  await db.query(
+    `INSERT INTO chat_messages (owner, id, seq, chat_id, parent_id, path_id,
+       role, status, text, reasoning, picker, level, retry_model, actual_model,
+       error, created_at)
+     SELECT $1, j.attempt_id, $3, j.chat_id, (j.input->>'userTurnId')::uuid,
+       j.path_id, 'assistant', $4, $5, $6, j.input->>'picker', j.input->>'level',
+       j.input->>'retryModel', $7, $8, (extract(epoch FROM now()) * 1000)::bigint
+     FROM chat_jobs j
+     WHERE j.owner = $1 AND j.attempt_id = $2 AND j.input IS NOT NULL
+       AND NOT ${tombstoned('j.chat_id')}
+     ON CONFLICT (owner, id) DO NOTHING`,
+    [
+      owner,
+      snapshot.attemptId,
+      seq,
+      snapshot.status,
+      snapshot.text,
+      snapshot.reasoning,
+      snapshot.actualModel,
+      snapshot.error,
+    ],
+  );
 }
 
 export async function purgeChat(
