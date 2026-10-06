@@ -96,4 +96,10 @@ CREATE INDEX IF NOT EXISTS chat_messages_seq ON chat_messages (owner, seq);
 CREATE INDEX IF NOT EXISTS chat_messages_chat ON chat_messages (owner, chat_id);
 ALTER TABLE deleted_chats ADD COLUMN IF NOT EXISTS seq bigint;
 CREATE INDEX IF NOT EXISTS deleted_chats_seq ON deleted_chats (owner, seq);
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS search tsvector
+  GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, title)) STORED;
+ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS search tsvector
+  GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, left(text, 100000))) STORED;
+CREATE INDEX IF NOT EXISTS chats_search ON chats USING gin (search);
+CREATE INDEX IF NOT EXISTS chat_messages_search ON chat_messages USING gin (search);
 `;

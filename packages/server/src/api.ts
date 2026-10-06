@@ -5,6 +5,7 @@ import {
   decode,
   decodeJson,
   idSchema,
+  searchRequestSchema,
   seqSchema,
   sessionRequestSchema,
   socketCommandSchema,
@@ -297,13 +298,14 @@ async function handleJobRoute(
   throw new RequestError(404, 'Route not found.');
 }
 
-async function handleSyncRoute(
+async function handleChatRowsRoute(
   request: Request,
   owner: string,
+  route: string,
   services: ApiServices,
 ): Promise<Response> {
   const chats = await services.chats();
-  if (request.method === 'GET') {
+  if (route === 'sync' && request.method === 'GET') {
     const after = seqSchema.parse(
       Number(new URL(request.url).searchParams.get('after') ?? Number.NaN),
     );
@@ -311,12 +313,16 @@ async function handleSyncRoute(
       headers: { 'Cache-Control': 'no-store' },
     });
   }
-  if (request.method === 'POST') {
+  if (route === 'sync' && request.method === 'POST') {
     await chats.push(
       owner,
       decodeJson(syncPushSchema, await readBody(request)),
     );
     return new Response(null, { status: 204 });
+  }
+  if (route === 'search' && request.method === 'POST') {
+    const { query } = decodeJson(searchRequestSchema, await readBody(request));
+    return Response.json(await chats.search(owner, query));
   }
   throw new RequestError(404, 'Route not found.');
 }
@@ -381,8 +387,8 @@ async function handleSignedInRoute(
     await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
     return new Response(null, { status: 204 });
   }
-  if (path[1] === 'sync' && path.length === 2)
-    return handleSyncRoute(request, owner, services);
+  if (path.length === 2 && (path[1] === 'sync' || path[1] === 'search'))
+    return handleChatRowsRoute(request, owner, path[1], services);
   throw new RequestError(404, 'Route not found.');
 }
 

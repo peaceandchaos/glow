@@ -1,7 +1,9 @@
 import {
   decodeJson,
+  searchResponseSchema,
   syncPageSchema,
   type AttemptSnapshot,
+  type SearchResponse,
   type SyncPage,
   type SyncPush,
 } from '../../../shared/contracts';
@@ -9,6 +11,8 @@ import type { Database, SqlConnection } from './database';
 
 const pageRows = 200;
 const pageBytes = 1_000_000;
+const searchHits = 20;
+const indexedCharacters = 100_000;
 
 // The only producer of seq values. The counter row lock is held to commit, so
 // per owner seq order is commit order and a pull past k has seen all below k.
@@ -26,6 +30,15 @@ async function stamp(
     [owner, ticks],
   );
   return Number(result.rows[0].data) - ticks;
+}
+
+// Raw input never reaches tsquery syntax: each word becomes a prefix term.
+function prefixQuery(query: string): string {
+  return (query.match(/[\p{L}\p{N}]+/gu) ?? [])
+    .filter(word => word.length >= 2)
+    .slice(0, 8)
+    .map(word => `${word}:*`)
+    .join(' & ');
 }
 
 const tombstoned = (chatId: string) =>
@@ -122,6 +135,37 @@ export class ChatRows {
       [owner, after],
     );
     return decodeJson(syncPageSchema, result.rows[0].data);
+  }
+
+  async search(owner: string, query: string): Promise<SearchResponse> {
+    const terms = prefixQuery(query);
+    if (!terms) return { hits: [] };
+    // A title match counts twice. Snippets run only on the returned hits.
+    const result = await this.database.query(
+      `WITH query AS (SELECT to_tsquery('simple', $2) AS q),
+       hits AS (
+         SELECT chat_id, id AS message_id, ts_rank_cd(search, q) AS rank
+         FROM chat_messages, query WHERE owner = $1 AND search @@ q
+         UNION ALL
+         SELECT id, NULL, 2 * ts_rank_cd(search, q)
+         FROM chats, query WHERE owner = $1 AND search @@ q),
+       best AS (
+         SELECT DISTINCT ON (chat_id) chat_id, message_id, rank
+         FROM hits ORDER BY chat_id, rank DESC),
+       top AS (
+         SELECT b.chat_id, b.message_id, b.rank, c.title, c.updated_at
+         FROM best b JOIN chats c ON c.owner = $1 AND c.id = b.chat_id
+         ORDER BY b.rank DESC, c.updated_at DESC LIMIT ${searchHits})
+       SELECT jsonb_build_object('hits', COALESCE(jsonb_agg(jsonb_build_object(
+         'chatId', t.chat_id, 'messageId', t.message_id, 'title', t.title,
+         'snippet', COALESCE(ts_headline('simple', left(m.text, ${indexedCharacters}), q,
+           'MaxFragments=1, MinWords=6, MaxWords=18, StartSel="", StopSel=""'), ''))
+         ORDER BY t.rank DESC, t.updated_at DESC), '[]'))::text AS data
+       FROM top t CROSS JOIN query
+       LEFT JOIN chat_messages m ON m.owner = $1 AND m.id = t.message_id`,
+      [owner, terms],
+    );
+    return decodeJson(searchResponseSchema, result.rows[0].data);
   }
 }
 

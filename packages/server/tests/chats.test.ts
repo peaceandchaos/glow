@@ -3,7 +3,9 @@ import type { PGlite } from '@electric-sql/pglite';
 import { bakedCatalog } from '../../../shared/catalog';
 import {
   decodeJson,
+  searchResponseSchema,
   syncPageSchema,
+  type SearchResponse,
   type Submission,
   type SyncPage,
   type SyncPush,
@@ -360,4 +362,101 @@ test('a chat deleted while its reply runs keeps no message rows', async () => {
 test('a stop before acceptance stores no reply', async () => {
   expect(await jobs.requestCancellation(owner, randomUUID())).toBeNull();
   expect((await pull(0)).messages).toEqual([]);
+});
+
+async function search(query: string, id = token): Promise<SearchResponse> {
+  const response = await send('search', 'POST', JSON.stringify({ query }), id);
+  expect(response.status).toBe(200);
+  return decodeJson(searchResponseSchema, await response.text());
+}
+
+test('a word in a reply finds its chat with a snippet around it', async () => {
+  const chatId = randomUUID();
+  const reply = {
+    ...message(
+      chatId,
+      'We could visit the aquarium on Saturday morning before lunch.',
+    ),
+    role: 'assistant' as const,
+  };
+  await push({
+    chats: [chat(chatId, { title: 'Weekend' })],
+    messages: [reply],
+  });
+  expect(await search('Aquarium')).toEqual({
+    hits: [
+      {
+        chatId,
+        messageId: reply.id,
+        title: 'Weekend',
+        snippet: expect.stringContaining('aquarium on Saturday'),
+      },
+    ],
+  });
+});
+
+test('a prefix matches whole words, and a title match ranks above a body match', async () => {
+  const titled = randomUUID();
+  const body = randomUUID();
+  const later = { updatedAt: 9_000 };
+  await push({
+    chats: [
+      chat(titled, { title: 'Running shoes' }),
+      chat(body, { title: 'Monday', ...later }),
+    ],
+    messages: [
+      message(titled, 'Which size?'),
+      message(body, 'I was running late'),
+    ],
+  });
+  const { hits } = await search('runn');
+  expect(hits.map(hit => [hit.chatId, hit.messageId])).toEqual([
+    [titled, null],
+    [body, expect.any(String)],
+  ]);
+});
+
+test('query syntax in the input never reaches the database as syntax', async () => {
+  const chatId = randomUUID();
+  await push({
+    chats: [chat(chatId)],
+    messages: [message(chatId, 'alpha beta')],
+  });
+  for (const query of [
+    'a & !b:*',
+    '!!! ???',
+    "al' | (be <-> :*",
+    'x² ½ 日本語 ab-cd',
+  ])
+    expect((await search(query)).hits.length).toBeLessThanOrEqual(1);
+  expect((await search('al & !be:*')).hits).toMatchObject([{ chatId }]);
+});
+
+test('search never matches a deleted chat or a chat another owner pushed', async () => {
+  const kept = randomUUID();
+  const deleted = randomUUID();
+  await push({
+    chats: [chat(kept), chat(deleted)],
+    messages: [message(kept, 'zebra'), message(deleted, 'zebra')],
+  });
+  expect((await send(`chats/${deleted}`, 'DELETE')).status).toBe(204);
+  const foreign = randomUUID();
+  await push(
+    { chats: [chat(foreign)], messages: [message(foreign, 'zebra')] },
+    otherToken,
+  );
+  expect((await search('zebra')).hits.map(hit => hit.chatId)).toEqual([kept]);
+});
+
+test('a message with over 1 MB of distinct words saves and stays searchable', async () => {
+  const chatId = randomUUID();
+  const cjk = (n: number) => String.fromCodePoint(0x4e00 + n);
+  const words = Array.from(
+    { length: 200_000 },
+    (_, i) => cjk(i % 20_000) + cjk(Math.floor(i / 20_000)),
+  );
+  const text = words.join(' ');
+  expect(Buffer.byteLength(words.join(''))).toBeGreaterThan(1_048_575);
+  await push({ chats: [chat(chatId)], messages: [message(chatId, text)] });
+  expect((await search(words[0])).hits).toMatchObject([{ chatId }]);
 });

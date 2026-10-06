@@ -144,7 +144,7 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
   }
 });
 
-test('the retired title-ranking route is gone and makes no paid call', async () => {
+test('a title-ranking request from an older app is refused without a paid call', async () => {
   const f = await fixture();
   const paid = jest.spyOn(globalThis, 'fetch');
   try {
@@ -159,7 +159,7 @@ test('the retired title-ranking route is gone and makes no paid call', async () 
       ),
       f.services,
     );
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(400);
     expect(paid).not.toHaveBeenCalled();
   } finally {
     paid.mockRestore();

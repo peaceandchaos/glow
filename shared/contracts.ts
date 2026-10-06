@@ -286,6 +286,19 @@ export const syncPageSchema = z.strictObject({
   more: z.boolean(),
 });
 export type SyncPage = z.infer<typeof syncPageSchema>;
+export const searchRequestSchema = z.strictObject({
+  query: z.string().trim().min(1).max(200),
+});
+const searchHitSchema = z.strictObject({
+  chatId: idSchema,
+  messageId: idSchema.nullable(),
+  title: z.string(),
+  snippet: z.string(),
+});
+export const searchResponseSchema = z.strictObject({
+  hits: z.array(searchHitSchema).max(20),
+});
+export type SearchResponse = z.infer<typeof searchResponseSchema>;
 
 export const sessionTokenBytes = 32;
 export const sessionTokenSchema = z
