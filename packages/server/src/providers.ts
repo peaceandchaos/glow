@@ -2,7 +2,7 @@ import type { ModelKey, Submission } from '../../../shared/contracts';
 import { makeCheckpoint, prepareContext, textItem } from './compaction/context';
 import type { GatewayClient } from './gateway';
 import type { JevClient } from './jev';
-import { models } from './models';
+import { models, type Effort } from './models';
 import type {
   BeforePaidCall,
   PreparedContext,
@@ -38,6 +38,7 @@ export class LiveProviders implements Providers {
           abort,
           before,
           () => Promise.resolve(),
+          null,
           maxOutput,
         ),
     });
@@ -50,6 +51,7 @@ export class LiveProviders implements Providers {
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
     beforeCall: BeforePaidCall,
+    effort: Effort | null,
   ): Promise<ProviderCompletion> {
     const config = models[model];
     if (config.wire === 'responses') {
@@ -59,6 +61,7 @@ export class LiveProviders implements Providers {
         signal,
         beforeCall,
         onChunk,
+        effort,
       );
       const before = context.items.flatMap(item =>
         item.type === 'compaction' ? [item.encrypted_content] : [],
@@ -81,6 +84,7 @@ export class LiveProviders implements Providers {
       signal,
       beforeCall,
       onChunk,
+      effort,
     );
     return {
       checkpoint: context.checkpoint

@@ -2,7 +2,7 @@ import { getVercelOidcToken } from '@vercel/oidc';
 import type { ModelKey, ResponseInputItem } from '../../../shared/contracts';
 import { parseGatewayEvent, SseDecoder } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
-import { gatewayHosts, isGatewayModel, models } from './models';
+import { gatewayHosts, isGatewayModel, models, type Effort } from './models';
 import type { BeforePaidCall, ProviderChunk } from './provider';
 
 type GatewayPart =
@@ -49,6 +49,7 @@ export class GatewayClient {
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
+    effort: Effort | null,
     maxOutput = models[model].maxOutput,
   ): Promise<string> {
     if (!isGatewayModel(model))
@@ -77,7 +78,7 @@ export class GatewayClient {
             messages,
             stream: true,
             max_tokens: maxOutput,
-            reasoning: { effort: 'none' },
+            ...(effort ? { reasoning: { effort } } : {}),
             // Per-request zeroDataRetention needs Pro or Enterprise, so it is
             // not sent:
             // https://vercel.com/docs/ai-gateway/security-and-compliance/zdr

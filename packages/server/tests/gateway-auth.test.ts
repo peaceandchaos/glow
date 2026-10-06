@@ -44,6 +44,7 @@ function sendToGateway() {
     new AbortController().signal,
     () => Promise.resolve(),
     () => Promise.resolve(),
+    null,
   );
 }
 
