@@ -150,7 +150,7 @@
       "findings": [
         {
           "finding": "The root cause is the locked vulnerable versions, not the check. The fix moves sharp, shell-quote and joi to their first or latest fixed releases instead of adding dispositions, and the probes show the advisory behavior gone: librsvg 2.63.2, the shell-quote quote() example throws a TypeError, and a joi __proto__ message code is rejected.",
-          "cites": "Pattern",
+          "cites": "Fix Root Causes",
           "commit": "e004230",
           "patch": "8aebca83dd67c2a7437a9bcd7956978f7fac1c24"
         }
