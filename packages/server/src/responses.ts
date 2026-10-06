@@ -7,7 +7,7 @@ import {
 } from '../../../shared/contracts';
 import { parseResponsesEvent } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
-import type { ResponsesModel } from './models';
+import type { Effort, ResponsesModel } from './models';
 import type { BeforePaidCall, ProviderChunk } from './provider';
 
 // Strip API-only fields (annotations, item status) while preserving every replay item.
@@ -118,6 +118,7 @@ export class ResponsesClient {
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
+    effort: Effort | null,
   ): Promise<ResponseInputItem[]> {
     await beforeCall();
     signal.throwIfAborted();
@@ -163,7 +164,9 @@ export class ResponsesClient {
             store: false,
             max_output_tokens: config.maxOutput,
             include: ['reasoning.encrypted_content'],
-            reasoning: { summary: 'auto' },
+            reasoning: effort
+              ? { summary: 'auto', effort }
+              : { summary: 'auto' },
             context_management: [
               {
                 type: 'compaction',

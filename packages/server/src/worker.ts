@@ -129,6 +129,7 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
       controller.signal,
       async chunk => chunks.push(chunk),
       beforeCall,
+      null,
     );
     controller.signal.throwIfAborted();
     const { unwritten, failure } = await chunks.close();

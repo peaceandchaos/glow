@@ -6,7 +6,7 @@ import { ProviderFailure } from '../src/errors';
 import { GatewayClient, gatewayMessages } from '../src/gateway';
 import { JevClient } from '../src/jev';
 import type { ProviderChunk } from '../src/provider';
-import { models } from '../src/models';
+import { models, type Effort } from '../src/models';
 import { ResponsesClient, trimCompacted } from '../src/responses';
 import { exampleGatewayAuth, submission } from './fixtures';
 
@@ -54,10 +54,17 @@ test('Gateway sends only its fixed model and emits a split UTF-8 stream once', a
     requests,
   );
   const received: ProviderChunk[] = [];
-  const answer = await client.generate('kimi', input, signal, before, event => {
-    received.push(event);
-    return Promise.resolve();
-  });
+  const answer = await client.generate(
+    'kimi',
+    input,
+    signal,
+    before,
+    event => {
+      received.push(event);
+      return Promise.resolve();
+    },
+    null,
+  );
   expect(answer).toBe('Hi 🦋');
   expect(requests).toHaveLength(1);
   expect(requests[0].body).toContain('moonshotai/kimi-k3');
@@ -74,7 +81,14 @@ test.each([
   const requests: RequestInit[] = [];
   const client = fakeGateway(records, requests);
   await expect(
-    client.generate('deepseek', input, signal, before, () => Promise.resolve()),
+    client.generate(
+      'deepseek',
+      input,
+      signal,
+      before,
+      () => Promise.resolve(),
+      null,
+    ),
   ).rejects.toBeInstanceOf(ProviderFailure);
   expect(requests).toHaveLength(1);
 });
@@ -98,13 +112,43 @@ test('a Gateway connection lost mid-stream is an uncertain interruption', async 
       ),
   });
   const received: string[] = [];
-  const result = client.generate('kimi', input, signal, before, event => {
-    received.push(event.text ?? '');
-    return Promise.resolve();
-  });
+  const result = client.generate(
+    'kimi',
+    input,
+    signal,
+    before,
+    event => {
+      received.push(event.text ?? '');
+      return Promise.resolve();
+    },
+    null,
+  );
   await expect(result).rejects.toBeInstanceOf(ProviderFailure);
   await expect(result).rejects.toMatchObject({ uncertain: true });
   expect(received).toEqual(['Partial']);
+});
+
+test('Gateway sends a reasoning effort only when one is chosen', async () => {
+  const requests: RequestInit[] = [];
+  const sent = async (effort: Effort | null) => {
+    await fakeGateway(
+      [chunk('Hi'), chunk(null, 'stop'), '[DONE]'],
+      requests,
+    ).generate(
+      'deepseek',
+      input,
+      signal,
+      before,
+      () => Promise.resolve(),
+      effort,
+    );
+    const body = requests.at(-1)?.body;
+    return z
+      .record(z.string(), z.unknown())
+      .parse(JSON.parse(typeof body === 'string' ? body : ''));
+  };
+  expect(await sent(null)).not.toHaveProperty('reasoning');
+  expect((await sent('high')).reasoning).toEqual({ effort: 'high' });
 });
 
 test('OpenAI opaque context is never translated into a Gateway request', () => {
@@ -171,9 +215,15 @@ test('Responses uses a real socket, store:false, and receives official compactio
         received.push(event);
         return Promise.resolve();
       },
+      null,
     );
-    await client.generate(models['gpt-6-astra'], input, signal, before, () =>
-      Promise.resolve(),
+    await client.generate(
+      models['gpt-6-astra'],
+      input,
+      signal,
+      before,
+      () => Promise.resolve(),
+      'high',
     );
     expect(requests).toHaveLength(2);
     expect(requests[0]).toContain('"store":false');
@@ -191,6 +241,12 @@ test('Responses uses a real socket, store:false, and receives official compactio
       ['gpt-6.1-sol', [{ type: 'compaction', compact_threshold: 200_000 }]],
       ['gpt-6-astra', [{ type: 'compaction', compact_threshold: 200_000 }]],
     ]);
+    expect(
+      requests.map(
+        raw =>
+          z.object({ reasoning: z.unknown() }).parse(JSON.parse(raw)).reasoning,
+      ),
+    ).toEqual([{ summary: 'auto' }, { summary: 'auto', effort: 'high' }]);
     expect(result[0]).toEqual({
       type: 'compaction',
       encrypted_content: 'opaque',

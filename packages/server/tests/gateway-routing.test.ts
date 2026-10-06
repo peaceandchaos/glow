@@ -17,7 +17,14 @@ async function sentBody(model: ModelKey): Promise<string> {
     },
   });
   await expect(
-    client.generate(model, [textItem('user', 'Hello')], signal, before, before),
+    client.generate(
+      model,
+      [textItem('user', 'Hello')],
+      signal,
+      before,
+      before,
+      null,
+    ),
   ).rejects.toThrow('HTTP 500');
   expect(bodies).toHaveLength(1);
   return bodies[0];
@@ -40,15 +47,6 @@ test.each<[ModelKey, string[]]>([
   },
 );
 
-test.each<ModelKey>(['kimi', 'deepseek'])(
-  '%s asks for no reasoning effort',
-  async model => {
-    expect(JSON.parse(await sentBody(model)).reasoning).toEqual({
-      effort: 'none',
-    });
-  },
-);
-
 test('only Gateway models have hosts, and a GPT model never reaches the Gateway', async () => {
   expect(Object.keys(gatewayHosts)).toEqual(
     Object.entries(models).flatMap(([key, config]) =>
@@ -64,6 +62,7 @@ test('only Gateway models have hosts, and a GPT model never reaches the Gateway'
       signal,
       before,
       before,
+      null,
     ),
   ).rejects.toThrow('does not run through AI Gateway');
   expect(fetcher).not.toHaveBeenCalled();

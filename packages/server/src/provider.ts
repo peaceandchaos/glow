@@ -4,6 +4,7 @@ import type {
   ResponseInputItem,
   Submission,
 } from '../../../shared/contracts';
+import type { Effort } from './models';
 
 export type PreparedContext = {
   items: ResponseInputItem[];
@@ -36,5 +37,6 @@ export interface Providers {
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
     beforeCall: BeforePaidCall,
+    effort: Effort | null,
   ): Promise<ProviderCompletion>;
 }
