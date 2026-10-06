@@ -44,4 +44,9 @@ CREATE TABLE IF NOT EXISTS chat_input_parts (
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (owner, attempt_id, part_index)
 );
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash text PRIMARY KEY,
+  user_id text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 `;
