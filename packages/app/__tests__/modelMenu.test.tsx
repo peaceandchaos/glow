@@ -185,3 +185,24 @@ test('the scrim, Recents, and New chat each close the open menu', async () => {
   expect(mockSetPage.mock.calls).toEqual([[recents]]);
   expect(newChat).toHaveBeenCalledTimes(1);
 });
+
+test('while the menu is open, a tap on the header row between its buttons reaches the scrim', async () => {
+  const view = await renderDrawer();
+  const row = () =>
+    view.root.findByProps({ accessibilityLabel: 'Recents' }).parent;
+  const scrim = () =>
+    view.root.findByProps({ accessibilityLabel: 'Dismiss model menu' }).parent;
+  expect(row()?.props.pointerEvents ?? 'auto').toBe('auto');
+
+  await view.open();
+  expect(row()?.props.pointerEvents).toBe('box-none');
+  expect(scrim()?.props.pointerEvents).toBe('auto');
+
+  await act(async () =>
+    view.root
+      .findByProps({ accessibilityLabel: 'Dismiss model menu' })
+      .props.onPressIn(),
+  );
+  expect(view.expanded()).toBe(false);
+  expect(row()?.props.pointerEvents ?? 'auto').toBe('auto');
+});
