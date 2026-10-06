@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import type { ModelKey, Picker } from '../../../../shared/contracts';
+import type { Picker } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
 import type { ChatArchive, ChatRecord, SavedMessage } from './archive';
 import type { AttemptActivity, ChatSession } from './session';
@@ -31,7 +31,7 @@ export type ChatViewState = {
   // Returns the saved user turn's id, or null when nothing was saved.
   send: (text: string, attachments?: Attachment[]) => string | null;
   stop: () => void;
-  setPicker: (model: ModelKey) => void;
+  setPicker: (picker: Picker) => void;
   newChat: () => void;
   openChat: (chatId: string) => void;
   loadOlder: () => void;
@@ -228,10 +228,10 @@ export function createChatView(
       const leaf = store.getState().messages.at(-1);
       if (leaf?.status === 'streaming') attempt(() => session.stop(leaf.id));
     },
-    setPicker: model =>
+    setPicker: picker =>
       attempt(() => {
-        archive.setPicker(store.getState().chatId, model);
-        store.setState({ picker: model });
+        archive.setPicker(store.getState().chatId, picker);
+        store.setState({ picker });
       }),
     newChat: () =>
       attempt(() => {
