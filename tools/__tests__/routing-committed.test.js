@@ -5,7 +5,6 @@ const {
   parseRouting,
   requiredSkills,
 } = require('../skills/routing.cjs');
-const { mustMatch, mustNotMatch } = require('./motion-lines.cjs');
 
 describe('the committed routing', () => {
   let routing;
@@ -28,7 +27,6 @@ describe('the committed routing', () => {
   const screen = 'packages/app/src/screens/ChatScreen.tsx';
   const recents = 'packages/app/src/screens/RecentsScreen.tsx';
   const shimmer = 'packages/app/src/components/ShimmerText.tsx';
-  const theme = 'packages/app/src/theme.ts';
   const animated = [
     'const reduceMotion = useReducedMotion();',
     'const shimmerOff = reduceMotion;',
@@ -63,38 +61,16 @@ describe('the committed routing', () => {
   }
   const skillsOf = (...groups) => [...new Set(groups.flat())].sort();
 
-  const everyChange = [
-    'deslop',
-    'no-comments',
-    'principle-prove-it-works',
-    'principle-sequence-verifiable-units',
-    'technical-writing',
-    'unslop',
-  ];
+  const everyChange = ['deslop', 'no-comments', 'principle-prove-it-works'];
+  const quality = ['thermo-nuclear-code-quality-review'];
   const docsOnly = ['technical-writing', 'unslop'];
   const tiny = ['principle-prove-it-works', 'technical-writing', 'unslop'];
-  const typescript = [
-    'principle-type-system-discipline',
-    'typescript-best-practices',
-  ];
-  const reactNative = [
-    'react-native-best-practices',
-    'react-native-best-practices-sm',
-  ];
-  const ui = ['expo-ios-hig'];
-  const motion = ['expo-animation', 'review-animations'];
-  const controls = [
-    'blast-radius',
-    'principle-test-behavior-not-implementation',
-  ];
-  const moves = [
-    'blast-radius',
-    'principle-migrate-callers-then-delete-legacy-apis',
-  ];
-  const addedFiles = [
-    'principle-minimize-reader-load',
-    'principle-subtract-before-you-add',
-  ];
+  const reactNative = ['react-native-best-practices'];
+  const server = ['typescript-best-practices'];
+  const boundary = ['principle-boundary-discipline'];
+  const native = ['ios-debugger-agent'];
+  const agentInstructions = ['unslop', 'writing-for-agents'];
+  const controls = ['blast-radius'];
 
   test('catalogues the routed and the optional motion skills', () => {
     const names = [
@@ -125,40 +101,28 @@ describe('the committed routing', () => {
       [docsOnly],
     ],
     [
+      'a 500-line docs edit',
+      [{ path: 'docs/providers.md', lines: 500 }],
+      'docs-only',
+      [docsOnly],
+    ],
+    [
       'a normal screen change',
       [{ path: screen, added: plain(60) }],
       null,
-      [everyChange, typescript, reactNative, ui],
+      [everyChange, quality, reactNative],
     ],
     [
       'a tiny UI tweak',
       [{ path: recents, added: plain(6) }],
       'tiny',
-      [tiny, typescript, reactNative, ui],
+      [tiny, reactNative],
     ],
     [
       'an animated component',
       [{ path: shimmer, added: [...animated, ...plain(23)] }],
       null,
-      [everyChange, typescript, reactNative, ui, motion],
-    ],
-    [
-      'a tiny animated tweak',
-      [{ path: shimmer, added: animated }],
-      'tiny',
-      [tiny, typescript, reactNative, ui, motion],
-    ],
-    [
-      'a tiny animated tweak with a gesture',
-      [{ path: shimmer, added: [...animated, 'const pan = Gesture.Pan();'] }],
-      'tiny',
-      [tiny, typescript, reactNative, ui, motion],
-    ],
-    [
-      'a motion token tune',
-      [{ path: theme, added: ['  fast: 150,'] }],
-      'tiny',
-      [tiny, typescript, reactNative, motion],
+      [everyChange, quality, reactNative],
     ],
     [
       'a UI test file',
@@ -169,12 +133,31 @@ describe('the committed routing', () => {
         },
       ],
       null,
-      [
-        everyChange,
-        typescript,
-        reactNative,
-        ['principle-test-behavior-not-implementation', 'test-prune'],
-      ],
+      [everyChange, quality, reactNative],
+    ],
+    [
+      'an app config change',
+      [{ path: 'packages/app/src/config.ts', added: plain(30) }],
+      null,
+      [everyChange, quality, reactNative, boundary],
+    ],
+    [
+      'a server change',
+      [{ path: 'packages/server/src/models.ts', added: plain(30) }],
+      null,
+      [everyChange, quality, server],
+    ],
+    [
+      'a server boundary change',
+      [{ path: 'packages/server/src/api.ts', added: plain(30) }],
+      null,
+      [everyChange, quality, server, boundary],
+    ],
+    [
+      'a native iOS change',
+      [{ path: 'packages/app/ios/Podfile', added: plain(30) }],
+      null,
+      [everyChange, quality, native],
     ],
   ])('routes %s', (_, files, tier, groups) => {
     expect(routed(range(files))).toEqual({ tier, skills: skillsOf(...groups) });
@@ -185,18 +168,7 @@ describe('the committed routing', () => {
       'a new doc',
       [{ status: 'added', path: 'docs/new.md', lines: 5 }],
       'docs-only',
-      [docsOnly, addedFiles],
-    ],
-    [
-      'a doc with fetch( in a code sample',
-      [
-        {
-          path: 'docs/providers.md',
-          added: ["const reply = await fetch('/chat');"],
-        },
-      ],
-      'docs-only',
-      [docsOnly, ['principle-boundary-discipline']],
+      [docsOnly],
     ],
     [
       'a renamed doc',
@@ -209,7 +181,7 @@ describe('the committed routing', () => {
         },
       ],
       'docs-only',
-      [docsOnly, moves],
+      [docsOnly],
     ],
     [
       'an upstream note under tools',
@@ -221,23 +193,29 @@ describe('the committed routing', () => {
       'a 30-line skill edit',
       [{ path: '.agents/skills/test-prune/SKILL.md', lines: 30 }],
       null,
-      [everyChange, ['writing-for-agents']],
+      [everyChange, quality, agentInstructions],
     ],
     [
       'a 2-line skill edit',
       [{ path: '.agents/skills/test-prune/SKILL.md', lines: 2 }],
       'tiny',
-      [tiny, ['writing-for-agents']],
+      [tiny, agentInstructions],
     ],
     [
       'a 2-line AGENTS.md edit',
       [{ path: 'AGENTS.md', lines: 2 }],
       null,
-      [everyChange, ['writing-for-agents'], controls],
+      [everyChange, quality, docsOnly, agentInstructions, controls],
     ],
     [
       'a 2-line check edit',
       [{ path: 'tools/skills/routing.cjs', lines: 2 }],
+      null,
+      [everyChange, quality, controls],
+    ],
+    [
+      'a lockfile-only change',
+      [{ path: 'package-lock.json', lines: 300 }],
       null,
       [everyChange, controls],
     ],
@@ -252,7 +230,7 @@ describe('the committed routing', () => {
         },
       ],
       null,
-      [everyChange, typescript, moves],
+      [everyChange, quality, server],
     ],
     [
       'a 2-line change that adds a file',
@@ -264,19 +242,19 @@ describe('the committed routing', () => {
         },
       ],
       null,
-      [everyChange, typescript, reactNative, ui, addedFiles],
+      [everyChange, quality, reactNative],
     ],
     [
       '20 changed lines',
       [{ path: recents, added: plain(20) }],
       'tiny',
-      [tiny, typescript, reactNative, ui],
+      [tiny, reactNative],
     ],
     [
       '21 changed lines',
       [{ path: recents, added: plain(21) }],
       null,
-      [everyChange, typescript, reactNative, ui],
+      [everyChange, quality, reactNative],
     ],
     [
       '2 files of 2 lines',
@@ -285,7 +263,7 @@ describe('the committed routing', () => {
         { path: screen, added: plain(2) },
       ],
       'tiny',
-      [tiny, typescript, reactNative, ui],
+      [tiny, reactNative],
     ],
     [
       '3 files of 2 lines',
@@ -298,27 +276,30 @@ describe('the committed routing', () => {
         },
       ],
       null,
-      [everyChange, typescript, reactNative, ui],
+      [everyChange, quality, reactNative],
     ],
     ['only a skill record', [], null, [everyChange]],
   ])('pins the tier edge for %s', (_, files, tier, groups) => {
     expect(routed(range(files))).toEqual({ tier, skills: skillsOf(...groups) });
   });
 
-  test('a fix commit inside a tiny change still requires the root-cause skill', () => {
-    const change = range(
-      [{ path: recents, added: plain(6) }],
-      ['fix: pad the recents row'],
-    );
-    expect(routed(change)).toEqual({
-      tier: 'tiny',
-      skills: skillsOf(tiny, typescript, reactNative, ui, [
-        'principle-fix-root-causes',
-      ]),
-    });
+  test.each([
+    [
+      'an app component',
+      ['packages/app/src/components/Header.tsx'],
+      [everyChange, quality, reactNative],
+    ],
+    [
+      'a server boundary',
+      ['packages/server/src/api.ts'],
+      [everyChange, quality, server, boundary],
+    ],
+    ['a readme', ['README.md'], [docsOnly]],
+  ])('a plan for %s lists the slim skill set', (_, paths, groups) => {
+    expect(routed(plan(paths)).skills).toEqual(skillsOf(...groups));
   });
 
-  test('a plan evaluates docs-only and leaves tiny and the motion rules unevaluated', () => {
+  test('a plan evaluates every rule and docs-only, and leaves tiny unevaluated', () => {
     expect(routed(plan(['docs/providers.md', 'README.md']))).toEqual({
       tier: 'docs-only',
       skills: docsOnly,
@@ -333,42 +314,8 @@ describe('the committed routing', () => {
       plan([shimmer]),
     );
     expect(tier).toBeNull();
-    expect(skipped).toEqual(
-      expect.arrayContaining(['motion-lines', 'motion-tokens']),
-    );
+    expect(skipped).toEqual([]);
     expect(skippedTiers).toEqual(['tiny']);
-  });
-
-  test.each([
-    ['press: 120', '  press: 120,'],
-    ['shimmer: 1500', '  shimmer: 1500,'],
-    [
-      'a motion token object',
-      'export const motionTokens = { fast: 150, base: 200 } as const;',
-    ],
-  ])(
-    'motion-tokens alone routes the motion skills for %s in theme.ts',
-    (_, line) => {
-      const { required } = requiredSkills(
-        routing,
-        range([{ path: theme, added: [line] }]),
-      );
-      const rules = skill =>
-        required
-          .find(entry => entry.skill === skill)
-          ?.reasons.map(({ rule }) => rule);
-      expect(rules('expo-animation')).toEqual(['motion-tokens']);
-      expect(rules('review-animations')).toEqual(['motion-tokens']);
-    },
-  );
-
-  test('motion-tokens ignores a style value outside theme.ts', () => {
-    expect(
-      routed(range([{ path: screen, added: ['    width: 120,'] }])),
-    ).toEqual({
-      tier: 'tiny',
-      skills: skillsOf(tiny, typescript, reactNative, ui),
-    });
   });
 
   const invocable = '---\nname: x\n---\n';
@@ -385,15 +332,5 @@ describe('the committed routing', () => {
     ['review-animations', readOnly, 'read all of f'],
   ])('skills:required tells the author how to load %s', (skill, text, line) => {
     expect(loadInstruction(routing, skill, 'f', text)).toBe(line);
-  });
-
-  test.each(mustMatch)('motion-lines matches %s', (_, line) => {
-    const rule = routing.rules.find(({ id }) => id === 'motion-lines');
-    expect(rule.addedLines.test(line)).toBe(true);
-  });
-
-  test.each(mustNotMatch)('motion-lines ignores %s', (_, line) => {
-    const rule = routing.rules.find(({ id }) => id === 'motion-lines');
-    expect(rule.addedLines.test(line)).toBe(false);
   });
 });

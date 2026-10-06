@@ -60,9 +60,9 @@ Every filter in a rule must match. A `change` rule matches the whole change once
 
 Globs match whole repository paths. `**` matches any number of directories, including dot directories. `*` and `?` stay within one directory. `{a,b}` matches either choice. Other characters, including `[`, match literally.
 
-Before the rules, the `tiers` list in `routing.json` is checked in order. A tier matches a small change, such as one that touches only docs (`docs-only`) or a few lines in at most two modified files (`tiny`), after ignoring skill records. A matching tier replaces only the `every-change` rule, with its own shorter skill list. The file rules still apply, and so do the other change rules, `large-change` and `fix-commits`.
+Before the rules, the `tiers` list in `routing.json` is checked in order. A tier matches a small change, such as one that touches only docs (`docs-only`) or a few lines in at most two modified files (`tiny`), after ignoring skill records. A matching tier replaces the `every-change` and `quality-review` rules with its own shorter skill list. The file rules still apply.
 
-`large-change` requires `thermo-nuclear-code-quality-review` above 400 changed lines. That is a judgment of what one reviewer reads in one sitting. Lockfile and skill-record lines do not count.
+`quality-review` requires `thermo-nuclear-code-quality-review` once for every change that no tier matches. A change to only `package-lock.json` or skill records does not need it.
 
 ## Record the skills a change applied
 

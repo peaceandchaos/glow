@@ -68,7 +68,7 @@
     {
       "id": "docs-only",
       "why": "A change to docs alone is prose, so it needs the writing skills and not the code review skills.",
-      "replaces": ["every-change"],
+      "replaces": ["every-change", "quality-review"],
       "excludePaths": ["tools/skills/records/**"],
       "paths": ["**/*.md"],
       "unlessRules": ["agent-instructions"],
@@ -77,7 +77,7 @@
     {
       "id": "tiny",
       "why": "A small edit to existing files outside the controls skips the full review, but still ships a commit and must prove what it claims.",
-      "replaces": ["every-change"],
+      "replaces": ["every-change", "quality-review"],
       "excludePaths": ["tools/skills/records/**"],
       "maxFiles": 2,
       "maxChangedLines": 20,
@@ -91,39 +91,14 @@
       "id": "every-change",
       "scope": "change",
       "why": "Every change ships commits and a PR description, and must prove what it claims.",
-      "skills": [
-        "deslop",
-        "no-comments",
-        "principle-prove-it-works",
-        "principle-sequence-verifiable-units",
-        "technical-writing",
-        "unslop"
-      ]
+      "skills": ["deslop", "no-comments", "principle-prove-it-works"]
     },
     {
-      "id": "large-change",
+      "id": "quality-review",
       "scope": "change",
-      "why": "More than 400 changed lines is more than one reviewer reads in a sitting, so the whole change gets a quality review. Lockfile and skill-record lines do not count.",
-      "minChangedLines": 400,
+      "why": "Every change outside the docs-only and tiny tiers gets one quality review of the whole change. A change to only the lockfile or skill records does not.",
       "excludePaths": ["package-lock.json", "tools/skills/records/**"],
       "skills": ["thermo-nuclear-code-quality-review"]
-    },
-    {
-      "id": "fix-commits",
-      "scope": "change",
-      "why": "A fix commit traces the defect to its root cause and shows its check failing before the fix.",
-      "commitSubject": "^fix[(:!]",
-      "skills": ["principle-fix-root-causes"]
-    },
-    {
-      "id": "typescript",
-      "scope": "file",
-      "why": "TypeScript code models its states in types and parses external data.",
-      "paths": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
-      "skills": [
-        "principle-type-system-discipline",
-        "typescript-best-practices"
-      ]
     },
     {
       "id": "react-native-app",
@@ -135,34 +110,14 @@
         "packages/app/harness/**",
         "packages/app/__tests__/**"
       ],
-      "skills": [
-        "react-native-best-practices",
-        "react-native-best-practices-sm"
-      ]
+      "skills": ["react-native-best-practices"]
     },
     {
-      "id": "ui-files",
+      "id": "server",
       "scope": "file",
-      "why": "Screens and components must look and behave like native iOS.",
-      "paths": ["packages/app/src/**/*.tsx"],
-      "excludePaths": ["**/__tests__/**", "**/*.test.tsx"],
-      "skills": ["expo-ios-hig"]
-    },
-    {
-      "id": "motion-lines",
-      "scope": "file",
-      "why": "Added lines that use animation APIs or motion values need the motion build and review skills.",
-      "paths": ["packages/app/src/**/*.{ts,tsx}"],
-      "addedLines": "from ['\"](?:react-native-reanimated|react-native-worklets|@shopify/react-native-skia)['\"]|\\bimport Animated\\b|\\b(?:with(?:Timing|Spring|Decay|Delay|Sequence|Repeat|Clamp)|useAnimated\\w+|useSharedValue|useDerivedValue|useFrameCallback|useScrollViewOffset|useReanimatedKeyboardAnimation|useKeyboardHandler|interpolate(?:Color)?|cancelAnimation|createAnimatedComponent|scheduleOnRN|scheduleOnUI|runOnJS|runOnUI|useClock|Keyframe|LayoutAnimationConfig|skipEntering|skipExiting|streamingAnimation|(?:Linear|Fading|Sequenced|Jumping|Curved|EntryExit)Transition|(?:Fade|Slide|Zoom|Bounce)(?:In|Out)(?:Up|Down|Left|Right)?)\\b|[Rr]educed?Motion|\\b(?:entering|exiting)=\\{|\\bAnimated\\.\\w|\\bLayoutAnimation\\.|\\b(?:transition|animation)(?:Property|Duration|Delay|TimingFunction|Name|IterationCount|Direction|FillMode|PlayState|Behavior)\\b|\\bEasing\\b|\\.(?:duration|delay|easing|springify|damping|stiffness|mass|withInitialValues|withCallback)\\(|\\b(?:dampingRatio|damping|stiffness|mass|velocity|overshootClamping|reduceMotion):|\\bduration:\\s*(?:\\d|motion\\b|\\w*ANIM)|\\bmotion\\b|^\\s*(?:fast|base|send)\\s*:\\s*\\d{3,4}\\b|^\\s*(?:\\d{1,3}|from|to)\\s*:\\s*\\{.*\\b(?:opacity|transform)\\b|\\btransform:.*\\.value\\b|\\bpressed\\b.*\\bscale\\b|\\b\\w*ANIM\\w*\\s*=\\s*\\d",
-      "skills": ["expo-animation", "review-animations"]
-    },
-    {
-      "id": "motion-tokens",
-      "scope": "file",
-      "why": "A 3- or 4-digit value or a motion name in theme.ts is a motion token, so a one-line tune still needs the motion skills.",
-      "paths": ["packages/app/src/theme.ts"],
-      "addedLines": "\\bmotion|^\\s*\\w+\\s*:\\s*\\d{3,4}\\b",
-      "skills": ["expo-animation", "review-animations"]
+      "why": "Server code is TypeScript that models its states in types and parses external data.",
+      "paths": ["packages/server/**"],
+      "skills": ["typescript-best-practices"]
     },
     {
       "id": "native-ios",
@@ -175,7 +130,7 @@
         "**/*.{swift,m,mm,h,podspec}",
         "**/Podfile*"
       ],
-      "skills": ["ios-debugger-agent", "react-native-best-practices"]
+      "skills": ["ios-debugger-agent"]
     },
     {
       "id": "boundaries",
@@ -190,14 +145,6 @@
       "skills": ["principle-boundary-discipline"]
     },
     {
-      "id": "network-calls",
-      "scope": "file",
-      "why": "Added network calls need a timeout or abort path and validated responses.",
-      "addedLines": "\\bfetch\\(|new WebSocket\\(|XMLHttpRequest",
-      "excludePaths": ["tools/skills/routing.json", "tools/skills/records/**"],
-      "skills": ["principle-boundary-discipline"]
-    },
-    {
       "id": "credentials-and-config",
       "scope": "file",
       "why": "Credential and configuration changes can leak secrets or widen access.",
@@ -208,43 +155,7 @@
         "tools/security-check.cjs",
         "tools/verification/*-dispositions.json"
       ],
-      "skills": ["blast-radius", "principle-boundary-discipline"]
-    },
-    {
-      "id": "credential-lines",
-      "scope": "file",
-      "why": "Added lines that mention keys, secrets, tokens, or authorization can leak credentials.",
-      "addedLines": "api[_-]?key|secret|password|authorization|bearer",
-      "excludePaths": [
-        "**/*.md",
-        "tools/skills/routing.json",
-        "tools/skills/records/**"
-      ],
       "skills": ["principle-boundary-discipline"]
-    },
-    {
-      "id": "durable-work",
-      "scope": "file",
-      "why": "Workflow steps and jobs rerun after crashes and must converge.",
-      "paths": [
-        "packages/server/workflows/**",
-        "packages/server/src/{jobs,worker,delivery,services,runtime}.ts"
-      ],
-      "skills": ["principle-make-operations-idempotent", "workflow"]
-    },
-    {
-      "id": "saved-state",
-      "scope": "file",
-      "why": "Saved chats and server rows survive restarts, so every write must be safe to repeat.",
-      "paths": ["packages/app/src/state/**", "packages/server/src/database.ts"],
-      "skills": ["principle-make-operations-idempotent"]
-    },
-    {
-      "id": "tests",
-      "scope": "file",
-      "why": "A test must fail when the behavior it names breaks.",
-      "paths": ["**/__tests__/**", "**/*.test.*", "packages/server/tests/**"],
-      "skills": ["principle-test-behavior-not-implementation", "test-prune"]
     },
     {
       "id": "docs",
@@ -260,37 +171,6 @@
       "why": "Agents read these files every run, so each line costs context and steers behavior.",
       "paths": ["AGENTS.md", "**/SKILL.md", "tools/skills/routing.json"],
       "skills": ["unslop", "writing-for-agents"]
-    },
-    {
-      "id": "added-files",
-      "scope": "file",
-      "why": "A new file adds a place to read; remove what it replaces first.",
-      "status": ["added"],
-      "excludePaths": ["tools/skills/records/**"],
-      "skills": [
-        "principle-minimize-reader-load",
-        "principle-subtract-before-you-add"
-      ]
-    },
-    {
-      "id": "deleted-or-renamed-files",
-      "scope": "file",
-      "why": "Deleting or moving a file breaks every caller, branch, and doc that still names it.",
-      "status": ["deleted", "renamed"],
-      "skills": [
-        "blast-radius",
-        "principle-migrate-callers-then-delete-legacy-apis"
-      ]
-    },
-    {
-      "id": "removed-exports",
-      "scope": "file",
-      "why": "A removed or renamed export breaks importers on other branches, and cherry-picks over it fail to compile.",
-      "removedExports": true,
-      "skills": [
-        "blast-radius",
-        "principle-migrate-callers-then-delete-legacy-apis"
-      ]
     },
     {
       "id": "controls",
@@ -311,7 +191,7 @@
         "packages/*/jest.config.*"
       ],
       "excludePaths": ["tools/skills/records/**"],
-      "skills": ["blast-radius", "principle-test-behavior-not-implementation"]
+      "skills": ["blast-radius"]
     }
   ]
 }
