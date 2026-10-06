@@ -1,22 +1,35 @@
+import type { JWTVerifyGetKey } from 'jose';
 import { z } from 'zod';
 import {
   decode,
   decodeJson,
   idSchema,
   searchRequestSchema,
+  sessionRequestSchema,
   socketCommandSchema,
   type SearchRequest,
   type ServerMessage,
+  type SessionResponse,
   type SocketCommand,
 } from '../../../shared/contracts';
-import { deviceOwner } from './auth';
+import {
+  allows,
+  appleUser,
+  bearerToken,
+  newSessionToken,
+  sessionOwner,
+  type SessionStore,
+} from './auth';
 import { deliverJob, jobStream } from './delivery';
 import { RequestError } from './errors';
 import { InputParts } from './input-parts';
 import { staleAfterMs, type Dispatcher, type JobRepository } from './jobs';
 
 export type ApiServices = {
+  // Apple user IDs that may sign in, separated by commas.
   allowlist: string;
+  appleKeys: JWTVerifyGetKey;
+  sessions: () => Promise<SessionStore>;
   jobs: () => Promise<JobRepository>;
   dispatch: Dispatcher;
   rank: (input: SearchRequest, signal: AbortSignal) => Promise<string[]>;
@@ -128,6 +141,7 @@ type SocketPeer = {
 // closing the socket detaches those readers without cancelling their jobs.
 export class SocketConnection {
   private readonly readers = new Map<string, AbortController>();
+  private owner: string | null = null;
 
   constructor(
     private readonly headers: Headers,
@@ -140,11 +154,24 @@ export class SocketConnection {
     return Promise.resolve();
   }
 
+  // The connection looks up its session once, then re-reads the allowlist on
+  // every frame. A frame never waits for the database to authenticate, even
+  // while another frame holds a transaction open during dispatch.
+  private async authenticate(runtime: ApiServices): Promise<string> {
+    if (this.owner === null || !allows(runtime.allowlist, this.owner))
+      this.owner = await sessionOwner(
+        this.headers,
+        runtime.allowlist,
+        runtime.sessions,
+      );
+    return this.owner;
+  }
+
   async message(read: () => string): Promise<void> {
     let attemptId: string | null = null;
     try {
       const runtime = this.services();
-      const owner = deviceOwner(this.headers, runtime.allowlist);
+      const owner = await this.authenticate(runtime);
       const raw = read();
       if (Buffer.byteLength(raw, 'utf8') > 4_000_000)
         throw new RequestError(413, 'Split large input into context parts.');
@@ -249,13 +276,55 @@ async function handleJobRoute(
   throw new RequestError(404, 'Route not found.');
 }
 
+async function signIn(
+  request: Request,
+  services: ApiServices,
+): Promise<Response> {
+  const body = decodeJson(sessionRequestSchema, await readBody(request));
+  const user = await appleUser(
+    body.identityToken,
+    body.nonce,
+    services.appleKeys,
+  );
+  if (!allows(services.allowlist, user)) {
+    // The owner reads this line once to add their Apple user ID.
+    console.warn(`sign-in refused for Apple user ${user}`);
+    throw new RequestError(403, 'This Apple account is not allowed.');
+  }
+  const token = newSessionToken();
+  await (await services.sessions()).create(token, user);
+  return Response.json({ token } satisfies SessionResponse, {
+    headers: { 'Cache-Control': 'no-store' },
+  });
+}
+
+// Sign-in is the one route that needs no session. Sign-out deletes the
+// session that sends it.
+async function handleSessionRoute(
+  request: Request,
+  services: ApiServices,
+): Promise<Response> {
+  if (request.method === 'POST') return signIn(request, services);
+  await sessionOwner(request.headers, services.allowlist, services.sessions);
+  if (request.method !== 'DELETE')
+    throw new RequestError(404, 'Route not found.');
+  await (await services.sessions()).revoke(bearerToken(request.headers));
+  return new Response(null, { status: 204 });
+}
+
 export async function handleRequest(
   request: Request,
   services: ApiServices,
 ): Promise<Response> {
   try {
-    const owner = deviceOwner(request.headers, services.allowlist);
     const path = new URL(request.url).pathname.split('/').filter(Boolean);
+    if (path.join('/') === 'v1/session')
+      return await handleSessionRoute(request, services);
+    const owner = await sessionOwner(
+      request.headers,
+      services.allowlist,
+      services.sessions,
+    );
     if (path[0] !== 'v1') throw new RequestError(404, 'Route not found.');
     if (path[1] === 'chat' && path.length === 2 && request.method === 'POST') {
       const command = decodeJson(socketCommandSchema, await readBody(request));

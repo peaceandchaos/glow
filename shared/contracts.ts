@@ -257,6 +257,16 @@ export const sessionTokenSchema = z
   .brand<'SessionToken'>();
 export type SessionToken = z.infer<typeof sessionTokenSchema>;
 
+// The app sends the raw nonce. Apple's identity token holds its SHA-256.
+export const sessionRequestSchema = z.strictObject({
+  identityToken: z.string().min(1).max(10_000),
+  nonce: z.string().min(1).max(1_000),
+});
+export const sessionResponseSchema = z.strictObject({
+  token: sessionTokenSchema,
+});
+export type SessionResponse = z.infer<typeof sessionResponseSchema>;
+
 export function decode<T>(
   schema: Pick<z.ZodType<T>, 'parse'>,
   // oxlint-disable-next-line anti-slop/no-unknown-parameters -- This is the common boundary for untrusted JSON and storage values.

@@ -1,8 +1,20 @@
 import type { JWTPayload, JWTVerifyGetKey } from 'jose';
-import { createHash } from 'node:crypto';
-import { appleUser, newSessionToken, sessionOwner } from '../src/auth';
+import { createHash, randomUUID } from 'node:crypto';
+import { decodeJson, sessionResponseSchema } from '../../../shared/contracts';
+import { handleRequest, SocketConnection, type ApiServices } from '../src/api';
+import {
+  appleUser,
+  newSessionToken,
+  sessionOwner,
+  SessionStore,
+} from '../src/auth';
+import type { Database } from '../src/database';
+import { JobRepository } from '../src/jobs';
 import { testDatabase } from './database';
 import { signedIn } from './sessions';
+
+// Each server test starts its own PGlite database.
+jest.setTimeout(30_000);
 
 // A local RS256 key set stands in for Apple's, so no test calls Apple.
 const appleUserId = 'apple-user-1';
@@ -123,4 +135,228 @@ test.each([
     sessionOwner(headers, appleUserId, sessions),
   ).rejects.toHaveProperty('status', 401);
   expect(sessions).not.toHaveBeenCalled();
+});
+
+type Server = {
+  services: ApiServices;
+  database: Database;
+  close: () => Promise<void>;
+};
+
+async function startServer(allowlist = appleUserId): Promise<Server> {
+  const { database, postgres } = await testDatabase();
+  const jobs = new JobRepository(database);
+  return {
+    services: {
+      allowlist,
+      appleKeys,
+      sessions: () => Promise.resolve(new SessionStore(database)),
+      jobs: () => Promise.resolve(jobs),
+      dispatch: () => Promise.reject(new Error('Must not dispatch')),
+      rank: () => Promise.resolve([]),
+    },
+    database,
+    close: () => postgres.close(),
+  };
+}
+
+async function signIn(server: Server, nonce = rawNonce): Promise<Response> {
+  return handleRequest(
+    new Request('https://fixture.example/v1/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identityToken: await identityToken(), nonce }),
+    }),
+    server.services,
+  );
+}
+
+async function sessionToken(server: Server): Promise<string> {
+  const response = await signIn(server);
+  expect(response.status).toBe(200);
+  return decodeJson(sessionResponseSchema, await response.text()).token;
+}
+
+function deleteChat(server: Server, chatId: string, authorization?: string) {
+  return handleRequest(
+    new Request(`https://fixture.example/v1/chats/${chatId}`, {
+      method: 'DELETE',
+      headers: authorization ? { Authorization: authorization } : {},
+    }),
+    server.services,
+  );
+}
+
+async function sessionCount(server: Server): Promise<number> {
+  const { rows } = await server.database.query(
+    'SELECT count(*)::text AS data FROM sessions',
+  );
+  return Number(rows[0].data);
+}
+
+test('a session from Sign in with Apple authorizes requests as that Apple user', async () => {
+  const server = await startServer();
+  try {
+    const response = await signIn(server);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const { token } = decodeJson(sessionResponseSchema, await response.text());
+    const chatId = randomUUID();
+    const deleted = await deleteChat(server, chatId, `Bearer ${token}`);
+    expect(deleted.status).toBe(204);
+    const { rows } = await server.database.query(
+      'SELECT owner AS data FROM deleted_chats WHERE chat_id = $1',
+      [chatId],
+    );
+    expect(rows.map(row => row.data)).toEqual([appleUserId]);
+  } finally {
+    await server.close();
+  }
+});
+
+test('a refused identity token gets 401 and no session', async () => {
+  const server = await startServer();
+  try {
+    expect((await signIn(server, 'another nonce')).status).toBe(401);
+    expect(await sessionCount(server)).toBe(0);
+  } finally {
+    await server.close();
+  }
+});
+
+test('an Apple user who is not on the allowlist gets 403, and the log names them', async () => {
+  const server = await startServer('apple-user-not-allowed');
+  const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  try {
+    const response = await signIn(server);
+    expect(response.status).toBe(403);
+    expect(warn.mock.calls).toEqual([
+      [`sign-in refused for Apple user ${appleUserId}`],
+    ]);
+    expect(await sessionCount(server)).toBe(0);
+  } finally {
+    warn.mockRestore();
+    await server.close();
+  }
+});
+
+test.each([
+  ['no credential', undefined],
+  ['a malformed token', 'Bearer not-a-session-token'],
+  ['a token the server never issued', `Bearer ${newSessionToken()}`],
+])('a request with %s gets 401', async (_name, authorization) => {
+  const server = await startServer();
+  try {
+    expect((await deleteChat(server, randomUUID(), authorization)).status).toBe(
+      401,
+    );
+    const health = await handleRequest(
+      new Request('https://fixture.example/v1/health', {
+        headers: authorization ? { Authorization: authorization } : {},
+      }),
+      server.services,
+    );
+    expect(health.status).toBe(401);
+  } finally {
+    await server.close();
+  }
+});
+
+test('sign-out revokes only the session that signs out', async () => {
+  const server = await startServer();
+  try {
+    const leaving = await sessionToken(server);
+    const staying = await sessionToken(server);
+    const signOut = await handleRequest(
+      new Request('https://fixture.example/v1/session', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${leaving}` },
+      }),
+      server.services,
+    );
+    expect(signOut.status).toBe(204);
+    expect(
+      (await deleteChat(server, randomUUID(), `Bearer ${leaving}`)).status,
+    ).toBe(401);
+    expect(
+      (await deleteChat(server, randomUUID(), `Bearer ${staying}`)).status,
+    ).toBe(204);
+  } finally {
+    await server.close();
+  }
+});
+
+test('removing a user from the allowlist locks out their existing sessions', async () => {
+  const server = await startServer();
+  try {
+    const token = await sessionToken(server);
+    server.services.allowlist = '';
+    expect(
+      (await deleteChat(server, randomUUID(), `Bearer ${token}`)).status,
+    ).toBe(401);
+  } finally {
+    await server.close();
+  }
+});
+
+test.each([
+  ['no credential', undefined],
+  ['a malformed token', 'Bearer not-a-session-token'],
+  ['a token the server never issued', `Bearer ${newSessionToken()}`],
+])(
+  'the socket closes for %s without running the frame',
+  async (_name, authorization) => {
+    const server = await startServer();
+    const jobs = jest.spyOn(server.services, 'jobs');
+    const closed: number[] = [];
+    const sent: string[] = [];
+    try {
+      const connection = new SocketConnection(
+        new Headers(authorization ? { Authorization: authorization } : {}),
+        () => server.services,
+        {
+          isOpen: () => true,
+          send: text => sent.push(text),
+          close: code => closed.push(code),
+        },
+      );
+      await connection.message(() =>
+        JSON.stringify({ kind: 'attach', attemptId: randomUUID(), after: 0 }),
+      );
+      expect(closed).toEqual([1008]);
+      expect(sent).toEqual([]);
+      expect(jobs).not.toHaveBeenCalled();
+    } finally {
+      await server.close();
+    }
+  },
+);
+
+test('the socket admits a signed-in user until the user leaves the allowlist', async () => {
+  const server = await startServer();
+  const closed: number[] = [];
+  const sent: string[] = [];
+  try {
+    const token = await sessionToken(server);
+    const connection = new SocketConnection(
+      new Headers({ Authorization: `Bearer ${token}` }),
+      () => server.services,
+      {
+        isOpen: () => true,
+        send: text => sent.push(text),
+        close: code => closed.push(code),
+      },
+    );
+    const frame = () =>
+      JSON.stringify({ kind: 'attach', attemptId: randomUUID(), after: 0 });
+    await connection.message(frame);
+    expect(closed).toEqual([]);
+    expect(sent).toHaveLength(1);
+    server.services.allowlist = '';
+    await connection.message(frame);
+    expect(closed).toEqual([1008]);
+    expect(sent).toHaveLength(1);
+  } finally {
+    await server.close();
+  }
 });

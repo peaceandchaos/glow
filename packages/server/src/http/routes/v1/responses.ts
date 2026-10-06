@@ -1,13 +1,16 @@
 import { defineWebSocketHandler } from 'nitro';
 import { SocketConnection } from '../../../api';
-import { deviceOwner } from '../../../auth';
+import { sessionOwner } from '../../../auth';
 import { services } from '../../../services';
 
 const connections = new Map<string, SocketConnection>();
 
 export default defineWebSocketHandler({
-  upgrade(request) {
-    deviceOwner(request.headers, process.env.ALLOWED_DEVICE_IDS ?? '');
+  // crossws awaits this hook and answers a thrown Response, here 401, in
+  // place of the upgrade.
+  async upgrade(request) {
+    const runtime = services();
+    await sessionOwner(request.headers, runtime.allowlist, runtime.sessions);
   },
   async message(peer, message) {
     let connection = connections.get(peer.id);

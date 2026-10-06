@@ -1,11 +1,20 @@
+import { createRemoteJWKSet } from 'jose';
 import { start } from 'workflow/api';
 import { replyWorkflow } from '../workflows/reply';
 import type { ApiServices } from './api';
-import { runtimeJev, runtimeJobs } from './runtime';
+import { runtimeJev, runtimeJobs, runtimeSessions } from './runtime';
+
+// One key set per process, so jose's cache of Apple's keys outlives each
+// request. jose fetches on first use and again for a key ID it has not seen.
+const appleKeys = createRemoteJWKSet(
+  new URL('https://appleid.apple.com/auth/keys'),
+);
 
 export function services(): ApiServices {
   return {
-    allowlist: process.env.ALLOWED_DEVICE_IDS ?? '',
+    allowlist: process.env.ALLOWED_APPLE_USER_IDS ?? '',
+    appleKeys,
+    sessions: runtimeSessions,
     jobs: runtimeJobs,
     async dispatch(owner, attemptId) {
       return (await start(replyWorkflow, [owner, attemptId])).runId;
