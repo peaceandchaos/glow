@@ -83,12 +83,12 @@ value. The value below is the default menu:
     {
       "model": "deepseek",
       "levels": ["none", "low", "high", "max"],
-      "defaultLevel": null
+      "defaultLevel": "low"
     },
     {
       "model": "kimi",
       "levels": ["none", "low", "high", "max"],
-      "defaultLevel": null
+      "defaultLevel": "low"
     },
     {
       "model": "gpt-6.1-sol",

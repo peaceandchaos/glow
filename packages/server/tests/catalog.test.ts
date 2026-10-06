@@ -16,7 +16,7 @@ test.each([
     false,
     'auto',
     'max',
-    { kind: 'model', model: deepseek, level: null },
+    { kind: 'model', model: deepseek, level: 'low' },
   ],
   [
     'a listed model and level',
@@ -44,7 +44,7 @@ test.each([
     true,
     'gpt-6-astra',
     'high',
-    { kind: 'model', model: deepseek, level: null },
+    { kind: 'model', model: deepseek, level: 'low' },
   ],
 ])(
   '%s resolves to the catalog choice',
@@ -59,13 +59,13 @@ test('the server default menu is the catalog the app bakes in', () => {
 
 test('the documented MODEL_MENU value for the default menu reproduces it', () => {
   const value =
-    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":null},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":null},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
+    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
   expect(catalogFrom(menuFrom(value))).toEqual(bakedCatalog);
 });
 
 test('the documented MODEL_MENU value with Luna appends it to the menu', () => {
   const value =
-    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":null},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":null},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-luna","levels":["none","low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
+    '{"auto":true,"models":[{"model":"deepseek","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"kimi","levels":["none","low","high","max"],"defaultLevel":"low"},{"model":"gpt-6.1-sol","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-astra","levels":["low","medium","high","xhigh","max"],"defaultLevel":"medium"},{"model":"gpt-6-luna","levels":["none","low","medium","high","xhigh","max"],"defaultLevel":"medium"}]}';
   expect(catalogFrom(menuFrom(value))).toEqual({
     auto: true,
     models: [

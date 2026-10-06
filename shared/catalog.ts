@@ -112,14 +112,14 @@ export const bakedCatalog: Catalog = {
       label: 'DeepSeek V4.1 Flash',
       transport: 'http',
       levels: openLevels,
-      defaultLevel: null,
+      defaultLevel: 'low',
     },
     {
       key: 'kimi',
       label: 'Kimi K3',
       transport: 'http',
       levels: openLevels,
-      defaultLevel: null,
+      defaultLevel: 'low',
     },
     {
       key: 'gpt-6.1-sol',
