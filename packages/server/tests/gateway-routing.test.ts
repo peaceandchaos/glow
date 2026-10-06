@@ -41,10 +41,10 @@ test.each<[ModelKey, string[]]>([
 );
 
 test.each<ModelKey>(['kimi', 'deepseek'])(
-  '%s asks for low reasoning effort',
+  '%s asks for no reasoning effort',
   async model => {
     expect(JSON.parse(await sentBody(model)).reasoning).toEqual({
-      effort: 'low',
+      effort: 'none',
     });
   },
 );

@@ -77,7 +77,7 @@ export class GatewayClient {
             messages,
             stream: true,
             max_tokens: maxOutput,
-            reasoning: { effort: 'low' },
+            reasoning: { effort: 'none' },
             // Per-request zeroDataRetention needs Pro or Enterprise, so it is
             // not sent:
             // https://vercel.com/docs/ai-gateway/security-and-compliance/zdr
