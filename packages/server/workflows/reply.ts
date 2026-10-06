@@ -7,17 +7,7 @@ export async function replyWorkflow(
   attemptId: string,
 ): Promise<void> {
   'use workflow';
-  await waitForCommittedInput(owner, attemptId);
   await generateReply(owner, attemptId);
-}
-
-async function waitForCommittedInput(
-  owner: string,
-  attemptId: string,
-): Promise<void> {
-  'use step';
-  // Dispatch can reach this read just before the submit transaction commits.
-  await (await runtimeJobs()).get(owner, attemptId);
 }
 
 async function generateReply(owner: string, attemptId: string): Promise<void> {
@@ -34,4 +24,3 @@ async function generateReply(owner: string, attemptId: string): Promise<void> {
 
 // A failed or ambiguous provider call must not turn into another paid attempt.
 generateReply.maxRetries = 0;
-waitForCommittedInput.maxRetries = 3;

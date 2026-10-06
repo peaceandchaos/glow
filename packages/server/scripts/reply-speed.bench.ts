@@ -91,7 +91,6 @@ async function measureReply(postgres: PGlite) {
     },
   );
   const jobs = new JobRepository(worker.database);
-  await jobs.get(owner, input.attemptId);
   await runAttempt({
     jobs,
     providers,

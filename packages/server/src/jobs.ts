@@ -276,6 +276,11 @@ export class JobRepository {
     claimId: string,
   ): Promise<boolean> {
     return this.database.transaction(async db => {
+      // Dispatch runs inside submit's transaction, which holds this lock until
+      // it commits, so the claim never reads before the job row exists.
+      await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
+        owner + attemptId,
+      ]);
       const job = await lockStateWithoutCheckpoint(db, owner, attemptId);
       if (
         job.claimId ||
