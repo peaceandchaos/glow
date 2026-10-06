@@ -103,7 +103,7 @@ function chatState(isStreaming: boolean): ChatViewState {
 function openChat(isStreaming: boolean) {
   mockStore = createStore(() => chatState(isStreaming));
   act(() => {
-    create(<ChatScreen onOpenRecents={() => undefined} openCount={0} />);
+    create(<ChatScreen shown onOpenRecents={() => undefined} openCount={0} />);
   });
   return {
     change: (messages: Message[]) => {
@@ -204,7 +204,7 @@ function chatWith(chats: Record<string, Message[]>, open: string) {
   }));
   let openCount = 0;
   const screen = () => (
-    <ChatScreen onOpenRecents={() => undefined} openCount={openCount} />
+    <ChatScreen shown onOpenRecents={() => undefined} openCount={openCount} />
   );
   const rendered = React.createRef<ReactTestRenderer>();
   act(() => {
