@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
-import type { ModelKey } from '../../../shared/contracts';
+import type { Picker } from '../../../shared/contracts';
 import { Icon } from '../src/components/Icon';
 import { RootDrawer } from '../src/screens/RootDrawer';
 import { ChatStoreContext } from '../src/state/chatStore';
@@ -73,7 +73,7 @@ jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
 
 const recents = 0;
 const chat = 1;
-const setPicker = jest.fn<void, [ModelKey]>();
+const setPicker = jest.fn<void, [Picker]>();
 const newChat = jest.fn<void, []>();
 let mockReduceMotion = false;
 
@@ -119,6 +119,7 @@ async function renderDrawer() {
     root.findByProps({ accessibilityHint: 'Chooses the model for this chat' });
   const menu = () => root.findByProps({ accessibilityRole: 'menu' });
   return {
+    store,
     root,
     pill,
     menu,
@@ -163,6 +164,51 @@ test('the menu marks the model the chat uses, and picking another model hands it
   expect(setPicker.mock.calls).toEqual([['kimi']]);
   expect(view.expanded()).toBe(false);
   expect(view.menu().props.pointerEvents).toBe('none');
+});
+
+test('Auto heads the menu, and the chat can go from Auto to a model and back to Auto', async () => {
+  const view = await renderDrawer();
+  view.store.setState({
+    setPicker: picker => {
+      setPicker(picker);
+      view.store.setState({ picker });
+    },
+  });
+  const options = () =>
+    view
+      .menu()
+      .findAll(
+        node =>
+          node.props.accessibilityRole === 'button' &&
+          typeof node.props.onPress === 'function',
+      )
+      .map(node => node.props.accessibilityLabel);
+  const pickFromMenu = async (label: string) => {
+    await view.open();
+    await act(async () => view.option(label).props.onPress());
+    expect(view.pill().props.accessibilityLabel).toBe(label);
+    expect(view.option(label).props.accessibilityState).toEqual({
+      selected: true,
+    });
+  };
+
+  await view.open();
+  expect(options()).toEqual([
+    'Auto',
+    'Kimi K3',
+    'DeepSeek V4.1 Flash',
+    'GPT-6.1 Sol',
+    'GPT-6 Astra',
+  ]);
+  await act(async () => view.pill().props.onPress());
+
+  await pickFromMenu('Auto');
+  await pickFromMenu('Kimi K3');
+  expect(view.option('Auto').props.accessibilityState).toEqual({
+    selected: false,
+  });
+  await pickFromMenu('Auto');
+  expect(setPicker.mock.calls).toEqual([['auto'], ['kimi'], ['auto']]);
 });
 
 test('the scrim, Recents, and New chat each close the open menu', async () => {
