@@ -1,0 +1,607 @@
+{
+  "change": "reply-speed",
+  "base": {
+    "commit": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+    "patch": "39c64d5178adfc1f25995bdbaf981352dfe7d541"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": ["packages/server/package.json"],
+      "findings": [
+        {
+          "finding": "The merged reply step is safe because submit takes lockAttempt(owner, attemptId) before it calls dispatch and holds it until commit (jobs.ts submit), and claim now takes the same lock first, so claim cannot read before the row commits. Reached step 2 only: PGlite runs one transaction at a time, so a local test cannot tell the lock from PGlite's own mutex.",
+          "cites": "How sure are you 2",
+          "open": "Prove the claim wait on a real Postgres with two connections, or on a preview deployment."
+        },
+        {
+          "finding": "No lock cycle: claim and requestCancellation take the advisory lock and then the row lock; update, heartbeat and markProviderStarted take only the row lock, so none waits on the advisory lock while holding the row.",
+          "cites": "Steps 3",
+          "none": "Walked every caller of lockAttempt and lockStateWithoutCheckpoint in jobs.ts."
+        },
+        {
+          "finding": "Removing the wait step does not break runs already in flight, because Workflow pins each run to the deployment that started it (node_modules/workflow/docs/foundations/versioning.mdx).",
+          "cites": "Steps 3",
+          "none": "Old runs keep the old two-step code."
+        },
+        {
+          "finding": "The bench:reply-speed script in packages/server/package.json changes no dependency or lockfile entry; npm run bench:reply-speed -w packages/server ran and passed.",
+          "cites": "How sure are you 4",
+          "none": "Script only."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_0113ZFVPcZxmW6MWTnFx7L6w",
+          "time": "2026-10-06T23:28:07.113Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "a52833a7e7eb300acd691b3ebf79fcac23692c6d",
+          "headPatch": "addbc7713e645978a2b693dde0047b9a198bc837",
+          "sig": "+tzSnTv3DVys7OS715uynihgSEmjcMYvgPX4lc1NdRKXGbEfB6UPamM0cF+QPxXFHT/3rLeEq7r2z4ASatPxBQ=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The diff adds no casts, no defensive guards and no try/catch beyond the one in the chunk writer, which records a failed write and keeps its batch for the terminal write.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_013JmLpWrEY3yeuJqkttZNYJ",
+          "time": "2026-10-06T23:21:30.833Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "R+HWZEGXWIVdHmemJY9HCSTU24J/D8T9nn3Nz+YRKgq/SUZcnTswjoVKtjx6kHk5AFpp7NeM9ftDj+FZVOP3AA=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "A comment-sicko review flagged four added comments: the chunk writer summary, the close() note, the claim lock note and the bench run line. All four were replaced by names in code: coalescingChunkWriter, the unwritten field, a shared lockAttempt helper, and the bench:reply-speed script.",
+          "cites": "Steps 3",
+          "commit": "a52833a",
+          "patch": "addbc7713e645978a2b693dde0047b9a198bc837"
+        },
+        {
+          "finding": "The PGlite delay comment in the bench stays: it states a dependency constraint (PGlite runs every transaction under one exclusive mutex) that the code cannot show.",
+          "cites": "Steps 2",
+          "none": "Kept with proof from the PGlite source."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01G6qyYKPUZaM9D1TRbF5J21",
+          "time": "2026-10-06T23:21:31.182Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "4ZHylExh2aqkuAn0FBNZ05+FaMy9/IdKKUFOgDO21s7SE+3WRsFNGhNFma50GKTBO85ataAJPeOypToWW9L5AA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-make-operations-idempotent",
+      "files": [
+        "packages/server/src/jobs.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "A lost worker and a retry converge: the retry's claim returns false, reconcile marks the reply interrupted with the saved text, a second reconcile returns the same snapshot, and event sequences stay contiguous.",
+          "cites": "Make Operations Idempotent 2",
+          "commit": "65c0ed3",
+          "patch": "f93cadd2a43f6ad92e8c920fcd88dd7001ca8ba2"
+        },
+        {
+          "finding": "A write that fails puts its batch back in front of the pending chunks, so the terminal write still carries every received chunk in order.",
+          "cites": "Make Operations Idempotent 3",
+          "commit": "65c0ed3",
+          "patch": "f93cadd2a43f6ad92e8c920fcd88dd7001ca8ba2"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-make-operations-idempotent",
+          "source": "Skill",
+          "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01DnYKvKpqE2TCsAFouisDZC",
+          "time": "2026-10-06T23:00:16.052Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "y5mgIJ8YKIUG7TJZEW2maQnwE26b/rpNRhqKdREUfs/qJPRyMbEO6k9uukzvve1J1Q2m+lVl10kQQYl9FFhFBA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-minimize-reader-load",
+      "files": ["packages/server/scripts/reply-speed.bench.ts"],
+      "findings": [
+        {
+          "finding": "The coalescing state lives in one closure next to runAttempt, which gains three lines, and the workflow file shrinks to one step with no stream writer.",
+          "cites": "Minimize Reader Load 2",
+          "none": "No new layer or shared state outside the closure."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-minimize-reader-load",
+          "source": "Skill",
+          "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Xeq31q942Zhb1xyBXowkeV",
+          "time": "2026-10-06T23:21:56.421Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "6nqXI+0k92Hvm7JILDY2tUGK5raPwECkK1Pv/tIw8eerc65ZhGIVKuRWRsnofbzQAbFOvcALtvLkIGNidjE3Aw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The bench ran on the base and after the changes with the same model: worker statements fell from 1123 to 119 and total time from about 17.9 s to about 1.8 s. Removing the folded-in unwritten batch from either terminal write made the coalescing test fail on the saved text.",
+          "cites": "Script the check when you can",
+          "none": "Numbers and the mutation results are in the report."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01YNVf6HA8zWDVLijKz5ojQE",
+          "time": "2026-10-06T23:00:18.687Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "+mR0DkTtPCQwblW5v9GPyOQzNo7MvnuMyk1NbrS4eQRH8vP7TvlJu29uepGPgmfLAr3TgiNunAHasX3u2k8TCg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-sequence-verifiable-units",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The bench landed first with its baseline run, then each change landed as its own commit that passed lint, typecheck and the server suite.",
+          "cites": "Sequence work into verifiable units",
+          "none": "Commits are in proof order."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-sequence-verifiable-units",
+          "source": "Skill",
+          "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01BSFNxs2UHZH8po8T6eoHgP",
+          "time": "2026-10-06T23:00:19.137Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "7A98eDPUqKIUubggzW89MJeN2j0T5/X/GF3QCJzACdlRLFsqfut64Q8L8cbultaWQDFPyZCAZixWvp//u7muAg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-subtract-before-you-add",
+      "files": ["packages/server/scripts/reply-speed.bench.ts"],
+      "findings": [
+        {
+          "finding": "The unused workflow stream and the publish callback were removed before the chunk writer was added.",
+          "cites": "Subtract Before You Add",
+          "none": "Removal came first."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-subtract-before-you-add",
+          "source": "Skill",
+          "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01R5kzEFf5UdJLw69Vf8oFyX",
+          "time": "2026-10-06T23:21:56.859Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "srjxLxT0VRBXJVzynUCeXNKxRFcqfUlGBxV7VBoBknkPCNtyK2zRBYYUfs/ket/RqOSpK6UJKG7xqY24iDYYAw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-test-behavior-not-implementation",
+      "files": [
+        "packages/server/package.json",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/worker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The coalescing test holds the first write open while 50 chunks arrive and checks the saved text, the provider events in order, contiguous sequences, and two transactions for the whole stream. Dropping the unwritten batch from the completed or the interrupted write fails it.",
+          "cites": "Test behavior, not implementation",
+          "commit": "65c0ed3",
+          "patch": "f93cadd2a43f6ad92e8c920fcd88dd7001ca8ba2"
+        },
+        {
+          "finding": "The Gateway test checks that the request body carries reasoning effort low for kimi and deepseek; the existing test already shows a GPT model never reaches the Gateway.",
+          "cites": "Test behavior, not implementation",
+          "commit": "4c3537d",
+          "patch": "fbe9265adc33ddee4ee877629ba6b50506d120a3"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-test-behavior-not-implementation",
+          "source": "Skill",
+          "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01HYs6jm7gQBcJMnzm4BBc9n",
+          "time": "2026-10-06T23:00:16.847Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "hT/8iBysZ4wtOLtJVufHLQTWXVOARyFxJJxaYEPfK9a89uNzLrELiw1BnEhomAsSy4uNZ8gdo126WBbSw9KDCg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-type-system-discipline",
+      "files": [
+        "packages/server/scripts/reply-speed.bench.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/jobs.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/worker.test.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The chunk batch is one typed record of text, reasoning and EventPayload[], and the provider event payload comes from the shared contract type.",
+          "cites": "Type System Discipline",
+          "none": "No casts or optional bags added."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-type-system-discipline",
+          "source": "Skill",
+          "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01UW4NrEdhio7rBvKAGTPt4b",
+          "time": "2026-10-06T23:00:19.423Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "s4JrResOqzjJb3hh1Ie6Jk8nsrrHaU+Zi4EaBdJOnuYjpDFlBdF+aQzxm2uenaDMz1INVioa7uGilUPBMemqAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Commit messages state the change and its reason in plain sentences.",
+          "cites": "Voice and repo specifics",
+          "none": "Checked each commit message."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01HfQ3WZMxBh3Fd6tvUmZHs8",
+          "time": "2026-10-06T23:21:57.278Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "6yFJ9uC0i4LPY669dKmrt61WbpRH6uHA68G1PDLQEjxpe+16r/nLzU9K/PwK3sS16VAeJkSUcbY0qAVOMN/2Bg=="
+        }
+      ]
+    },
+    {
+      "skill": "test-prune",
+      "files": [
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/worker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The ordering test in worker.test.ts now reads events from SQL instead of the removed publish callback; the assertion is unchanged and checks the durable record the phone reads.",
+          "cites": "Decisions and repairs",
+          "commit": "d504a3b",
+          "patch": "bf75ad05c4af0098f4e8659258580018ec72d481"
+        },
+        {
+          "finding": "images.test.ts and session-harness.ts only lose the removed publish option; no assertion changed.",
+          "cites": "Review questions",
+          "none": "No protection lost."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "test-prune",
+          "source": "Skill",
+          "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Nrie5KqWdQp7AuEC6qW7p8",
+          "time": "2026-10-06T23:00:19.635Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "2JSvJATSmKW4cJA3A4qZriSiX26cGitc3h/ncviaxe6AtY4syA6u6pILO0dc/0z9WYnDmj90uBymyfuuMdFJBQ=="
+        }
+      ]
+    },
+    {
+      "skill": "thermo-nuclear-code-quality-review",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "No file passes 1000 lines, runAttempt gains no special-case branches, and the reply workflow drops a step and the stream writer. The coalescing logic sits in its own function instead of inside the generate callback.",
+          "cites": "Approval Bar",
+          "none": "No structural regression found."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "thermo-nuclear-code-quality-review",
+          "source": "Skill",
+          "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_019miQDj7nUJjkzQ1CuyBEAM",
+          "time": "2026-10-06T23:21:31.463Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "TvnuKVNomJhWx3EPUTyazAJQWer6SCV328mknvKJxEA4YPjIFKD+xNP+yl8P0kxZ4Uta8wRJAATzhalSeeofDg=="
+        }
+      ]
+    },
+    {
+      "skill": "typescript-best-practices",
+      "files": [
+        "packages/server/scripts/reply-speed.bench.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/jobs.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/worker.test.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "No as casts, any or unknown parameters were added; the bench Database wrapper satisfies the Database interface directly.",
+          "cites": "TypeScript best practices",
+          "none": "Nothing to change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "typescript-best-practices",
+          "source": "Skill",
+          "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_012v8jgkjCV6mYJDXdteHvHS",
+          "time": "2026-10-06T23:00:16.672Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "MLCH3xcVXqDB1WRPc15bONkdg33coHt8ii1yeWBsekBvBX2292+Kuo1rL9qbfBN31JIiTps8RNRBLXpg2dw8AA=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Commit messages and the record contain no AI patterns.",
+          "cites": "Process 1",
+          "none": "No AI patterns found."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01RNV2gZ3UaZNYmX4GTjJ2e2",
+          "time": "2026-10-06T23:21:57.037Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "4c3537dce3c4d471654daa2959dad690a30e11e8",
+          "headPatch": "fbe9265adc33ddee4ee877629ba6b50506d120a3",
+          "sig": "iKCEbIOzIbcEzIyc0lqg+rU5Bq8GxlsliPquvakzxzwYMf/N4uPXPP+WigrXwszofmMQ2VYshTRct0l5M93oBw=="
+        }
+      ]
+    },
+    {
+      "skill": "workflow",
+      "files": [
+        "packages/server/src/jobs.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "Nothing read the workflow stream (no getReadable or getRun in the repo), so the getWritable writes were removed.",
+          "cites": "Streaming",
+          "commit": "d504a3b",
+          "patch": "bf75ad05c4af0098f4e8659258580018ec72d481"
+        },
+        {
+          "finding": "The input wait merged into the reply step keeps maxRetries = 0. A transient database error before claim now fails the run instead of being retried by the old wait step's three retries.",
+          "cites": "Error Handling",
+          "none": "Kept maxRetries = 0, the existing policy and the smallest reversible choice. Allowing retries is safe for paid calls, because claim refuses a second run, and stays an owner call."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "workflow",
+          "source": "Skill",
+          "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a389b1a5c3c5b09ca",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01KfPv4VwkJ1BPBwMKQuwc6u",
+          "time": "2026-10-06T23:00:15.747Z",
+          "cwd": "74247bf461eb6c86c28bf9ed47b01f3354857dd6c89932a7a6f2594c1352aa61",
+          "commonDir": "31d1673c08a5e6df122dd2a44da2eeacef57f7310c7c3be239da57a7f05155bc",
+          "branch": "submission/reply-speed",
+          "head": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
+          "headPatch": "39c64d5178adfc1f25995bdbaf981352dfe7d541",
+          "sig": "oEAbp1tjAWRpOiKjZGAw1OU4Ltx3jghu7cUBmujAoneHOhb3yk9ieMK1hAKQnOWkNKHsJyd14vCriEAZEp1QCA=="
+        }
+      ]
+    }
+  ]
+}
