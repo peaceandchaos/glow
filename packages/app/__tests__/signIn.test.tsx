@@ -4,6 +4,7 @@ import {
   type AppleRequestResponse,
 } from '@invertase/react-native-apple-authentication';
 import {
+  AccessibilityInfo,
   Alert,
   AppState,
   Text,
@@ -308,7 +309,13 @@ test('the sign-in screen goes from request to failure, retries, and opens the ch
   fetch.mockResolvedValueOnce(response(500));
   await act(async () => finishApple(appleCredential()));
   await settle();
-  expect(app.texts()).toEqual(['Sign-in failed. Try again.', signInLabel]);
+  expect(app.texts()).toEqual([
+    'Server sign-in failed (HTTP 500).',
+    signInLabel,
+  ]);
+  expect(
+    jest.mocked(AccessibilityInfo.announceForAccessibility).mock.calls,
+  ).toEqual([['Server sign-in failed (HTTP 500).']]);
   expect(app.control(signInLabel).props.accessibilityState).toEqual({
     disabled: false,
     busy: false,
@@ -319,6 +326,7 @@ test('the sign-in screen goes from request to failure, retries, and opens the ch
   );
   await app.press(signInLabel);
   expect(app.texts()).toEqual([signInLabel]);
+  expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledTimes(1);
 
   performRequest.mockResolvedValueOnce(appleCredential());
   fetch.mockResolvedValueOnce(response(403));

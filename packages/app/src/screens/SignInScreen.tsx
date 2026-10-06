@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  AccessibilityInfo,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import BootSplash from 'react-native-bootsplash';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signInWithApple, type Account } from '../account';
@@ -34,6 +40,7 @@ export function SignInScreen({ onSignedIn }: SignInScreenProps) {
         return;
       case 'failed':
         setPhase({ kind: 'failed', message: result.message });
+        AccessibilityInfo.announceForAccessibility(result.message);
         return;
       default: {
         const unhandled: never = result;
