@@ -1,1 +1,17 @@
-* @peaceandchaos
+/.github/ @peaceandchaos
+/.husky/ @peaceandchaos
+/.agents/ @peaceandchaos
+/.claude/ @peaceandchaos
+/tools/ @peaceandchaos
+/AGENTS.md @peaceandchaos
+/.gitignore @peaceandchaos
+/.node-version @peaceandchaos
+/.oxlintrc.json @peaceandchaos
+/.oxfmtrc.json @peaceandchaos
+/package-lock.json @peaceandchaos
+package.json @peaceandchaos
+tsconfig.json @peaceandchaos
+jest.config.* @peaceandchaos
+babel.config.* @peaceandchaos
+/packages/app/patches/ @peaceandchaos
+/tools/skills/records/
