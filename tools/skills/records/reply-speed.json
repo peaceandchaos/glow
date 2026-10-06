@@ -310,10 +310,10 @@
           "patch": "f93cadd2a43f6ad92e8c920fcd88dd7001ca8ba2"
         },
         {
-          "finding": "The Gateway test checks that the request body carries reasoning effort low for kimi and deepseek; the existing test already shows a GPT model never reaches the Gateway.",
+          "finding": "The Gateway test checks that the request body carries reasoning effort none for kimi and deepseek; the existing test already shows a GPT model never reaches the Gateway.",
           "cites": "Test behavior, not implementation",
-          "commit": "4c3537d",
-          "patch": "fbe9265adc33ddee4ee877629ba6b50506d120a3"
+          "commit": "612d23a",
+          "patch": "fa5cd58cdb8384e34cda2b000c87a9257b4786fb"
         }
       ],
       "receipts": [
