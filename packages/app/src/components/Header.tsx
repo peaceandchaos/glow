@@ -32,11 +32,13 @@ const optionSlop = {
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
 
 export const Header = React.memo(function ({
+  shown,
   picker,
   onPickModel,
   onNewChat,
   onOpenRecents,
 }: {
+  shown: boolean;
   picker: Picker;
   onPickModel: (model: ModelKey) => void;
   onNewChat: () => void;
@@ -45,6 +47,7 @@ export const Header = React.memo(function ({
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
+  if (open && !shown) setOpen(false);
   const [pill, setPill] = useState({ x: 0, width: 0 });
   const fade = {
     transitionDuration: reduceMotion ? 80 : 200,

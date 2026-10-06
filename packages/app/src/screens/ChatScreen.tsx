@@ -46,12 +46,17 @@ const ReasoningSheet = React.lazy(() =>
 );
 
 type ChatScreenProps = {
+  shown: boolean;
   onOpenRecents: () => void;
   // Counts chats opened from Recents, including the one already shown.
   openCount: number;
 };
 
-export function ChatScreen({ onOpenRecents, openCount }: ChatScreenProps) {
+export function ChatScreen({
+  shown,
+  onOpenRecents,
+  openCount,
+}: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const send = useChatStore(state => state.send);
@@ -260,6 +265,7 @@ export function ChatScreen({ onOpenRecents, openCount }: ChatScreenProps) {
 
       {/* Last, so the open model menu's scrim covers the composer too. */}
       <Header
+        shown={shown}
         picker={picker}
         onPickModel={setPicker}
         onNewChat={newChat}
