@@ -121,7 +121,6 @@ beforeAll(async () => {
           claimId: randomUUID(),
           heartbeatMs: 10,
           timeoutMs: 20_000,
-          publish: () => Promise.resolve(),
         }),
       );
       return Promise.resolve(`run-${attemptId}`);

@@ -99,7 +99,6 @@ async function measureReply(postgres: PGlite) {
     attemptId: input.attemptId,
     runId: 'run',
     claimId: 'claim',
-    publish: () => Promise.resolve(),
   });
   const workerMs = performance.now() - started;
   await reading;

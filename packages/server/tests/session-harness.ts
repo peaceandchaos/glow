@@ -321,7 +321,6 @@ export async function startServer(): Promise<Server> {
         claimId: randomUUID(),
         heartbeatMs: 10,
         timeoutMs: 20_000,
-        publish: () => Promise.resolve(),
       });
       workers.add(worker);
       void worker.finally(() => workers.delete(worker));
