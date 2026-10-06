@@ -65,7 +65,7 @@ function seed(kind: SeedKind | undefined) {
     seedChat(archive, [{ question: title, answer: 'Seeded reply.' }]);
   }
   clock = Date.now();
-  archive.createChat();
+  archive.createChat('auto');
 }
 seed(seedKind());
 

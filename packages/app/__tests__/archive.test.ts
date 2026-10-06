@@ -53,11 +53,12 @@ test('new chats inherit then independently remember the current picker across re
   const storage = new MemoryStorage();
   const archive = new ChatArchive(storage, randomUUID);
   archive.recover();
-  const a = archive.createChat();
+  const a = archive.createChat('deepseek');
+  expect(a.picker).toBe('deepseek');
   expect(archive.recents()).toHaveLength(0);
   archive.setPicker(a.id, 'gpt-6.1-sol');
   const aReply = archive.createTurn(a.id, 'Chat A', []);
-  const b = archive.createChat();
+  const b = archive.createChat('deepseek');
   expect(b.picker).toBe('gpt-6.1-sol');
   archive.setPicker(b.id, 'kimi');
   const bReply = archive.createTurn(b.id, 'Chat B', []);
@@ -75,7 +76,7 @@ test('new chats inherit then independently remember the current picker across re
 
 test('retry versions preserve both continuations and restore the selected path', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   const first = archive.createTurn(chat.id, 'Original question', []);
   complete(archive, first, 'Version one');
   const oldContinuation = archive.createTurn(chat.id, 'Follow version one', []);
@@ -108,12 +109,12 @@ test('retry versions preserve both continuations and restore the selected path',
 
 test('only the busy path is blocked and partial answers are marked incomplete in later context', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
-  const a = archive.createChat();
+  const a = archive.createChat('auto');
   const first = archive.createTurn(a.id, 'A', []);
   expect(() => archive.createTurn(a.id, 'Queued', [])).toThrow(
     'Wait for this reply',
   );
-  const b = archive.createChat();
+  const b = archive.createChat('auto');
   expect(archive.createTurn(b.id, 'B', []).chatId).toBe(b.id);
   archive.saveMessages([
     {
@@ -133,7 +134,7 @@ test('only the busy path is blocked and partial answers are marked incomplete in
 test('the write journal restores a send interrupted between message and index writes', () => {
   const storage = new MemoryStorage();
   const archive = new ChatArchive(storage, randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   storage.failAfter = 3;
   expect(() => archive.createTurn(chat.id, 'Saved before sending', [])).toThrow(
     'Simulated termination',
@@ -151,8 +152,8 @@ test('the write journal restores a send interrupted between message and index wr
 test('a save that fails partway is completed before the next save, so a later write cannot strand it', () => {
   const storage = new MemoryStorage();
   const archive = new ChatArchive(storage, randomUUID);
-  const kept = archive.createChat();
-  const deleted = archive.createChat();
+  const kept = archive.createChat('auto');
+  const deleted = archive.createChat('auto');
   complete(archive, archive.createTurn(deleted.id, 'Delete me', []));
   storage.failAfter = 1;
   expect(() => archive.deleteChat(deleted.id)).toThrow('Simulated termination');
@@ -183,7 +184,7 @@ test('unsupported or corrupt records are preserved and cannot silently become em
 
 test('history beyond 500 messages remains stored while the visible window can be paged', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   for (let index = 0; index < 255; index += 1) {
     const reply = archive.createTurn(chat.id, `Question ${index}`, []);
     complete(archive, reply);
@@ -205,7 +206,7 @@ test('history beyond 500 messages remains stored while the visible window can be
 test('Delete removes every version and keeps a pending server tombstone across restart', () => {
   const storage = new MemoryStorage();
   const archive = new ChatArchive(storage, randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   const first = archive.createTurn(chat.id, 'A question', []);
   complete(archive, first);
   const second = archive.retry(first.id);
@@ -221,7 +222,7 @@ test('Delete removes every version and keeps a pending server tombstone across r
 
 test('a checkpoint after a fork cannot enter a sibling retry or continuation', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   const first = archive.createTurn(chat.id, 'Question', []);
   complete(archive, first);
   archive.saveMessages([
@@ -245,7 +246,7 @@ test('a checkpoint after a fork cannot enter a sibling retry or continuation', (
 
 test('Retry reuses a model saved only as a retry model and refuses to swap a known model', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   const first = archive.createTurn(chat.id, 'Question', []);
   const failed = (message: SavedMessage) => {
     archive.saveMessages([

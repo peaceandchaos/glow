@@ -20,7 +20,7 @@ afterEach(() => shutdown(server));
 
 test('a turn is saved before any request and acknowledged only after its final result is saved', async () => {
   const phone = openPhone(server);
-  const chat = phone.archive.createChat();
+  const chat = phone.archive.createChat('auto');
   phone.archive.setPicker(chat.id, 'kimi');
   const savedAtRequest: string[] = [];
   phone.network.beforeRequest = (method, path) => {
@@ -56,7 +56,7 @@ test('a turn is saved before any request and acknowledged only after its final r
 
 test('partial text reaches storage on a bounded checkpoint, not on every token', async () => {
   const phone = openPhone(server);
-  const chat = phone.archive.createChat();
+  const chat = phone.archive.createChat('auto');
   phone.archive.setPicker(chat.id, 'deepseek');
   const reply = phone.session.send(chat.id, 'Count', []);
   const tokens = Array.from({ length: 60 }, (_, index) => `${index} `);
@@ -405,7 +405,7 @@ test('a reply stream that closes cleanly before the reply finishes is watched ag
     `POST /v1/jobs/${overHttp.id}/ack`,
   ]);
 
-  const auto = phone.archive.createChat();
+  const auto = phone.archive.createChat('auto');
   phone.archive.setPicker(auto.id, 'auto');
   const overSocket = phone.session.send(auto.id, 'Socket', []);
   server.providers.script(overSocket.id).text('x');

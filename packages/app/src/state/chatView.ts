@@ -237,7 +237,7 @@ export function createChatView(
       attempt(() => {
         const current = archive.chat(store.getState().chatId);
         if (current.leafId === null) return;
-        const chat = archive.createChat();
+        const chat = archive.createChat(firstChatPicker);
         showPage(chat, newestPage(chat));
       }),
     openChat: chatId =>

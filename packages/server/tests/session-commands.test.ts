@@ -114,7 +114,7 @@ test('one chat’s rejection and reconnect never pause or cancel another chat', 
 
 test('Auto saves the chosen model over the socket; a failed choice stays visible and Retry needs an explicit model', async () => {
   const phone = openPhone(server);
-  const chat = phone.archive.createChat();
+  const chat = phone.archive.createChat('auto');
   expect(chat.picker).toBe('auto');
   server.providers.selection = 'deepseek';
   const chosen = phone.session.send(chat.id, 'Pick one', []);
@@ -156,7 +156,7 @@ test('Auto saves the chosen model over the socket; a failed choice stays visible
   ).toHaveLength(1);
 
   phone.archive.setPicker(chat.id, 'gpt-6.1-sol');
-  const inherited = phone.archive.createChat();
+  const inherited = phone.archive.createChat('auto');
   expect(inherited.picker).toBe('gpt-6.1-sol');
   const gpt = phone.session.send(inherited.id, 'Socket', []);
   server.providers.script(gpt.id).text('Respon', 'ses');
@@ -457,7 +457,7 @@ test('a chat deleted offline stays deleted across a restart and its server work 
 
 test('a server error for another command does not fail an unsent reply that shares its socket', async () => {
   const phone = openPhone(server);
-  const chat = phone.archive.createChat();
+  const chat = phone.archive.createChat('auto');
   let release = () => {};
   server.dispatchGate = new Promise<void>(resolve => {
     release = resolve;
@@ -529,7 +529,11 @@ test('chat deletion finishes on 404 or 410, retries 5xx, and stops retrying a re
 test('a submission the server cannot accept fails once on the socket, as it does over HTTP', async () => {
   const phone = openPhone(server);
   phone.network.rewrite = body => body.replace('"version":1', '"version":2');
-  const overSocket = phone.session.send(phone.archive.createChat().id, 'A', []);
+  const overSocket = phone.session.send(
+    phone.archive.createChat('auto').id,
+    'A',
+    [],
+  );
   const overHttp = phone.session.send(createChat(phone, 'kimi').id, 'B', []);
   await settled(phone, overSocket.id);
   await settled(phone, overHttp.id);

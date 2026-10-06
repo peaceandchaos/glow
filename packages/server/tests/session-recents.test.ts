@@ -39,7 +39,7 @@ function seededStorage() {
   const b = seedChat(archive, [{ question: 'Bravo', answer: 'B1' }]);
   archive.setPicker(b, 'deepseek');
   clock = 3_000;
-  const unsent = archive.createChat().id;
+  const unsent = archive.createChat('auto').id;
   return { storage, a, b, unsent };
 }
 
