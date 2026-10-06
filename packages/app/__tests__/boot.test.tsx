@@ -57,16 +57,16 @@ jest.mock('@invertase/react-native-apple-authentication', () => ({
 }));
 jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
 
-const deviceId = 'a'.repeat(43);
+const service = 'personal-chat.session.v1';
 
 test('a failed start hides the splash and offers Retry, and Retry opens the saved chats', async () => {
   const keychain = jest.mocked(Keychain.getGenericPassword);
   keychain
     .mockRejectedValueOnce(new Error('The keychain is locked.'))
     .mockResolvedValue({
-      service: 'personal-chat.device-id.v1',
-      username: 'device',
-      password: deviceId,
+      service,
+      username: 'apple-user',
+      password: 'a'.repeat(43),
       storage: Keychain.STORAGE_TYPE.AES_GCM,
     });
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
@@ -88,7 +88,7 @@ test('a failed start hides the splash and offers Retry, and Retry opens the save
   await act(async () => {
     retry?.onPress?.();
   });
-  expect(keychain).toHaveBeenCalledTimes(2);
+  expect(keychain.mock.calls).toEqual([[{ service }], [{ service }]]);
   expect(alert).toHaveBeenCalledTimes(1);
   const shown = renderer.root.findByType(Text).props.children;
   expect(shown).toMatch(/^[0-9a-f-]{36}$/u);
