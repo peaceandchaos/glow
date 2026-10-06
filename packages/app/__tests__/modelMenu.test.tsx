@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
+import { bakedCatalog } from '../../../shared/catalog';
 import type { Picker } from '../../../shared/contracts';
 import { Icon } from '../src/components/Icon';
 import { RootDrawer } from '../src/screens/RootDrawer';
@@ -86,6 +87,7 @@ function chatState(): ChatViewState {
   return {
     chatId: 'chat',
     picker: 'deepseek',
+    catalog: bakedCatalog,
     messages: [],
     isStreaming: false,
     recents: [],
@@ -98,6 +100,7 @@ function chatState(): ChatViewState {
     draftText: () => '',
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
+    receiveCatalog: () => undefined,
   };
 }
 

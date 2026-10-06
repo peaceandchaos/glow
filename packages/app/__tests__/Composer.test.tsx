@@ -3,6 +3,7 @@ import { TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
+import { bakedCatalog } from '../../../shared/catalog';
 import { Composer, type SendResult } from '../src/components/Composer';
 import { ChatStoreContext } from '../src/state/chatStore';
 import type { ChatViewState } from '../src/state/chatView';
@@ -38,6 +39,7 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
   const store = createStore<ChatViewState>()(() => ({
     chatId: 'chat',
     picker: 'kimi',
+    catalog: bakedCatalog,
     messages: [],
     isStreaming: false,
     recents: [],
@@ -50,6 +52,7 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
     draftText: chatId => draftsOnDisk[chatId] ?? '',
     saveDraftAfterPause,
     saveDraftsNow: () => undefined,
+    receiveCatalog: () => undefined,
   }));
   const wrap = (element: React.ReactElement) => (
     <ChatStoreContext.Provider value={store}>

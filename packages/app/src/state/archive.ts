@@ -1,5 +1,10 @@
 import { z } from 'zod';
 import {
+  bakedCatalog,
+  parseCatalog,
+  type Catalog,
+} from '../../../../shared/catalog';
+import {
   attemptStatusSchema,
   checkpointSchema,
   decodeJson,
@@ -84,6 +89,9 @@ const childrenKey = (chatId: string, parentId: string | null) =>
 const selectedKey = (chatId: string, parentId: string | null) =>
   `archive/selected/${chatId}/${parentId ?? 'root'}`;
 const draftKey = (chatId: string) => `archive/draft/${chatId}`;
+// Outside archive/, so a catalog cached before the first chat never reads as
+// a chat archive without its index.
+const catalogKey = 'catalog/v1';
 const write = (
   key: string,
   value: ChatRecord | SavedMessage | ArchiveMetadata | string[] | string,
@@ -506,6 +514,16 @@ export class ChatArchive {
         ? { key: draftKey(chatId), value: null }
         : write(draftKey(chatId), text),
     );
+  }
+
+  catalog(): Catalog {
+    return (
+      parseCatalog(this.storage.getString(catalogKey) ?? '') ?? bakedCatalog
+    );
+  }
+
+  saveCatalog(body: string): void {
+    this.storage.set(catalogKey, body);
   }
 
   deleteChat(id: string): void {

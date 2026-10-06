@@ -2,6 +2,7 @@ import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { useStore as mockUseStore } from 'zustand';
 import { createStore, type StoreApi } from 'zustand/vanilla';
+import { bakedCatalog } from '../../../shared/catalog';
 import type { SendResult } from '../src/components/Composer';
 import { ChatScreen } from '../src/screens/ChatScreen';
 import type { ChatViewState, Message } from '../src/state/chatView';
@@ -77,6 +78,7 @@ function chatState(isStreaming: boolean): ChatViewState {
   return {
     chatId: 'chat',
     picker: 'kimi',
+    catalog: bakedCatalog,
     messages: [
       { id: 'question', role: 'user', text: 'Question', status: 'done' },
       {
@@ -97,6 +99,7 @@ function chatState(isStreaming: boolean): ChatViewState {
     draftText: () => '',
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
+    receiveCatalog: () => undefined,
   };
 }
 

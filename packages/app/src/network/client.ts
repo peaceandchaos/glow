@@ -181,6 +181,11 @@ export class ServerTransport implements ChatTransport {
     await this.request(`/v1/chats/${id}`, signal, 'DELETE');
   }
 
+  async models(signal: AbortSignal): Promise<string> {
+    const response = await this.request('/v1/models', signal);
+    return response.text();
+  }
+
   async rank(input: SearchRequest, signal: AbortSignal): Promise<string[]> {
     const response = await this.request(
       '/v1/search',

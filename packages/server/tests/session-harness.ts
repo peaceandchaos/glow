@@ -504,7 +504,7 @@ export function openPhone(
       socket: (_url, headers) => new InProcessSocket(server, network, headers),
       decoder: () => new TextDecoder(),
     },
-    () => bakedCatalog,
+    () => archive.catalog(),
     true,
   );
   const session = new ChatSession({
