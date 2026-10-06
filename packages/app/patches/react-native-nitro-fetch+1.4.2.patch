@@ -34,15 +34,15 @@ index e0a9c63..0d05b68 100644
    }
  
 diff --git a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
-index 310efae..d494473 100644
+index 310efae..17f465d 100644
 --- a/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
 +++ b/node_modules/react-native-nitro-fetch/ios/HybridUrlRequestBuilder.swift
 @@ -88,6 +88,8 @@ class HybridUrlRequestBuilder: HybridUrlRequestBuilderSpec {
    }
  
    func build() throws -> any HybridUrlRequestSpec {
-+    // DevTools would show the session token, request body, and reply text.
-+    let reportsToDevTools = urlRequest.value(forHTTPHeaderField: "Authorization") == nil
++    // Every request or its reply carries a token, and DevTools would show it.
++    let reportsToDevTools = false
      let delegate = URLSessionDelegateAdapter(
        onRedirectReceived: onRedirectReceivedCallback,
        onResponseStarted: onResponseStartedCallback,
