@@ -76,6 +76,16 @@ export const models = {
     threshold: 800_000,
     compactThreshold: 200_000,
   },
+  'gpt-6-luna': {
+    id: 'gpt-6-luna',
+    label: 'GPT-6 Luna',
+    levels: ['none', 'low', 'medium', 'high', 'xhigh', 'max'],
+    wire: 'responses',
+    window: 1_050_000,
+    maxOutput: 32_768,
+    threshold: 800_000,
+    compactThreshold: 200_000,
+  },
 } satisfies Record<string, ModelConfig>;
 export type RegistryKey = keyof typeof models;
 

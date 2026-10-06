@@ -11,6 +11,8 @@ const criteria: Record<RegistryKey, string> = {
     'GPT-6.1 Sol. Default GPT for demanding reasoning or explicit GPT requests that do not name another GPT model.',
   'gpt-6-astra':
     'GPT-6 Astra. Strongest and most expensive option. Only the most demanding reasoning or explicit GPT-6 Astra requests.',
+  'gpt-6-luna':
+    'GPT-6 Luna. Most efficient GPT for focused, high-volume tasks.',
 };
 
 export class JevClient {
