@@ -191,17 +191,26 @@ test('the scrim, Recents, and New chat each close the open menu', async () => {
   expect(newChat).toHaveBeenCalledTimes(1);
 });
 
-test('while the menu is open, a tap on the header row between its buttons reaches the scrim', async () => {
+test('only while the menu is open, the scrim takes touches, the header is modal for VoiceOver, and a tap on the header row between its buttons reaches the scrim', async () => {
   const view = await renderDrawer();
   const row = () =>
     view.root.findByProps({ accessibilityLabel: 'Recents' }).parent;
   const scrim = () =>
     view.root.findByProps({ accessibilityLabel: 'Dismiss model menu' }).parent;
+  const header = () => {
+    let node = scrim()?.parent;
+    while (node && !('accessibilityViewIsModal' in node.props))
+      node = node.parent;
+    return node;
+  };
   expect(row()?.props.pointerEvents ?? 'auto').toBe('auto');
+  expect(scrim()?.props.pointerEvents).toBe('none');
+  expect(header()?.props.accessibilityViewIsModal).toBe(false);
 
   await view.open();
   expect(row()?.props.pointerEvents).toBe('box-none');
   expect(scrim()?.props.pointerEvents).toBe('auto');
+  expect(header()?.props.accessibilityViewIsModal).toBe(true);
 
   await act(async () =>
     view.root
@@ -210,6 +219,8 @@ test('while the menu is open, a tap on the header row between its buttons reache
   );
   expect(view.expanded()).toBe(false);
   expect(row()?.props.pointerEvents ?? 'auto').toBe('auto');
+  expect(scrim()?.props.pointerEvents).toBe('none');
+  expect(header()?.props.accessibilityViewIsModal).toBe(false);
 });
 
 test('with Reduce Motion, the pill dims on press instead of shrinking, and the open chevron points up without turning', async () => {
