@@ -154,7 +154,6 @@ async function startServer(allowedAppleUserIds = appleUserId): Promise<Server> {
       sessions: () => Promise.resolve(new SessionStore(database)),
       jobs: () => Promise.resolve(jobs),
       dispatch: () => Promise.reject(new Error('Must not dispatch')),
-      rank: () => Promise.resolve([]),
       catalog: bakedCatalog,
     },
     database,

@@ -239,14 +239,6 @@ export const serverMessageSchema = z.discriminatedUnion('kind', [
 ]);
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
 
-export const searchRequestSchema = z.strictObject({
-  query: z.string().min(1).max(500),
-  candidates: z
-    .array(z.strictObject({ id: idSchema, title: z.string().min(1).max(200) }))
-    .max(20),
-});
-export type SearchRequest = z.infer<typeof searchRequestSchema>;
-
 export const sessionTokenBytes = 32;
 export const sessionTokenSchema = z
   .string()

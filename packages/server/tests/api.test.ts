@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   bakedCatalog,
   parseCatalog,
@@ -47,7 +48,6 @@ async function fixture() {
   const { database, postgres } = await testDatabase();
   const jobs = new JobRepository(database);
   const dispatch = jest.fn(() => Promise.resolve('fixture-workflow'));
-  const rank = jest.fn(() => Promise.resolve([]));
   const services: ApiServices = {
     ...(await signedIn(database, [
       [token, owner],
@@ -55,23 +55,20 @@ async function fixture() {
     ])),
     jobs: () => Promise.resolve(jobs),
     dispatch,
-    rank,
     catalog: bakedCatalog,
   };
-  return { jobs, postgres, services, dispatch, rank };
+  return { jobs, postgres, services, dispatch };
 }
 
-test('unauthorized requests are rejected before body decoding, database access, or evaluation', async () => {
+test('unauthorized requests are rejected before body decoding or database access', async () => {
   const jobs = jest.fn(() =>
     Promise.reject(new Error('Must not load database')),
   );
   const dispatch = jest.fn(() => Promise.resolve('never'));
-  const rank = jest.fn(() => Promise.resolve([]));
   const services: ApiServices = {
     ...withoutDatabase(owner),
     jobs,
     dispatch,
-    rank,
     catalog: bakedCatalog,
   };
   const response = await handleRequest(
@@ -81,7 +78,6 @@ test('unauthorized requests are rejected before body decoding, database access, 
   expect(response.status).toBe(401);
   expect(jobs).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
-  expect(rank).not.toHaveBeenCalled();
 });
 
 test('a body that is not UTF-8 is a client error, not a server failure', async () => {
@@ -100,7 +96,6 @@ test('a body that is not UTF-8 is a client error, not a server failure', async (
         ...(await signedIn(database, [[token, owner]])),
         jobs,
         dispatch: jest.fn(),
-        rank: jest.fn(),
         catalog: bakedCatalog,
       },
     );
@@ -141,6 +136,29 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
       ],
     });
   } finally {
+    await f.postgres.close();
+  }
+});
+
+test('the retired title-ranking route is gone and makes no paid call', async () => {
+  const f = await fixture();
+  const paid = jest.spyOn(globalThis, 'fetch');
+  try {
+    const response = await handleRequest(
+      request(
+        'search',
+        'POST',
+        JSON.stringify({
+          query: 'hello',
+          candidates: [{ id: randomUUID(), title: 'Hello' }],
+        }),
+      ),
+      f.services,
+    );
+    expect(response.status).toBe(404);
+    expect(paid).not.toHaveBeenCalled();
+  } finally {
+    paid.mockRestore();
     await f.postgres.close();
   }
 });

@@ -110,7 +110,6 @@ beforeAll(async () => {
   services = {
     ...(await signedIn(fixture.database, [[token, owner]])),
     jobs: () => Promise.resolve(jobs),
-    rank: () => Promise.resolve([]),
     catalog: bakedCatalog,
     dispatch(dispatchOwner, attemptId) {
       workers.push(

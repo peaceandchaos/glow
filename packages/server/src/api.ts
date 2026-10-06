@@ -5,10 +5,8 @@ import {
   decode,
   decodeJson,
   idSchema,
-  searchRequestSchema,
   sessionRequestSchema,
   socketCommandSchema,
-  type SearchRequest,
   type ServerMessage,
   type SessionResponse,
   type SocketCommand,
@@ -32,7 +30,6 @@ export type ApiServices = {
   sessions: () => Promise<SessionStore>;
   jobs: () => Promise<JobRepository>;
   dispatch: Dispatcher;
-  rank: (input: SearchRequest, signal: AbortSignal) => Promise<string[]>;
   catalog: Catalog;
 };
 
@@ -355,10 +352,6 @@ async function handleSignedInRoute(
   ) {
     await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
     return new Response(null, { status: 204 });
-  }
-  if (path[1] === 'search' && path.length === 2 && request.method === 'POST') {
-    const body = decodeJson(searchRequestSchema, await readBody(request));
-    return Response.json({ ids: await services.rank(body, request.signal) });
   }
   throw new RequestError(404, 'Route not found.');
 }

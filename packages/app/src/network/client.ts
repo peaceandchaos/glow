@@ -2,12 +2,10 @@ import { z } from 'zod';
 import {
   attemptSnapshotSchema,
   decodeJson,
-  idSchema,
   isTerminal,
   serverMessageSchema,
   submissionCommands,
   type AttemptSnapshot,
-  type SearchRequest,
   type ServerMessage,
   type SocketCommand,
   type Submission,
@@ -62,7 +60,6 @@ type Feed = {
   staged: ((index: number) => void) | null;
 };
 const errorSchema = z.object({ error: z.string() });
-const rankSchema = z.strictObject({ ids: z.array(idSchema).max(20) });
 
 export function validateServerAddress(
   raw: string,
@@ -184,23 +181,6 @@ export class ServerTransport implements ChatTransport {
   async models(signal: AbortSignal): Promise<string> {
     const response = await this.request('/v1/models', signal);
     return response.text();
-  }
-
-  async rank(input: SearchRequest, signal: AbortSignal): Promise<string[]> {
-    const response = await this.request(
-      '/v1/search',
-      signal,
-      'POST',
-      JSON.stringify(input),
-    );
-    const ranked = decodeJson(rankSchema, await response.text()).ids;
-    const candidates = new Set(input.candidates.map(candidate => candidate.id));
-    if (
-      new Set(ranked).size !== ranked.length ||
-      ranked.some(id => !candidates.has(id))
-    )
-      throw new TransportError(502, 'Invalid title ranking.');
-    return ranked;
   }
 
   async submit(

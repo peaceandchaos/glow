@@ -1,6 +1,5 @@
 import type {
   AttemptSnapshot,
-  SearchRequest,
   ServerMessage,
   Submission,
 } from '../../../../shared/contracts';
@@ -39,6 +38,5 @@ export interface ChatTransport {
   stop(id: string, signal: AbortSignal): Promise<AttemptSnapshot | null>;
   acknowledge(id: string, sequence: number, signal: AbortSignal): Promise<void>;
   deleteChat(id: string, signal: AbortSignal): Promise<void>;
-  rank(input: SearchRequest, signal: AbortSignal): Promise<string[]>;
   disconnect(): void;
 }

@@ -512,17 +512,6 @@ test('server-address validation requires TLS except explicit private development
     expect(() => validateServerAddress(address, false)).toThrow();
 });
 
-test('ranking rejects IDs outside the provided title candidates', async () => {
-  const fixture = setup();
-  fixture.reply(response(JSON.stringify({ ids: [otherAttempt] })));
-  await expect(
-    fixture.transport.rank(
-      { query: 'hello', candidates: [{ id: chatId, title: 'Hello' }] },
-      new AbortController().signal,
-    ),
-  ).rejects.toThrow('Invalid title ranking');
-});
-
 test('server event runtime validation rejects invalid HTTP status values', () => {
   expect(() =>
     decodeJson(
