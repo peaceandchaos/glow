@@ -58,10 +58,10 @@
   },
   "overrides": {
     "@react-native-community/cli-config": {
-      "joi": "17.13.7"
+      "joi": "17.13.8"
     },
     "@react-native-community/cli-types": {
-      "joi": "17.13.7"
+      "joi": "17.13.8"
     },
     "metro": {
       "image-size": "2.0.3"
