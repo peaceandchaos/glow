@@ -1,4 +1,6 @@
+import { setImmediate as tick } from 'node:timers/promises';
 import type { PGlite } from '@electric-sql/pglite';
+import type { Database } from '../src/database';
 import { JobRepository, staleAfterMs } from '../src/jobs';
 import { ProviderFailure } from '../src/errors';
 import type { Providers } from '../src/provider';
@@ -9,6 +11,7 @@ import { submission } from './fixtures';
 jest.setTimeout(30_000);
 const owner = 'c'.repeat(64);
 let postgres: PGlite;
+let database: Database;
 let jobs: JobRepository;
 let selectionCalls: number;
 let generationCalls: number;
@@ -17,7 +20,8 @@ let providers: Providers;
 beforeAll(async () => {
   const fixture = await testDatabase();
   postgres = fixture.postgres;
-  jobs = new JobRepository(fixture.database);
+  database = fixture.database;
+  jobs = new JobRepository(database);
 });
 beforeEach(async () => {
   await postgres.exec('TRUNCATE chat_job_events, chat_jobs, deleted_chats');
@@ -166,4 +170,149 @@ test('an upstream disconnect retains the partial answer without another paid cal
     status: 'interrupted',
     text: 'Partial',
   });
+});
+
+async function storedEvents(attemptId: string) {
+  return (await jobs.poll(owner, attemptId, 0, staleAfterMs)).events;
+}
+
+async function untilSaved(attemptId: string, text: string): Promise<void> {
+  while ((await jobs.get(owner, attemptId)).snapshot.text !== text)
+    await tick();
+}
+
+test.each([
+  ['completed', 'completes'],
+  ['interrupted', 'disconnects'],
+] as const)(
+  'chunks that arrive during a slow write all reach the %s reply in order',
+  async (status, ending) => {
+    const input = { ...submission(), picker: 'deepseek' as const };
+    await jobs.submit(owner, input, async () => 'run');
+    const parts = Array.from({ length: 50 }, (_, index) => `${index} `);
+    let transactions = 0;
+    let held: Promise<void> | null = null;
+    const slow: Database = {
+      query: (sql, values) => database.query(sql, values),
+      async transaction(operation) {
+        transactions += 1;
+        const wait = held;
+        held = null;
+        await wait;
+        return database.transaction(operation);
+      },
+    };
+    let streamStart = 0;
+    providers.generate = async (_input, _model, _context, _signal, emit) => {
+      let release = () => {};
+      held = new Promise<void>(resolve => {
+        release = resolve;
+      });
+      streamStart = transactions;
+      for (const [index, text] of parts.entries())
+        await emit({ wire: 'gateway', raw: `{"n":${index}}`, text });
+      release();
+      if (ending === 'disconnects')
+        throw new ProviderFailure(
+          'The provider connection was interrupted.',
+          true,
+        );
+      return { checkpoint: null };
+    };
+    await runAttempt({
+      jobs: new JobRepository(slow),
+      providers,
+      owner,
+      attemptId: input.attemptId,
+      runId: 'run',
+      claimId: 'claim',
+      heartbeatMs: 60_000,
+      timeoutMs: 5_000,
+    });
+    expect(transactions - streamStart).toBe(2);
+    expect((await jobs.get(owner, input.attemptId)).snapshot).toMatchObject({
+      status,
+      text: parts.join(''),
+    });
+    const events = await storedEvents(input.attemptId);
+    expect(events.map(event => event.sequence)).toEqual(
+      events.map((_, index) => index + 1),
+    );
+    expect(
+      events.flatMap(event => (event.kind === 'provider' ? [event.raw] : [])),
+    ).toEqual(parts.map((_, index) => `{"n":${index}}`));
+  },
+);
+
+test('Stop mid-stream keeps the saved text and accepts nothing after it', async () => {
+  const input = { ...submission(), picker: 'deepseek' as const };
+  await jobs.submit(owner, input, async () => 'run');
+  providers.generate = async (_input, _model, _context, _signal, emit) => {
+    await emit({ wire: 'gateway', raw: 'kept', text: 'Kept ' });
+    await untilSaved(input.attemptId, 'Kept ');
+    await jobs.requestCancellation(owner, input.attemptId);
+    for (let index = 0; index < 100; index += 1) {
+      await emit({ wire: 'gateway', raw: 'late', text: 'Late ' });
+      await tick();
+    }
+    return { checkpoint: null };
+  };
+  await execute(input.attemptId);
+  expect((await jobs.get(owner, input.attemptId)).snapshot).toMatchObject({
+    status: 'stopped',
+    text: 'Kept ',
+  });
+  const events = await storedEvents(input.attemptId);
+  expect(events.at(-1)).toMatchObject({
+    kind: 'snapshot',
+    snapshot: { status: 'stopped', text: 'Kept ' },
+  });
+  expect(
+    events.some(event => event.kind === 'provider' && event.raw === 'late'),
+  ).toBe(false);
+});
+
+test('a worker lost mid-stream and a retry converge on one interrupted reply', async () => {
+  const input = { ...submission(), picker: 'deepseek' as const };
+  await jobs.submit(owner, input, async () => 'run');
+  providers.generate = async (_input, _model, _context, signal, emit) => {
+    generationCalls += 1;
+    await emit({ wire: 'gateway', raw: 'saved', text: 'Saved ' });
+    await untilSaved(input.attemptId, 'Saved ');
+    await new Promise((_resolve, reject) =>
+      signal.addEventListener('abort', () => reject(new Error('aborted')), {
+        once: true,
+      }),
+    );
+    return { checkpoint: null };
+  };
+  const lost = execute(input.attemptId);
+  await untilSaved(input.attemptId, 'Saved ');
+  await runAttempt({
+    jobs,
+    providers,
+    owner,
+    attemptId: input.attemptId,
+    runId: 'retry',
+    claimId: 'retry',
+    heartbeatMs: 5,
+    timeoutMs: 5_000,
+  });
+  const later = new JobRepository(
+    database,
+    () => Date.now() + staleAfterMs + 1,
+  );
+  const first = await later.reconcile(owner, input.attemptId, staleAfterMs);
+  await lost;
+  const second = await later.reconcile(owner, input.attemptId, staleAfterMs);
+  expect(generationCalls).toBe(1);
+  expect(first.snapshot).toMatchObject({
+    status: 'interrupted',
+    text: 'Saved ',
+  });
+  expect(second.snapshot).toEqual(first.snapshot);
+  const events = await storedEvents(input.attemptId);
+  expect(events.map(event => event.sequence)).toEqual(
+    events.map((_, index) => index + 1),
+  );
 });

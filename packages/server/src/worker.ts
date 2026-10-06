@@ -1,7 +1,11 @@
-import { isTerminal, type ModelKey } from '../../../shared/contracts';
+import {
+  isTerminal,
+  type EventPayload,
+  type ModelKey,
+} from '../../../shared/contracts';
 import { AttemptCancelled, ProviderFailure } from './errors';
 import type { JobRepository } from './jobs';
-import type { Providers } from './provider';
+import type { ProviderChunk, Providers } from './provider';
 
 type WorkerOptions = {
   jobs: JobRepository;
@@ -13,6 +17,55 @@ type WorkerOptions = {
   heartbeatMs?: number;
   timeoutMs?: number;
 };
+
+type ChunkBatch = { text: string; reasoning: string; events: EventPayload[] };
+
+const emptyBatch = (): ChunkBatch => ({ text: '', reasoning: '', events: [] });
+
+// Keeps one write in flight. Chunks that arrive during it join the next write,
+// so a slow database round trip never paces the provider stream.
+function chunkWriter(write: (batch: ChunkBatch) => Promise<void>) {
+  let pending = emptyBatch();
+  let writing: Promise<void> | null = null;
+  let failure: { error: unknown } | null = null;
+  let closed = false;
+  const drain = async () => {
+    while (!closed && !failure && pending.events.length > 0) {
+      const batch = pending;
+      pending = emptyBatch();
+      try {
+        await write(batch);
+      } catch (error) {
+        failure = { error };
+        pending = {
+          text: batch.text + pending.text,
+          reasoning: batch.reasoning + pending.reasoning,
+          events: [...batch.events, ...pending.events],
+        };
+      }
+    }
+    writing = null;
+  };
+  return {
+    push(chunk: ProviderChunk): void {
+      if (failure) throw failure.error;
+      pending.text += chunk.text ?? '';
+      pending.reasoning += chunk.reasoning ?? '';
+      pending.events.push({
+        kind: 'provider',
+        wire: chunk.wire,
+        raw: chunk.raw,
+      });
+      writing ??= drain();
+    },
+    // The terminal write carries the unwritten rest, so nothing received is lost.
+    async close() {
+      closed = true;
+      await writing;
+      return { rest: pending, failure };
+    },
+  };
+}
 
 export async function runAttempt(options: WorkerOptions): Promise<void> {
   const { jobs, providers, owner, attemptId, runId, claimId } = options;
@@ -42,6 +95,9 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
     await jobs.markProviderStarted(owner, attemptId, claimId);
     controller.signal.throwIfAborted();
   };
+  const chunks = chunkWriter(async batch => {
+    await jobs.update(owner, attemptId, claimId, batch);
+  });
 
   try {
     const input = await jobs.input(owner, attemptId);
@@ -74,24 +130,22 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
       model,
       context,
       controller.signal,
-      async chunk => {
-        await jobs.update(owner, attemptId, claimId, {
-          text: chunk.text,
-          reasoning: chunk.reasoning,
-          events: [{ kind: 'provider', wire: chunk.wire, raw: chunk.raw }],
-        });
-      },
+      async chunk => chunks.push(chunk),
       beforeCall,
     );
     controller.signal.throwIfAborted();
+    const { rest, failure } = await chunks.close();
+    if (failure) throw failure.error;
     const resultUpdate = result.checkpoint
       ? { checkpoint: result.checkpoint }
       : {};
     await jobs.update(owner, attemptId, claimId, {
+      ...rest,
       ...resultUpdate,
       status: 'completed',
     });
   } catch (error) {
+    const { rest } = await chunks.close();
     const current = await jobs.get(owner, attemptId);
     if (
       isTerminal(current.snapshot.status) ||
@@ -108,6 +162,7 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
         ? error.message
         : 'The reply could not finish. Retry creates a new answer.';
     await jobs.update(owner, attemptId, claimId, {
+      ...rest,
       status: interrupted ? 'interrupted' : 'failed',
       error: message,
     });
