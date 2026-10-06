@@ -49,4 +49,4 @@ Every high/critical dependency advisory blocks acceptance. The one exception is 
 
 ## Completion evidence
 
-Report the scope, commit, commands, results, and remaining limitations. Run proportionate checks after relevant changes; do not repeat passing checks without a reason. Acceptance requires the full implemented suite for the actual commit, protected GitHub checks, and required owner review. Submission branches and local commits remain unaccepted candidates. Do not claim enforcement before remote rules and the separate actor are verified.
+Report the scope, commit, commands, results, and remaining limitations. Run proportionate checks after relevant changes; do not repeat passing checks without a reason. Acceptance requires the full implemented suite for the actual commit and protected GitHub checks. Changes to the control paths in `.github/CODEOWNERS` also require owner review, and other changes merge on green checks. Submission branches and local commits remain unaccepted candidates. Do not claim enforcement before remote rules and the separate actor are verified.
