@@ -455,7 +455,10 @@ class InProcessSocket implements ClientSocket {
             this.readyState = 'OPEN';
             this.onopen?.();
           },
-          () => this.close(1008),
+          () => {
+            this.onerror?.('Unauthorized');
+            this.close(1006);
+          },
         );
     }, 0);
   }
