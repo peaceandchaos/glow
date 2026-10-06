@@ -1,6 +1,7 @@
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
+import type { ModelKey } from '../../../shared/contracts';
 import { RootDrawer } from '../src/screens/RootDrawer';
 import { ChatStoreContext } from '../src/state/chatStore';
 import type { ChatViewState } from '../src/state/chatView';
@@ -59,18 +60,24 @@ jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
 
 const recents = 0;
 const chat = 1;
+const setPicker = jest.fn<void, [ModelKey]>();
+const newChat = jest.fn<void, []>();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 function chatState(): ChatViewState {
   return {
     chatId: 'chat',
-    picker: 'kimi',
+    picker: 'deepseek',
     messages: [],
     isStreaming: false,
     recents: [],
     send: () => null,
     stop: () => undefined,
-    setPicker: () => undefined,
-    newChat: () => undefined,
+    setPicker,
+    newChat,
     openChat: () => undefined,
     loadOlder: () => undefined,
     draftText: () => '',
@@ -79,7 +86,7 @@ function chatState(): ChatViewState {
   };
 }
 
-async function renderDrawer(): Promise<ReactTestRenderer> {
+async function renderDrawer() {
   const store = createStore<ChatViewState>()(chatState);
   const rendered = React.createRef<ReactTestRenderer>();
   await act(async () => {
@@ -91,31 +98,78 @@ async function renderDrawer(): Promise<ReactTestRenderer> {
   });
   const renderer = rendered.current;
   if (!renderer) throw new Error('The test renderer was not created.');
-  return renderer;
+  const root = renderer.root;
+  const pager = root.findByProps({ testID: 'pager' });
+  const pill = () =>
+    root.findByProps({ accessibilityHint: 'Chooses the model for this chat' });
+  const menu = () => root.findByProps({ accessibilityRole: 'menu' });
+  return {
+    root,
+    menu,
+    expanded: (): boolean => pill().props.accessibilityState.expanded,
+    option: (label: string) =>
+      menu().findByProps({ accessibilityLabel: label }),
+    open: () => act(async () => pill().props.onPress()),
+    selectPage: (position: number) =>
+      act(async () => {
+        pager.props.onPageSelected({ nativeEvent: { position } });
+      }),
+  };
 }
 
 test('leaving the chat page closes the open model menu, and the menu is still closed when the chat page shows again', async () => {
-  const renderer = await renderDrawer();
-  const pager = renderer.root.findByProps({ testID: 'pager' });
-  const pill = () =>
-    renderer.root.findByProps({
-      accessibilityHint: 'Chooses the model for this chat',
+  const view = await renderDrawer();
+
+  await view.open();
+  expect(view.expanded()).toBe(true);
+  expect(view.menu().props.pointerEvents).toBe('auto');
+
+  await view.selectPage(recents);
+  expect(view.expanded()).toBe(false);
+  expect(view.menu().props.pointerEvents).toBe('none');
+
+  await view.selectPage(chat);
+  expect(view.expanded()).toBe(false);
+  expect(view.menu().props.pointerEvents).toBe('none');
+});
+
+test('the menu marks the model the chat uses, and picking another model hands it to the chat and closes the menu', async () => {
+  const view = await renderDrawer();
+  await view.open();
+  expect(view.option('DeepSeek V4.1 Flash').props.accessibilityState).toEqual({
+    selected: true,
+  });
+  expect(view.option('Kimi K3').props.accessibilityState).toEqual({
+    selected: false,
+  });
+
+  await act(async () => view.option('Kimi K3').props.onPress());
+  expect(setPicker.mock.calls).toEqual([['kimi']]);
+  expect(view.expanded()).toBe(false);
+  expect(view.menu().props.pointerEvents).toBe('none');
+});
+
+test('the scrim, Recents, and New chat each close the open menu', async () => {
+  const view = await renderDrawer();
+  const controls = [
+    { label: 'Dismiss model menu', handler: 'onPressIn' },
+    { label: 'Recents', handler: 'onPress' },
+    { label: 'New chat', handler: 'onPress' },
+  ];
+
+  for (const { label, handler } of controls) {
+    await view.open();
+    expect({ label, expanded: view.expanded() }).toEqual({
+      label,
+      expanded: true,
     });
-  const menu = () => renderer.root.findByProps({ accessibilityRole: 'menu' });
-  const selectPage = (position: number) =>
-    act(async () => {
-      pager.props.onPageSelected({ nativeEvent: { position } });
+    await act(async () =>
+      view.root.findByProps({ accessibilityLabel: label }).props[handler](),
+    );
+    expect({ label, expanded: view.expanded() }).toEqual({
+      label,
+      expanded: false,
     });
-
-  await act(async () => pill().props.onPress());
-  expect(pill().props.accessibilityState).toEqual({ expanded: true });
-  expect(menu().props.pointerEvents).toBe('auto');
-
-  await selectPage(recents);
-  expect(pill().props.accessibilityState).toEqual({ expanded: false });
-  expect(menu().props.pointerEvents).toBe('none');
-
-  await selectPage(chat);
-  expect(pill().props.accessibilityState).toEqual({ expanded: false });
-  expect(menu().props.pointerEvents).toBe('none');
+  }
+  expect(newChat).toHaveBeenCalledTimes(1);
 });
