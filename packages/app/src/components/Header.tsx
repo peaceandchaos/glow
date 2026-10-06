@@ -176,7 +176,6 @@ export const Header = React.memo(function ({
         </Pressable>
       </View>
 
-      {/* The menu offers models only. A chat saved on Auto still shows Auto. */}
       <Animated.View
         style={[
           styles.menu,
