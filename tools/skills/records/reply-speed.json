@@ -937,7 +937,7 @@
           {
             "finding": "Commit messages state each change in plain sentences. docs/providers.md shows only the providerOptions part of the Gateway body and does not list reasoning effort; it makes no wrong claim.",
             "cites": "Voice and repo specifics",
-            "none": "Adding the effort line to docs/providers.md is a follow-up for the lead."
+            "none": "A follow-up change can add the effort line to docs/providers.md."
           }
         ],
         "receipts": [
@@ -1092,7 +1092,7 @@
           {
             "finding": "Removing getWritable is safe: nothing calls getReadable or getRun, and delivery reads chat_job_events. Removing waitForCommittedInput is safe because claim() now waits on the attempt lock. In-flight runs keep the old two-step code because runs stay on their deployment (node_modules/workflow/docs/foundations/versioning.mdx). maxRetries = 0 means one run with no retry (errors-and-retries.mdx); a transient error in claim now fails the run, and reconcile marks it interrupted after the stale window.",
             "cites": "*CRITICAL*: Always Use Correct `workflow` Documentation 2",
-            "none": "Crash and retry stay safe; the retry policy is the owner's call."
+            "none": "Crash and retry stay safe. Retrying the merged step is a separate policy change."
           }
         ],
         "receipts": [
