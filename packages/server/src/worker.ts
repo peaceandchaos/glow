@@ -22,9 +22,7 @@ type ChunkBatch = { text: string; reasoning: string; events: EventPayload[] };
 
 const emptyBatch = (): ChunkBatch => ({ text: '', reasoning: '', events: [] });
 
-// Keeps one write in flight. Chunks that arrive during it join the next write,
-// so a slow database round trip never paces the provider stream.
-function chunkWriter(write: (batch: ChunkBatch) => Promise<void>) {
+function coalescingChunkWriter(write: (batch: ChunkBatch) => Promise<void>) {
   let pending = emptyBatch();
   let writing: Promise<void> | null = null;
   let failure: { error: unknown } | null = null;
@@ -58,11 +56,10 @@ function chunkWriter(write: (batch: ChunkBatch) => Promise<void>) {
       });
       writing ??= drain();
     },
-    // The terminal write carries the unwritten rest, so nothing received is lost.
     async close() {
       closed = true;
       await writing;
-      return { rest: pending, failure };
+      return { unwritten: pending, failure };
     },
   };
 }
@@ -95,7 +92,7 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
     await jobs.markProviderStarted(owner, attemptId, claimId);
     controller.signal.throwIfAborted();
   };
-  const chunks = chunkWriter(async batch => {
+  const chunks = coalescingChunkWriter(async batch => {
     await jobs.update(owner, attemptId, claimId, batch);
   });
 
@@ -134,18 +131,18 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
       beforeCall,
     );
     controller.signal.throwIfAborted();
-    const { rest, failure } = await chunks.close();
+    const { unwritten, failure } = await chunks.close();
     if (failure) throw failure.error;
     const resultUpdate = result.checkpoint
       ? { checkpoint: result.checkpoint }
       : {};
     await jobs.update(owner, attemptId, claimId, {
-      ...rest,
+      ...unwritten,
       ...resultUpdate,
       status: 'completed',
     });
   } catch (error) {
-    const { rest } = await chunks.close();
+    const { unwritten } = await chunks.close();
     const current = await jobs.get(owner, attemptId);
     if (
       isTerminal(current.snapshot.status) ||
@@ -162,7 +159,7 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
         ? error.message
         : 'The reply could not finish. Retry creates a new answer.';
     await jobs.update(owner, attemptId, claimId, {
-      ...rest,
+      ...unwritten,
       status: interrupted ? 'interrupted' : 'failed',
       error: message,
     });
