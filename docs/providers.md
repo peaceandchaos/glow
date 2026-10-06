@@ -10,11 +10,16 @@ The server owns this allowlist. Phone requests cannot supply model URLs or ids.
 | DeepSeek    | `deepseek/deepseek-v4.1-flash` | Gateway Chat Completions HTTP/SSE | 1,000,000                 |
 | GPT-6.1 Sol | `gpt-6.1-sol`                  | OpenAI Responses WebSocket        | 1,050,000                 |
 | GPT-6 Astra | `gpt-6-astra`                  | OpenAI Responses WebSocket        | 1,050,000                 |
+| GPT-6 Luna  | `gpt-6-luna`                   | OpenAI Responses WebSocket        | 1,050,000                 |
 
 Sources: [Kimi](https://vercel.com/ai-gateway/models/kimi-k3),
 [DeepSeek](https://vercel.com/ai-gateway/models/deepseek-v4.1-flash),
 [GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
-[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra).
+[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra),
+[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna).
+
+GPT-6 Luna is registered but is not in the default menu, so neither the picker
+nor Auto can choose it until `MODEL_MENU` lists it. No live call has used it.
 
 GPT-6.1 Sol is the default GPT; GPT-6 Astra is the strongest and most expensive
 option. On 2026-10-01 one Responses WebSocket call and one Responses
@@ -33,6 +38,76 @@ this output budget need live verification together before release.
 Jev operations set `maxRetries: 0`. The pinned Gateway adapter passes `abortSignal`
 to its HTTP call. A local fixture checks that cancellation reaches that call and
 that HTTP 500 does not cause a second evaluation. Billing cessation is unverified.
+
+## Reasoning levels and the model menu
+
+Each registry entry in `packages/server/src/models.ts` lists the reasoning
+efforts its provider accepts. A chat can store one level. The server sends it as
+`reasoning.effort` on a Responses request and as `reasoning: { effort }` on a
+Gateway chat-completions request. With no effort, the request has no effort
+field, so the body is the same as before levels existed. Context summaries,
+standalone compaction and Jev never send an effort.
+
+| Model               | Accepted efforts                                | Default effort |
+| ------------------- | ----------------------------------------------- | -------------- |
+| DeepSeek V4.1 Flash | `none`, `low`, `high`, `max`                    | none sent      |
+| Kimi K3             | `none`, `low`, `high`, `max`                    | none sent      |
+| GPT-6.1 Sol         | `low`, `medium`, `high`, `xhigh`, `max`         | `medium`       |
+| GPT-6 Astra         | `low`, `medium`, `high`, `xhigh`, `max`         | `medium`       |
+| GPT-6 Luna          | `none`, `low`, `medium`, `high`, `xhigh`, `max` | `medium`       |
+
+GPT-6 Astra does not accept `none`, so the registry does not list it.
+Gateway reasoning text is not shown. Sources:
+[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
+[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra),
+[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna),
+[Gateway reasoning](https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/reasoning),
+and the Gateway endpoint pages under "Gateway hosts". No live call has checked
+an effort value yet.
+
+`GET /v1/models` serves the menu to a signed-in phone: the models in order,
+their labels, the levels each one offers, each default level, and whether Auto
+is offered. The first model is the fallback. A stored model the menu does not
+offer runs the first model, and a stored level the model does not offer runs the
+model's default level. Under Auto, Jev chooses only among the offered models,
+and its choice runs at that model's default level.
+
+The `MODEL_MENU` server setting replaces the whole default menu with one JSON
+value. The value below is the default menu:
+
+```json
+{
+  "auto": true,
+  "models": [
+    {
+      "model": "deepseek",
+      "levels": ["none", "low", "high", "max"],
+      "defaultLevel": null
+    },
+    {
+      "model": "kimi",
+      "levels": ["none", "low", "high", "max"],
+      "defaultLevel": null
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "levels": ["low", "medium", "high", "xhigh", "max"],
+      "defaultLevel": "medium"
+    },
+    {
+      "model": "gpt-6-astra",
+      "levels": ["low", "medium", "high", "xhigh", "max"],
+      "defaultLevel": "medium"
+    }
+  ]
+}
+```
+
+Each `model` must be a registry key, listed once. Each `levels` list must be a
+subset of the model's accepted efforts. `defaultLevel` is `null` (no effort
+sent) or one of the listed levels. An invalid value is logged as
+`MODEL_MENU ignored: <reason>`, and the server serves the default menu. A
+changed value takes effect on the next deployment.
 
 ## Gateway hosts for Kimi and DeepSeek
 
