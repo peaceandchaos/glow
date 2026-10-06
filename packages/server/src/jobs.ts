@@ -71,6 +71,16 @@ function newJob(input: Submission, now: number): StoredJob {
   };
 }
 
+async function lockAttempt(
+  db: SqlConnection,
+  owner: string,
+  attemptId: string,
+): Promise<void> {
+  await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
+    owner + attemptId,
+  ]);
+}
+
 async function readJob(
   db: SqlConnection,
   owner: string,
@@ -187,9 +197,7 @@ export class JobRepository {
       await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
         owner + input.chatId,
       ]);
-      await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
-        owner + input.attemptId,
-      ]);
+      await lockAttempt(db, owner, input.attemptId);
       const cancelled = await db.query(
         'SELECT attempt_id::text AS data FROM cancelled_attempts WHERE owner = $1 AND attempt_id = $2',
         [owner, input.attemptId],
@@ -276,11 +284,7 @@ export class JobRepository {
     claimId: string,
   ): Promise<boolean> {
     return this.database.transaction(async db => {
-      // Dispatch runs inside submit's transaction, which holds this lock until
-      // it commits, so the claim never reads before the job row exists.
-      await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
-        owner + attemptId,
-      ]);
+      await lockAttempt(db, owner, attemptId);
       const job = await lockStateWithoutCheckpoint(db, owner, attemptId);
       if (
         job.claimId ||
@@ -409,9 +413,7 @@ export class JobRepository {
   ): Promise<AttemptSnapshot | null> {
     // Serialize Stop against submission, including a handoff still in flight.
     return this.database.transaction(async db => {
-      await db.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
-        owner + attemptId,
-      ]);
+      await lockAttempt(db, owner, attemptId);
       const job = await readJob(db, owner, attemptId, true).catch(error => {
         if (error instanceof RequestError && error.status === 404) return null;
         throw error;

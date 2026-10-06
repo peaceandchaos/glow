@@ -27,6 +27,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --config jest.config.cjs",
+    "bench:reply-speed": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --config jest.config.cjs --testMatch '<rootDir>/scripts/reply-speed.bench.ts'",
     "dev": "nitro dev",
     "build": "nitro build"
   }

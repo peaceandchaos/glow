@@ -9,7 +9,6 @@ import { schemaSql } from '../src/schema';
 import { runAttempt } from '../src/worker';
 import { submission } from '../tests/fixtures';
 
-// Run: npm test -w packages/server -- --testMatch '<rootDir>/scripts/reply-speed.bench.ts'
 const roundTripMs = 15;
 const chunks = 200;
 const chunkGapMs = 5;
