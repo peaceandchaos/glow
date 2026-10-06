@@ -307,7 +307,7 @@ async function run(
         redirect: 'error',
         stream: true,
         signal: new AbortController().signal,
-        headers: { 'X-Device-Id': device },
+        headers: { Authorization: `Bearer ${device}` },
       },
     );
     const reader = response.body?.getReader();

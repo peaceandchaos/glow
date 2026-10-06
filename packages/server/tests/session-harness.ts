@@ -352,14 +352,6 @@ export async function startServer(): Promise<Server> {
   };
 }
 
-function asBearer(init: HeadersInit | undefined): Headers {
-  const headers = new Headers(init);
-  const token = headers.get('X-Device-Id');
-  headers.delete('X-Device-Id');
-  if (token !== null) headers.set('Authorization', `Bearer ${token}`);
-  return headers;
-}
-
 function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
   return async (url, init) => {
     const method = init.method ?? 'GET';
@@ -381,10 +373,7 @@ function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
     if (typeof requestInit.body === 'string' && network.rewrite)
       requestInit.body = network.rewrite(requestInit.body);
     const response = await handleRequest(
-      new Request(url, {
-        ...requestInit,
-        headers: asBearer(requestInit.headers),
-      }),
+      new Request(url, requestInit),
       server.services,
     );
     if (network.shouldLose(url, method)) {
@@ -444,11 +433,7 @@ class InProcessSocket implements ClientSocket {
         return;
       }
       void server.socket
-        .upgrade(
-          new Request('http://127.0.0.1:8787/v1/responses', {
-            headers: asBearer(headers),
-          }),
-        )
+        .upgrade(new Request('http://127.0.0.1:8787/v1/responses', { headers }))
         .then(
           admitted => {
             Object.assign(context, admitted.context);

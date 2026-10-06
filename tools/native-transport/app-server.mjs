@@ -124,24 +124,24 @@ const services = {
 
 const adopted = new Map();
 function adopt(headers) {
-  const token = sessionTokenSchema.safeParse(headers['x-device-id']);
+  const token = sessionTokenSchema.safeParse(
+    headers.authorization?.replace(/^Bearer /u, ''),
+  );
   if (!token.success) return Promise.resolve();
   if (!adopted.has(token.data))
     adopted.set(
       token.data,
       sessions
         .create(token.data, harnessUser)
-        .then(() => record({ event: 'adopted-device' })),
+        .then(() => record({ event: 'adopted-session' })),
     );
   return adopted.get(token.data);
 }
 
-function bearerHeaders(nodeHeaders) {
+function webHeaders(nodeHeaders) {
   const headers = new Headers();
   for (const [name, value] of Object.entries(nodeHeaders))
     if (typeof value === 'string') headers.set(name, value);
-  const device = headers.get('X-Device-Id');
-  if (device !== null) headers.set('Authorization', `Bearer ${device}`);
   return headers;
 }
 
@@ -201,7 +201,7 @@ async function api(req, res) {
   await adopt(req.headers);
   const controller = new AbortController();
   res.on('close', () => controller.abort());
-  const headers = bearerHeaders(req.headers);
+  const headers = webHeaders(req.headers);
   const body =
     req.method === 'GET' || req.method === 'HEAD'
       ? undefined
@@ -241,7 +241,7 @@ async function upgrade(req, socket, head) {
   try {
     admitted = await route.upgrade(
       new Request(`http://localhost${req.url}`, {
-        headers: bearerHeaders(req.headers),
+        headers: webHeaders(req.headers),
       }),
     );
   } catch (error) {
