@@ -2,7 +2,7 @@ import { getVercelOidcToken } from '@vercel/oidc';
 import type { ModelKey, ResponseInputItem } from '../../../shared/contracts';
 import { parseGatewayEvent, SseDecoder } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
-import { models } from './models';
+import { gatewayHosts, isGatewayModel, models } from './models';
 import type { BeforePaidCall, ProviderChunk } from './provider';
 
 type GatewayPart =
@@ -47,6 +47,9 @@ export class GatewayClient {
     onChunk: (chunk: ProviderChunk) => Promise<void>,
     maxOutput = models[model].maxOutput,
   ): Promise<string> {
+    if (!isGatewayModel(model))
+      throw new ProviderFailure('This model does not run through AI Gateway.');
+    const hosts = gatewayHosts[model];
     const messages = gatewayMessages(items);
     const token = this.options.apiKey ?? (await getVercelOidcToken());
     await beforeCall();
@@ -68,6 +71,17 @@ export class GatewayClient {
             messages,
             stream: true,
             max_tokens: maxOutput,
+            // Per-request zeroDataRetention needs Pro or Enterprise, so it is
+            // not sent. The only list keeps requests on hosts with Vercel ZDR
+            // agreements.
+            providerOptions: {
+              gateway: {
+                order: hosts,
+                only: hosts,
+                disallowPromptTraining: true,
+                inferenceRegion: { scope: 'zone', geoRegion: 'us' },
+              },
+            },
           }),
         },
       );
