@@ -74,6 +74,44 @@ test('new chats inherit then independently remember the current picker across re
   expect(restored.submission(bReply.id).history[0].text).toBe('Chat B');
 });
 
+test('a chat level persists, rides each reply and its retry, and a new model drops it', () => {
+  const storage = new MemoryStorage();
+  const archive = new ChatArchive(storage, randomUUID);
+  archive.recover();
+  const chat = archive.createChat('gpt-6.1-sol');
+  const plain = archive.createTurn(chat.id, 'At the default level', []);
+  expect(storage.values.get(`archive/chat/${chat.id}`)).not.toContain(
+    '"level"',
+  );
+  expect(storage.values.get(`archive/message/${plain.id}`)).not.toContain(
+    '"level"',
+  );
+  expect(archive.submission(plain.id)).not.toHaveProperty('level');
+  complete(archive, plain);
+
+  archive.setLevel(chat.id, 'high');
+  const restored = new ChatArchive(storage, randomUUID);
+  restored.recover();
+  expect(restored.chat(chat.id).level).toBe('high');
+  const reply = restored.createTurn(chat.id, 'At high', []);
+  expect(restored.submission(reply.id).level).toBe('high');
+  complete(restored, reply);
+  restored.setLevel(chat.id, 'low');
+  const retry = restored.retry(reply.id);
+  expect(restored.submission(retry.id)).toMatchObject({
+    retryModel: 'kimi',
+    level: 'high',
+  });
+
+  const next = restored.createChat('deepseek');
+  expect(next).toMatchObject({ picker: 'gpt-6.1-sol', level: 'low' });
+  restored.setPicker(next.id, 'gpt-6-astra');
+  expect(restored.chat(next.id)).not.toHaveProperty('level');
+  expect(storage.values.get(`archive/chat/${next.id}`)).not.toContain(
+    '"level"',
+  );
+});
+
 test('retry versions preserve both continuations and restore the selected path', () => {
   const archive = new ChatArchive(new MemoryStorage(), randomUUID);
   const chat = archive.createChat('auto');
