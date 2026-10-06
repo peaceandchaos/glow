@@ -17,8 +17,13 @@ import {
   type ClientSocket,
 } from '../../app/src/network/client';
 import { ChatSession } from '../../app/src/state/session';
-import { handleRequest, SocketConnection, type ApiServices } from '../src/api';
-import { newSessionToken, sessionOwner } from '../src/auth';
+import {
+  handleRequest,
+  socketRoute,
+  type ApiServices,
+  type SocketPeer,
+} from '../src/api';
+import { newSessionToken } from '../src/auth';
 import { ProviderFailure } from '../src/errors';
 import { JobRepository } from '../src/jobs';
 import type {
@@ -275,6 +280,7 @@ export type Server = {
   postgres: PGlite;
   jobs: JobRepository;
   services: ApiServices;
+  socket: ReturnType<typeof socketRoute>;
   owner: string;
   token: SessionToken;
   providers: FakeProviders;
@@ -326,6 +332,7 @@ export async function startServer(): Promise<Server> {
     postgres,
     jobs,
     services,
+    socket: socketRoute(() => services),
     owner,
     token,
     providers,
@@ -404,33 +411,33 @@ function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
   };
 }
 
-// A WebSocket frame shell around the route's own SocketConnection. Frames
-// cross asynchronously, as they would over a network.
+// A WebSocket frame shell around the route's own socket hooks. Frames cross
+// asynchronously, as they would over a network.
 class InProcessSocket implements ClientSocket {
   readyState = 'CONNECTING';
   onopen: (() => void) | null = null;
   onmessage: ((event: { data: string }) => void) | null = null;
   onclose: ((event: { code: number }) => void) | null = null;
   onerror: ((error: string) => void) | null = null;
-  private readonly connection: SocketConnection;
+  private readonly peer: SocketPeer;
 
   constructor(
-    server: Server,
+    private readonly server: Server,
     private readonly network: Network,
     headers: Record<string, string>,
   ) {
-    this.connection = new SocketConnection(
-      asBearer(headers),
-      () => server.services,
-      {
-        isOpen: () => this.readyState === 'OPEN',
-        send: data => {
-          if (this.readyState === 'OPEN')
-            setTimeout(() => this.onmessage?.({ data }), 0);
-        },
-        close: code => this.close(code),
+    const context = {};
+    const isOpen = () => this.readyState === 'OPEN';
+    this.peer = {
+      context,
+      get websocket() {
+        return { readyState: isOpen() ? 1 : 3 };
       },
-    );
+      send: data => {
+        if (isOpen()) setTimeout(() => this.onmessage?.({ data }), 0);
+      },
+      close: code => this.close(code),
+    };
     server.sockets.push(this);
     setTimeout(() => {
       if (!network.online) {
@@ -438,24 +445,33 @@ class InProcessSocket implements ClientSocket {
         this.onerror?.('offline');
         return;
       }
-      void sessionOwner(asBearer(headers), server.services).then(
-        () => {
-          this.readyState = 'OPEN';
-          this.onopen?.();
-        },
-        () => this.close(1008),
-      );
+      // Production answers a refused upgrade with HTTP 401. This shell
+      // closes the socket with 1008 instead.
+      void server.socket
+        .upgrade(
+          new Request('http://127.0.0.1:8787/v1/responses', {
+            headers: asBearer(headers),
+          }),
+        )
+        .then(
+          admitted => {
+            Object.assign(context, admitted.context);
+            this.readyState = 'OPEN';
+            this.onopen?.();
+          },
+          () => this.close(1008),
+        );
     }, 0);
   }
 
   send(data: string): void {
     const frame = this.network.rewrite?.(data) ?? data;
-    void this.connection.message(() => frame);
+    void this.server.socket.message(this.peer, { text: () => frame });
   }
 
   // A frame from some other command on this connection.
   inject(data: string): void {
-    void this.connection.message(() => data);
+    void this.server.socket.message(this.peer, { text: () => data });
   }
 
   // A frame from the server, such as the route's end-of-window detach.
@@ -467,7 +483,7 @@ class InProcessSocket implements ClientSocket {
   close(code = 1000): void {
     if (this.readyState === 'CLOSED') return;
     this.readyState = 'CLOSED';
-    this.connection.close();
+    this.server.socket.close(this.peer);
     this.onclose?.({ code });
   }
 }

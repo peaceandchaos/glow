@@ -1,7 +1,12 @@
 import type { JWTPayload, JWTVerifyGetKey } from 'jose';
 import { createHash, randomUUID } from 'node:crypto';
 import { decodeJson, sessionResponseSchema } from '../../../shared/contracts';
-import { handleRequest, SocketConnection, type ApiServices } from '../src/api';
+import {
+  handleRequest,
+  socketRoute,
+  type ApiServices,
+  type SocketPeer,
+} from '../src/api';
 import {
   appleUser,
   newSessionToken,
@@ -324,63 +329,80 @@ test('removing a user from the allowlist locks out their existing sessions', asy
   }
 });
 
+function socketPeer(context: SocketPeer['context']) {
+  const closed: (number | undefined)[] = [];
+  const sent: string[] = [];
+  const peer: SocketPeer = {
+    context,
+    websocket: { readyState: 1 },
+    send: text => sent.push(text),
+    close: code => closed.push(code),
+  };
+  return { peer, closed, sent };
+}
+
+const attachFrame = {
+  text: () =>
+    JSON.stringify({ kind: 'attach', attemptId: randomUUID(), after: 0 }),
+};
+
+function socketUpgrade(server: Server, headers: HeadersInit) {
+  return socketRoute(() => server.services).upgrade(
+    new Request('https://fixture.example/v1/responses', { headers }),
+  );
+}
+
 test.each([
   ['no credential', undefined],
   ['a malformed token', 'Bearer not-a-session-token'],
   ['a token the server never issued', `Bearer ${newSessionToken()}`],
-])(
-  'the socket closes for %s without running the frame',
-  async (_name, authorization) => {
-    const server = await startServer();
-    const jobs = jest.spyOn(server.services, 'jobs');
-    const closed: number[] = [];
-    const sent: string[] = [];
-    try {
-      const connection = new SocketConnection(
-        new Headers(authorization ? { Authorization: authorization } : {}),
-        () => server.services,
-        {
-          isOpen: () => true,
-          send: text => sent.push(text),
-          close: code => closed.push(code),
-        },
-      );
-      await connection.message(() =>
-        JSON.stringify({ kind: 'attach', attemptId: randomUUID(), after: 0 }),
-      );
-      expect(closed).toEqual([1008]);
-      expect(sent).toEqual([]);
-      expect(jobs).not.toHaveBeenCalled();
-    } finally {
-      await server.close();
-    }
-  },
-);
-
-test('the socket admits a signed-in user until the user leaves the allowlist', async () => {
+])('the socket upgrade refuses %s with 401', async (_name, authorization) => {
   const server = await startServer();
-  const closed: number[] = [];
-  const sent: string[] = [];
+  try {
+    await expect(
+      socketUpgrade(
+        server,
+        authorization ? { Authorization: authorization } : {},
+      ),
+    ).rejects.toHaveProperty('status', 401);
+  } finally {
+    await server.close();
+  }
+});
+
+test('the socket looks up its session once, at the upgrade, and then checks only the allowlist', async () => {
+  const server = await startServer();
   try {
     const token = await sessionToken(server);
-    const connection = new SocketConnection(
-      new Headers({ Authorization: `Bearer ${token}` }),
-      () => server.services,
-      {
-        isOpen: () => true,
-        send: text => sent.push(text),
-        close: code => closed.push(code),
-      },
+    const sessions = jest.spyOn(server.services, 'sessions');
+    const route = socketRoute(() => server.services);
+    const { context } = await route.upgrade(
+      new Request('https://fixture.example/v1/responses', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
     );
-    const frame = () =>
-      JSON.stringify({ kind: 'attach', attemptId: randomUUID(), after: 0 });
-    await connection.message(frame);
-    expect(closed).toEqual([]);
-    expect(sent).toHaveLength(1);
+    const { peer, closed, sent } = socketPeer(context);
+    await route.message(peer, attachFrame);
+    await route.message(peer, attachFrame);
+    expect(sessions).toHaveBeenCalledTimes(1);
+    expect([sent.length, closed]).toEqual([2, []]);
     server.services.allowedAppleUserIds = '';
-    await connection.message(frame);
-    expect(closed).toEqual([1008]);
-    expect(sent).toHaveLength(1);
+    await route.message(peer, attachFrame);
+    expect([sent.length, closed]).toEqual([2, [1008]]);
+  } finally {
+    await server.close();
+  }
+});
+
+test('a frame on a socket the upgrade did not admit closes with 1011 and runs nothing', async () => {
+  const server = await startServer();
+  const jobs = jest.spyOn(server.services, 'jobs');
+  try {
+    const { peer, closed, sent } = socketPeer({});
+    await socketRoute(() => server.services).message(peer, attachFrame);
+    expect(closed).toEqual([1011]);
+    expect(sent).toEqual([]);
+    expect(jobs).not.toHaveBeenCalled();
   } finally {
     await server.close();
   }
