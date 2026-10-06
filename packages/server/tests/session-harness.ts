@@ -411,8 +411,6 @@ function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
   };
 }
 
-// A WebSocket frame shell around the route's own socket hooks. Frames cross
-// asynchronously, as they would over a network.
 class InProcessSocket implements ClientSocket {
   readyState = 'CONNECTING';
   onopen: (() => void) | null = null;
@@ -445,8 +443,6 @@ class InProcessSocket implements ClientSocket {
         this.onerror?.('offline');
         return;
       }
-      // Production answers a refused upgrade with HTTP 401. This shell
-      // closes the socket with 1008 instead.
       void server.socket
         .upgrade(
           new Request('http://127.0.0.1:8787/v1/responses', {
