@@ -10,9 +10,6 @@ export const theme = {
   border: '#2C2C2E',
   sendActive: '#FFFFFF',
   sendInactive: '#48484A',
-  // The model menu's panel is opaque, because React Native has no backdrop
-  // blur on iOS and text would show through a translucent panel. The color is
-  // rgba(28, 28, 30, 0.92) over the black background.
   menuBackground: '#1A1A1C',
   menuText: '#EAEAEA',
 } as const;
