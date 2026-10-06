@@ -130,7 +130,6 @@ export async function executeCommand(
   }
 }
 
-// The parts of a crossws peer that the socket route reads.
 export type SocketPeer = {
   readonly context: object;
   readonly websocket: { readonly readyState?: number };
@@ -138,9 +137,6 @@ export type SocketPeer = {
   close(code?: number, reason?: string): void;
 };
 
-// One phone WebSocket, for an owner whose session the upgrade checked. Each
-// accepted attempt gets its own delivery reader; closing the socket detaches
-// those readers without cancelling their jobs.
 class SocketConnection {
   private readonly readers = new Map<string, AbortController>();
 
@@ -234,7 +230,7 @@ class SocketConnection {
     }
   }
 
-  close(): void {
+  detachReaders(): void {
     for (const reader of this.readers.values()) reader.abort();
     this.readers.clear();
   }
@@ -247,11 +243,9 @@ function connectionOf({ context }: SocketPeer): SocketConnection | null {
     : null;
 }
 
-// The phone socket's crossws hooks. The upgrade looks up the session once.
-// A refused credential throws sessionOwner's 401 Response, which crossws
-// sends in place of the upgrade.
 export function socketRoute(services: () => ApiServices) {
   return {
+    // crossws answers the handshake with a Response thrown from upgrade().
     async upgrade(request: Request) {
       const connection = await SocketConnection.admit(
         request.headers,
@@ -261,13 +255,11 @@ export function socketRoute(services: () => ApiServices) {
     },
     async message(peer: SocketPeer, message: { text(): string }) {
       const connection = connectionOf(peer);
-      // A peer the upgrade did not admit is a server fault. The app reads
-      // 1008 as signed out, so this closes with 1011.
       if (connection) await connection.message(peer, () => message.text());
       else peer.close(1011, 'Server error');
     },
     close(peer: SocketPeer) {
-      connectionOf(peer)?.close();
+      connectionOf(peer)?.detachReaders();
     },
   };
 }

@@ -17,8 +17,8 @@ export class JevClient {
     const { createGateway } = await import('@ai-sdk/gateway');
     const { experimental_evaluate: evaluate } = await import('ai');
     return {
-      // Without a key, the SDK reads AI_GATEWAY_API_KEY, which gatewayAuth()
-      // found empty, and then signs in with the Vercel OIDC token.
+      // With no apiKey, @ai-sdk/gateway reads AI_GATEWAY_API_KEY, and signs in
+      // with the Vercel OIDC token when that is empty too.
       gateway: createGateway({
         apiKey: this.auth.kind === 'api-key' ? this.auth.apiKey : undefined,
         fetch: this.fetcher,
