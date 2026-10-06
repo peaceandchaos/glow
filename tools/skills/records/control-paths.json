@@ -1,0 +1,329 @@
+{
+  "change": "control-paths",
+  "base": {
+    "commit": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+    "patch": "4b97b33b52b7262afa385bd3fbb1291cda909f88"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": [
+        ".github/CODEOWNERS",
+        "AGENTS.md",
+        "tools/github/integration-rules.json"
+      ],
+      "findings": [
+        {
+          "finding": "The change is safe because GitHub still requires a code-owner approval for owned paths when required approvals is 0, and it reads CODEOWNERS from the base branch. This PR is the proof: it touches .github/CODEOWNERS while main's CODEOWNERS owns every file, so it must show review required before the owner approves.",
+          "cites": "How sure are you 3",
+          "none": "Proof runs on this PR's own review state before merge."
+        },
+        {
+          "finding": "CI runs npm run verify:current from the candidate, which reads package.json scripts, tools/**, the jest and babel configs, tsconfig, the lint configs and the patches. CODEOWNERS owns each of them, plus .github, .husky, .agents, .claude, AGENTS.md, .gitignore and .node-version. It covers every path in the routing controls rule.",
+          "cites": "Steps 3",
+          "commit": "3c4749f3b6c88f5e9fd5c9ac97cb828cd82a1d4d",
+          "patch": "4078d66c6205a15894b3dd4749ee67f29055071d"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01UUYeUm3sFBQwtRQ5ybWFFV",
+          "time": "2026-10-06T22:20:05.563Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "0iOn27RZTPS7R19woL47w9YSN5NoRDzuYapM2u+2cCvEfshLNqNL0oAiw3w5HcVYLB67YzxRxn+ypDZx75yoBA=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The diff adds no code paths, casts or defensive checks.",
+          "cites": "Focus Areas",
+          "none": "Config and prose only."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01A41fSQo4MsRZ4tMtRjQMkp",
+          "time": "2026-10-06T22:20:05.705Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "mylfKG2n4dMVN4O+pe247o3tM9Na3wu72SSjG5AYhe3KZEZhVebkuAFAoT/f0rQgRgkm74/+0xtHVhJ21gxsAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "comment-sicko flagged the three CODEOWNERS comment lines as restating docs/github-controls.md. They are deleted.",
+          "cites": "Steps 3",
+          "commit": "3c4749f3b6c88f5e9fd5c9ac97cb828cd82a1d4d",
+          "patch": "4078d66c6205a15894b3dd4749ee67f29055071d"
+        },
+        {
+          "finding": "comment-sicko proposed moving tools/skills/records out of tools so the unowned line can go. That moves the record path used by tools/skills and the docs, so it is outside this change. The unowned line stays without a comment.",
+          "cites": "Steps 4",
+          "none": "Out of scope for this change; the unowned line works as written."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01QLMgp9LWNTKb29uDpgbwaC",
+          "time": "2026-10-06T22:20:05.786Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "iyr09Z43tuhKq3dUJHoSZNOjq1/dsujKrXiwg7f69UM3SCz3DEKKFmHxMs6VZQg2QvvWtZZoiXgnzbd57642Cw=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The ruleset test passes with the new count, and the live ruleset reads required_approving_review_count 0 with require_code_owner_review true. The code-owner proof is this PR's REVIEW_REQUIRED state before approval.",
+          "cites": "Prove It Works",
+          "none": "Checked against the live ruleset and the test run."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_016ZRWgTPCCuJzEfUFfDpymo",
+          "time": "2026-10-06T22:20:05.863Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "G+lzHJCjf9YmmIYMpVXJkSrzueQazBaBOVWOPeMVxnZ4Rbfbt8QyF+uDV5rC7p3lxXLeti2tjQJ97ayRJoE5BA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-sequence-verifiable-units",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The owner changed the live ruleset first, which alone loosens nothing while CODEOWNERS owns every file. This PR narrows CODEOWNERS second, so each step leaves a checkable state.",
+          "cites": "Sequence work into verifiable units",
+          "none": "Order already verified."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-sequence-verifiable-units",
+          "source": "Skill",
+          "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01ASjeUa7mGBgxi1r5pdBHHm",
+          "time": "2026-10-06T22:20:05.942Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "fGXKTijJqHoTLsNpydMA5Ac4TzBxPE6X4ZOLuUhTKJFnJ8RB6NLu36qtqm6Oh6WRiR0YW8IxKooAtc9i9wqjCQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-test-behavior-not-implementation",
+      "files": [
+        ".github/CODEOWNERS",
+        "AGENTS.md",
+        "tools/github/integration-rules.json"
+      ],
+      "findings": [
+        {
+          "finding": "The ruleset test checks rule types, checks and conditions, not the approval count, so it does not freeze the changed value. No test asserts CODEOWNERS; GitHub's review state on a PR is the behavior check.",
+          "cites": "Test behavior, not implementation",
+          "none": "No test change needed."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-test-behavior-not-implementation",
+          "source": "Skill",
+          "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01VYgk3aBGcX7aBdorz4omc2",
+          "time": "2026-10-06T22:20:06.025Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "6vWTyNh4UXg/6s3Ir97DP3Cgm/0s+W6INHifYHeF5UtsmjGwB1szqPnXLT2M5J2Q7/6jKd7tXDumW+HellpbCw=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": [
+        "<change>",
+        "AGENTS.md",
+        "README.md",
+        "docs/github-controls.md"
+      ],
+      "findings": [
+        {
+          "finding": "The docs line after Keep auto-merge off began with It, which read as pointing at the instruction. It now names the ruleset. A semicolon in AGENTS.md became a period.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "3c4749f3b6c88f5e9fd5c9ac97cb828cd82a1d4d",
+          "patch": "4078d66c6205a15894b3dd4749ee67f29055071d"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01931dJ2dy5pCii1WmRvkGrQ",
+          "time": "2026-10-06T22:20:06.385Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "OOjh0D6QxOjrOKhsPJrkj+WsXhuGYYrmaBbT49W4C+6qSLbOFVxNVLcS3CekCXplGAev8PYOi2zV6LUQPHuGCw=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": [
+        "<change>",
+        "AGENTS.md",
+        "README.md",
+        "docs/github-controls.md"
+      ],
+      "findings": [
+        {
+          "finding": "The new doc sentences use plain words, active voice and no em dashes.",
+          "cites": "Plain speech",
+          "none": "No slop patterns found."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01DDstMafUMHt5gn8eY4wRen",
+          "time": "2026-10-06T22:20:06.651Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "lDtmhP37tpMXHbtNIzHih40VJR8jLbkq0R4EbDfplY7ZNORlRCNVOgu71n9E/1GEOxuXrJxZ0LYKy0D47cu/CQ=="
+        }
+      ]
+    },
+    {
+      "skill": "writing-for-agents",
+      "files": ["AGENTS.md"],
+      "findings": [
+        {
+          "finding": "AGENTS.md now points at .github/CODEOWNERS for the control paths instead of restating them, keeping one source of truth.",
+          "cites": "Pruning",
+          "commit": "3c4749f3b6c88f5e9fd5c9ac97cb828cd82a1d4d",
+          "patch": "4078d66c6205a15894b3dd4749ee67f29055071d"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "writing-for-agents",
+          "source": "Skill",
+          "sha256": "a842323e664e5af104eac5c97ad22fda929ebeb62d81c501161ac1f6f482db58",
+          "partial": false,
+          "session": "7ead68f4-a2ad-4e93-8957-9cf5200d7a1f",
+          "agent": null,
+          "agentType": null,
+          "toolUseId": "toolu_01Fp4jwSSCymMhLmhrxQoYei",
+          "time": "2026-10-06T22:20:06.894Z",
+          "cwd": "4b82f3b6fb74fb1f3a97dc31e26565d6f48d6d4778c0b82312d746ab465b314a",
+          "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+          "branch": "codeowners-control",
+          "head": "ff3323d7d7f628788b8554c82c83a9a8f0a05619",
+          "headPatch": "4b97b33b52b7262afa385bd3fbb1291cda909f88",
+          "sig": "qVt6abLI/XhhtCn3GTFNZbFJYZp1z9XnSJR/ReJjeA8lmLyfIV0d+jDitK42YzDB2vnZNkUrf0Hn6UCeVMIVAA=="
+        }
+      ]
+    }
+  ]
+}
