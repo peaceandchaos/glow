@@ -1,8 +1,8 @@
-import type { ModelKey, Submission } from '../../../shared/contracts';
+import type { Submission } from '../../../shared/contracts';
 import { makeCheckpoint, prepareContext, textItem } from './compaction/context';
 import type { GatewayClient } from './gateway';
 import type { JevClient } from './jev';
-import { models, type Effort } from './models';
+import { models, type Effort, type RegistryKey } from './models';
 import type {
   BeforePaidCall,
   PreparedContext,
@@ -19,13 +19,18 @@ export class LiveProviders implements Providers {
     private readonly jev: JevClient,
   ) {}
 
-  select(input: Submission, signal: AbortSignal, beforeCall: BeforePaidCall) {
-    return this.jev.select(input, signal, beforeCall);
+  select(
+    input: Submission,
+    signal: AbortSignal,
+    beforeCall: BeforePaidCall,
+    offered: readonly string[],
+  ) {
+    return this.jev.select(input, signal, beforeCall, offered);
   }
 
   prepare(
     input: Submission,
-    model: ModelKey,
+    model: RegistryKey,
     signal: AbortSignal,
     beforeCall: BeforePaidCall,
   ): Promise<PreparedContext> {
@@ -46,7 +51,7 @@ export class LiveProviders implements Providers {
 
   async generate(
     input: Submission,
-    model: ModelKey,
+    model: RegistryKey,
     context: PreparedContext,
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,

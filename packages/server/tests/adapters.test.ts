@@ -299,7 +299,7 @@ test('Jev uses one evaluation with no retry and propagates AbortSignal', async (
   };
   const client = new JevClient(exampleGatewayAuth, fetcher);
   await expect(
-    client.select(submission(), controller.signal, before),
+    client.select(submission(), controller.signal, before, ['deepseek']),
   ).rejects.toThrow();
   expect(aborted).toBe(true);
   expect(calls).toBe(1);
@@ -313,6 +313,39 @@ test('Jev 500 failures do not trigger a second paid call', async () => {
       Response.json({ error: 'Fixture failure' }, { status: 500 }),
     );
   });
-  await expect(client.select(submission(), signal, before)).rejects.toThrow();
+  await expect(
+    client.select(submission(), signal, before, ['deepseek']),
+  ).rejects.toThrow();
   expect(calls).toBe(1);
+});
+
+test('Jev sees only the offered models and refuses any other answer', async () => {
+  const bodies: string[] = [];
+  const jev = (choice: string) =>
+    new JevClient(exampleGatewayAuth, (_url, init) => {
+      bodies.push(typeof init?.body === 'string' ? init.body : '');
+      return Promise.resolve(
+        Response.json({ answers: { model: { type: 'choice', choice } } }),
+      );
+    });
+  expect(
+    await jev('kimi').select(submission(), signal, before, [
+      'kimi',
+      'gpt-6.1-sol',
+    ]),
+  ).toBe('kimi');
+  const sent = z
+    .object({
+      questions: z.object({
+        model: z.object({ criteria: z.record(z.string(), z.string()) }),
+      }),
+    })
+    .parse(JSON.parse(bodies[0]));
+  expect(Object.keys(sent.questions.model.criteria)).toEqual([
+    'kimi',
+    'gpt-6.1-sol',
+  ]);
+  await expect(
+    jev('deepseek').select(submission(), signal, before, ['kimi']),
+  ).rejects.toThrow();
 });

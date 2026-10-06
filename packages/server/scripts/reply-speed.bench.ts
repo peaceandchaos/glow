@@ -1,5 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import { PGlite } from '@electric-sql/pglite';
+import { bakedCatalog } from '../../../shared/catalog';
 import { isTerminal } from '../../../shared/contracts';
 import type { Database } from '../src/database';
 import { deliverJob } from '../src/delivery';
@@ -93,6 +94,7 @@ async function measureReply(postgres: PGlite) {
   await runAttempt({
     jobs,
     providers,
+    catalog: bakedCatalog,
     owner,
     attemptId: input.attemptId,
     runId: 'run',

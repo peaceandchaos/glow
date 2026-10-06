@@ -195,8 +195,8 @@ test('Auto heads the menu, and the chat can go from Auto to a model and back to 
   await view.open();
   expect(options()).toEqual([
     'Auto',
-    'Kimi K3',
     'DeepSeek V4.1 Flash',
+    'Kimi K3',
     'GPT-6.1 Sol',
     'GPT-6 Astra',
   ]);

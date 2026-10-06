@@ -11,11 +11,8 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  modelLabels,
-  pickerSchema,
-  type Picker,
-} from '../../../../shared/contracts';
+import { bakedCatalog } from '../../../../shared/catalog';
+import type { Picker } from '../../../../shared/contracts';
 import { Glass } from './Glass';
 import { Icon } from './Icon';
 import { theme } from '../theme';
@@ -30,8 +27,10 @@ const optionSlop = {
 };
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
 
-const pickerLabel = (picker: Picker): string =>
-  picker === 'auto' ? 'Auto' : modelLabels[picker];
+const menuOptions: { key: Picker; label: string }[] = [
+  { key: 'auto', label: 'Auto' },
+  ...bakedCatalog.models,
+];
 
 export const Header = React.memo(function ({
   shown,
@@ -60,7 +59,13 @@ export const Header = React.memo(function ({
     transitionTimingFunction: easeOut,
   };
 
-  const label = pickerLabel(picker);
+  const label =
+    picker === 'auto'
+      ? 'Auto'
+      : (
+          bakedCatalog.models.find(entry => entry.key === picker) ??
+          bakedCatalog.models[0]
+        ).label;
   const pick = (option: Picker) => {
     onPickModel(option);
     setOpen(false);
@@ -198,7 +203,7 @@ export const Header = React.memo(function ({
         accessibilityElementsHidden={!open}
         importantForAccessibility={open ? 'auto' : 'no-hide-descendants'}
       >
-        {pickerSchema.options.map(option => {
+        {menuOptions.map(({ key: option, label: optionLabel }) => {
           const selected = option === picker;
           return (
             <Pressable
@@ -206,7 +211,7 @@ export const Header = React.memo(function ({
               onPress={() => pick(option)}
               hitSlop={optionSlop}
               accessibilityRole="button"
-              accessibilityLabel={pickerLabel(option)}
+              accessibilityLabel={optionLabel}
               accessibilityState={{ selected }}
               style={({ pressed }) => [
                 styles.option,
@@ -218,7 +223,7 @@ export const Header = React.memo(function ({
               ]}
             >
               <Text style={styles.check}>{selected ? '✓' : ''}</Text>
-              <Text style={styles.optionLabel}>{pickerLabel(option)}</Text>
+              <Text style={styles.optionLabel}>{optionLabel}</Text>
             </Pressable>
           );
         })}

@@ -1,5 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { PGlite } from '@electric-sql/pglite';
+import { decodeJson, submissionSchema } from '../../../shared/contracts';
 import { makeCheckpoint } from '../src/compaction/context';
 import type { Database } from '../src/database';
 import { JobRepository, staleAfterMs } from '../src/jobs';
@@ -37,6 +38,23 @@ test('a lost acceptance response recovers the same job without dispatching again
   const second = await jobs.submit(owner, input, dispatch);
   expect(first.snapshot.attemptId).toBe(second.snapshot.attemptId);
   expect(second.runId).toBe('run_1');
+  expect(dispatchCount).toBe(1);
+});
+
+test('an input from before reply levels keeps its fingerprint and stored form', async () => {
+  const sent = JSON.stringify(submission());
+  const input = decodeJson(submissionSchema, sent);
+  await jobs.submit(owner, input, dispatch);
+  const stored = await database.query(
+    'SELECT request_hash AS data FROM chat_jobs WHERE owner = $1 AND attempt_id = $2',
+    [owner, input.attemptId],
+  );
+  expect(stored.rows[0].data).toBe(
+    createHash('sha256').update(sent).digest('hex'),
+  );
+  const reread = await jobs.input(owner, input.attemptId);
+  expect(JSON.stringify(reread)).toBe(sent);
+  await jobs.submit(owner, reread, dispatch);
   expect(dispatchCount).toBe(1);
 });
 

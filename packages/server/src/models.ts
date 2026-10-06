@@ -1,9 +1,17 @@
 import { z } from 'zod';
-import type { ModelKey } from '../../../shared/contracts';
+import type { Catalog, CatalogModel } from '../../../shared/catalog';
 
 const efforts = ['none', 'low', 'medium', 'high', 'xhigh', 'max'] as const;
 export type Effort = (typeof efforts)[number];
 const effortSchema = z.enum(efforts);
+const levelLabels: Record<Effort, string> = {
+  none: 'None',
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  xhigh: 'Extra high',
+  max: 'Max',
+};
 
 type Limits = {
   id: string;
@@ -68,7 +76,7 @@ export const models = {
     threshold: 800_000,
     compactThreshold: 200_000,
   },
-} satisfies Record<ModelKey, ModelConfig>;
+} satisfies Record<string, ModelConfig>;
 export type RegistryKey = keyof typeof models;
 
 export function isRegistryKey(key: string): key is RegistryKey {
@@ -116,7 +124,7 @@ const menuSchema = z.strictObject({
   models: z.tuple([menuEntrySchema], menuEntrySchema),
 });
 // Array order is menu order; the first model is the fallback and the first chat's model.
-export type Menu = z.infer<typeof menuSchema>;
+type Menu = z.infer<typeof menuSchema>;
 
 export const defaultMenu: Menu = {
   auto: true,
@@ -154,4 +162,24 @@ export function menuFrom(raw: string | undefined): Menu {
     );
     return defaultMenu;
   }
+}
+
+function catalogModel(entry: Menu['models'][number]): CatalogModel {
+  return {
+    key: entry.model,
+    label: models[entry.model].label,
+    levels: entry.levels.map(level => ({
+      key: level,
+      label: levelLabels[level],
+    })),
+    defaultLevel: entry.defaultLevel,
+  };
+}
+
+export function catalogFrom(menu: Menu): Catalog {
+  const [first, ...rest] = menu.models;
+  return {
+    auto: menu.auto,
+    models: [catalogModel(first), ...rest.map(catalogModel)],
+  };
 }

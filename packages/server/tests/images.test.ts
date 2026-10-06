@@ -4,14 +4,15 @@ import { WebSocketServer } from 'ws';
 import {
   submissionCommands,
   submissionSchema,
-  type ModelKey,
   type Submission,
 } from '../../../shared/contracts';
+import { bakedCatalog } from '../../../shared/catalog';
 import { handleRequest, type ApiServices } from '../src/api';
 import { newSessionToken } from '../src/auth';
 import { GatewayClient } from '../src/gateway';
 import { JevClient } from '../src/jev';
 import { JobRepository } from '../src/jobs';
+import type { RegistryKey } from '../src/models';
 import { LiveProviders } from '../src/providers';
 import { ResponsesClient } from '../src/responses';
 import { runAttempt } from '../src/worker';
@@ -115,6 +116,7 @@ beforeAll(async () => {
         runAttempt({
           jobs,
           providers,
+          catalog: bakedCatalog,
           owner: dispatchOwner,
           attemptId,
           runId: `run-${attemptId}`,
@@ -138,7 +140,7 @@ beforeEach(() => {
   upstream.length = 0;
 });
 
-function photoTurn(model: ModelKey, images: string[]): Submission {
+function photoTurn(model: RegistryKey, images: string[]): Submission {
   const userTurnId = randomUUID();
   return {
     version: 1,
@@ -182,7 +184,7 @@ async function submitTurn(input: Submission) {
   return { status, error };
 }
 
-test.each<ModelKey>(['kimi', 'deepseek', 'gpt-6.1-sol', 'gpt-6-astra'])(
+test.each<RegistryKey>(['kimi', 'deepseek', 'gpt-6.1-sol', 'gpt-6-astra'])(
   'a 1 MB photo from the picker reaches %s and the reply completes',
   async model => {
     expect(photo.length).toBeGreaterThan(1_000_000);
@@ -196,7 +198,7 @@ test.each<ModelKey>(['kimi', 'deepseek', 'gpt-6.1-sol', 'gpt-6-astra'])(
   },
 );
 
-test.each<ModelKey>(['kimi', 'deepseek', 'gpt-6.1-sol', 'gpt-6-astra'])(
+test.each<RegistryKey>(['kimi', 'deepseek', 'gpt-6.1-sol', 'gpt-6-astra'])(
   'a message with the most and largest photos the contract accepts reaches %s',
   async model => {
     const photos = Array.from(

@@ -2,22 +2,16 @@ import { z } from 'zod';
 
 export const contractVersion = 1;
 export const idSchema = z.uuid();
-export const modelSchema = z.enum([
-  'kimi',
-  'deepseek',
-  'gpt-6.1-sol',
-  'gpt-6-astra',
-]);
-export const pickerSchema = z.enum(['auto', ...modelSchema.options]);
-export type ModelKey = z.infer<typeof modelSchema>;
+// Keys stay open so the server can change its model menu without an app
+// build. 'auto' is never a model key, so a picker stays unambiguous.
+export const modelKeySchema = z
+  .string()
+  .regex(/^(?!auto$)[a-z0-9][a-z0-9.-]{0,47}$/u);
+export const levelKeySchema = z.string().regex(/^[a-z]{1,16}$/u);
+export const pickerSchema = z.union([z.literal('auto'), modelKeySchema]);
+export type ModelKey = z.infer<typeof modelKeySchema>;
+export type LevelKey = z.infer<typeof levelKeySchema>;
 export type Picker = z.infer<typeof pickerSchema>;
-
-export const modelLabels: Record<ModelKey, string> = {
-  kimi: 'Kimi K3',
-  deepseek: 'DeepSeek V4.1 Flash',
-  'gpt-6.1-sol': 'GPT-6.1 Sol',
-  'gpt-6-astra': 'GPT-6 Astra',
-};
 
 export const imageSchema = z
   .string()
@@ -68,7 +62,7 @@ export const responseInputItemSchema = z.union([
 export type ResponseInputItem = z.infer<typeof responseInputItemSchema>;
 
 export const checkpointSchema = z.strictObject({
-  model: modelSchema,
+  model: modelKeySchema,
   throughMessageId: idSchema,
   method: z.enum(['openai-compaction', 'kimi-summary', 'deepseek-summary']),
   items: z.array(responseInputItemSchema),
@@ -83,7 +77,10 @@ export const submissionSchema = z.strictObject({
   pathId: idSchema,
   userTurnId: idSchema,
   picker: pickerSchema,
-  retryModel: modelSchema.nullable(),
+  retryModel: modelKeySchema.nullable(),
+  // Absent means the model's default level. Optional, not nullable, so an
+  // older input serializes unchanged.
+  level: levelKeySchema.optional(),
   history: z.array(historyEntrySchema).min(1),
   checkpoints: z.array(checkpointSchema).max(4),
 });
@@ -141,7 +138,7 @@ export const attemptSnapshotSchema = z.strictObject({
   userTurnId: idSchema,
   sequence: z.number().int().nonnegative().safe(),
   status: attemptStatusSchema,
-  actualModel: modelSchema.nullable(),
+  actualModel: modelKeySchema.nullable(),
   text: z.string(),
   reasoning: z.string(),
   error: z.string().nullable(),
@@ -161,7 +158,7 @@ export const jobEventSchema = z.discriminatedUnion('kind', [
     ...eventIdentity,
     kind: z.literal('status'),
     status: attemptStatusSchema,
-    actualModel: modelSchema.nullable(),
+    actualModel: modelKeySchema.nullable(),
   }),
   z.strictObject({
     ...eventIdentity,

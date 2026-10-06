@@ -1,5 +1,5 @@
 import { getStepMetadata, getWorkflowMetadata } from 'workflow';
-import { runtimeJobs, runtimeProviders } from '../src/runtime';
+import { runtimeCatalog, runtimeJobs, runtimeProviders } from '../src/runtime';
 import { runAttempt } from '../src/worker';
 
 export async function replyWorkflow(
@@ -17,6 +17,7 @@ async function generateReply(owner: string, attemptId: string): Promise<void> {
     attemptId,
     jobs: await runtimeJobs(),
     providers: runtimeProviders(),
+    catalog: runtimeCatalog(),
     runId: getWorkflowMetadata().workflowRunId,
     claimId: getStepMetadata().stepId,
   });
