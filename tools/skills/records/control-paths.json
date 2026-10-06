@@ -10,6 +10,7 @@
       "files": [
         ".github/CODEOWNERS",
         "AGENTS.md",
+        "package-lock.json",
         "tools/github/integration-rules.json"
       ],
       "findings": [
@@ -23,6 +24,12 @@
           "cites": "Steps 3",
           "commit": "3c4749f3b6c88f5e9fd5c9ac97cb828cd82a1d4d",
           "patch": "4078d66c6205a15894b3dd4749ee67f29055071d"
+        },
+        {
+          "finding": "The lockfile moves only shell-quote to 1.12.0 and sharp with its @img binaries to 0.35.5 and 1.3.4. Each stays inside its parent's declared range (launch-editor ^1.8.4, react-devtools-core ^1.6.1, react-native-bootsplash ^0.35.2), and the dependency policy check now passes.",
+          "cites": "Steps 3",
+          "commit": "07322feb19d49c52b20daa6e0991582243041391",
+          "patch": "5b9efeb7e60302de615be046404dc29b8f047b36"
         }
       ],
       "receipts": [
@@ -186,6 +193,7 @@
       "files": [
         ".github/CODEOWNERS",
         "AGENTS.md",
+        "package-lock.json",
         "tools/github/integration-rules.json"
       ],
       "findings": [
@@ -193,6 +201,12 @@
           "finding": "The ruleset test checks rule types, checks and conditions, not the approval count, so it does not freeze the changed value. No test asserts CODEOWNERS; GitHub's review state on a PR is the behavior check.",
           "cites": "Test behavior, not implementation",
           "none": "No test change needed."
+        },
+        {
+          "finding": "The dependency policy check is the behavior test here. It failed on both advisories before the bump and passes after it.",
+          "cites": "Test behavior, not implementation",
+          "commit": "07322feb19d49c52b20daa6e0991582243041391",
+          "patch": "5b9efeb7e60302de615be046404dc29b8f047b36"
         }
       ],
       "receipts": [
