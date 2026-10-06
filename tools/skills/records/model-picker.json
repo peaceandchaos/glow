@@ -801,5 +801,736 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "At large text sizes the pill pushed the New chat button off screen. The fix rests on one fact: Yoga gives every view flexShrink 0 (yoga/style/Style.h, DefaultFlexShrink), so a row child shrinks only if it sets flexShrink. 6026223 sets flexShrink 1 and minWidth 0 on the Pressable, its animated wrapper, the Glass pill and the label. Simulator screenshots at an accessibility text size show both round buttons on screen and the label cut to an ellipsis, and the default size is unchanged.",
+            "cites": "How sure are you 5",
+            "commit": "6026223",
+            "patch": "cdc72c88456e1f64d6fb5e7c4ce6586877be7952"
+          },
+          {
+            "finding": "RootDrawer now keeps the selected page in state, so a page change renders RootDrawer and ChatScreen once more. Nothing else reads selectedPage, and the tests that leave and reopen the chat page pass.",
+            "cites": "Steps 4",
+            "none": "One extra render per page change, and no other reader of the page state."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01MvrRfWRAwNw1notBAdQHeA",
+            "time": "2026-10-06T03:45:42.358Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "W+NgCnlR4XhDkiAep+C5cCmGF+K4L+6BBpDBmDPPBRSnweukrOsqe0KRPIE94a6k297wTz/IfQ/7E/i5iocpAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "Five added comments restated the Picker type, a constant name or a ternary, and one said wrongly that React Native has no blur on iOS. 113f38d deletes them.",
+            "cites": "Focus Areas",
+            "commit": "113f38d",
+            "patch": "e905cc25bb81e98bfcb1422998e3c7df65d9e6da"
+          },
+          {
+            "finding": "The branch adds no casts, try/catch or defensive guards. The only comment it still adds is the ChatScreen note on render order.",
+            "cites": "Guardrails",
+            "none": "Nothing else to remove."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01UF5yc5ZisrRfoDqvycMmiN",
+            "time": "2026-10-06T03:45:42.503Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "sVkjV1VVjHtce9pbKS3Cw/9gXe5W/YbZOmuWxx5h9vPrXONdyFcLD9rB+1wv3f1Bs9GTZX9RJ4SS26ttxSzjAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "expo-animation",
+        "findings": [
+          {
+            "finding": "Under Reduce Motion the pill scaled and the chevron turned. fd7568c dims the pill on press and swaps the chevron with no rotation, and the Reduce Motion test fails when either change is reverted.",
+            "cites": "9. Reduced motion and accessibility",
+            "commit": "fd7568c",
+            "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
+          },
+          {
+            "finding": "Every animation is a Reanimated CSS transition on transform or opacity with cubicBezier(0.23, 1, 0.32, 1). The menu opens in 200 ms and closes in 150 ms, press feedback takes 120 ms, and no layout property animates.",
+            "cites": "4. Pick the properties",
+            "none": "Tool, properties, curve and durations match the skill's tables."
+          },
+          {
+            "finding": "useReducedMotion reads the setting once, at app start, so turning on Reduce Motion while the app runs takes effect after a relaunch.",
+            "cites": "9. Reduced motion and accessibility",
+            "none": "This is the hook the skill prescribes. A live listener would be a separate change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "expo-animation",
+            "source": "Skill",
+            "sha256": "cad39a1208a5b65e496fb14588e28b684cf94c263b9a2a97bd9da994058db057",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01BXFeR3UUePnNmvvjrgHo5H",
+            "time": "2026-10-06T03:45:42.594Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "HZOiAjnZH9MhFanbwjcn7X3P+BUqvtOc/rKs3wVzPe/zg5mLXDfybcuE0iCvtxl6XVclkSi9n8KM5o2pB03VCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "expo-ios-hig",
+        "findings": [
+          {
+            "finding": "At large Dynamic Type sizes the pill could not shrink, so DeepSeek V4.1 Flash pushed New chat and the chevron off screen. 6026223 lets the pill shrink, and the label truncates.",
+            "cites": "7. Accessibility (MEDIUM-HIGH)",
+            "commit": "6026223",
+            "patch": "cdc72c88456e1f64d6fb5e7c4ce6586877be7952"
+          },
+          {
+            "finding": "At accessibility text sizes the 44 pt pill clips the descender of the p in DeepSeek. The label stays readable, and VoiceOver reads the full name from accessibilityLabel.",
+            "cites": "7. Accessibility (MEDIUM-HIGH)",
+            "none": "Cosmetic, at accessibility sizes only. The fixed pill height comes from main, and a cap through maxFontSizeMultiplier is a design change outside this branch."
+          },
+          {
+            "finding": "The menu is a custom panel, not the native UIMenu that AttachmentMenu.tsx already gets from zeego, and it marks the current model with a text check mark. The panel keeps 44 pt targets, VoiceOver buttons with a selected state, a modal header with an escape gesture, and Reduce Motion handling.",
+            "cites": "2. Native Component Fidelity (CRITICAL)",
+            "none": "The custom panel is a deliberate design, and it covers the accessibility a native menu would give."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "expo-ios-hig",
+            "source": "Skill",
+            "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_011jrMe32rxpVN7a2roSpy3r",
+            "time": "2026-10-06T03:45:42.688Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "SQX8Gheiqb4MaGbJ/6YGWMz1lNU4TDr4TunN12dMyy/BGQ99unGMmeBH21IpoytYi9yL7UyaTXPsUfK3gNNqCA=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "Five added comments said what the code already says, and the theme note was wrong about blur on iOS 26. 113f38d deletes all five.",
+            "cites": "Steps 2",
+            "commit": "113f38d",
+            "patch": "e905cc25bb81e98bfcb1422998e3c7df65d9e6da"
+          },
+          {
+            "finding": "The ChatScreen comment says Header renders after the composer so the scrim covers it. The JSX order alone does not say why.",
+            "cites": "Steps 2",
+            "none": "Kept, because it gives a reason the code cannot show."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01CXcCC8HHcn4w4jXSPTRAVu",
+            "time": "2026-10-06T03:45:46.795Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "Q7ewzsEe8erJ/Ij6brvSwwS97QsWUsL3YrITCxzTj9/DUdK77TIEJnoNHUPj1qkv7qM2/CqmSIbjTk7N1EvaAA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-fix-root-causes",
+        "findings": [
+          {
+            "finding": "The overflow came from flexShrink 0 on the pill's ancestors, not from the label. 343df7d stopped the label from wrapping. 6026223 fixes the ancestors, so no width cap or font clamp hides the cause.",
+            "cites": "Fix Root Causes",
+            "commit": "6026223",
+            "patch": "cdc72c88456e1f64d6fb5e7c4ce6586877be7952"
+          },
+          {
+            "finding": "Header held the open state, and nothing told it that the pager had left the chat page. 325803b passes the page state down as shown, and Header resets the state during render, so every route away from the chat closes the menu.",
+            "cites": "Fix Root Causes",
+            "commit": "325803b",
+            "patch": "89390cef2f26992fc4823754b243d9e611e9fc4f"
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-fix-root-causes",
+            "source": "Skill",
+            "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01T7ueMMPoeSnHuj72SiRSEN",
+            "time": "2026-10-06T03:45:47.438Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "SFf9OkQnj6p4BUwfEZUYVMAbohU2p86EUFxEhdHlr4EVVjgp6LG/2XcBvBFlcB9fHmJrO3rtSL1Pny8XCX2yAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-make-operations-idempotent",
+        "findings": [
+          {
+            "finding": "setPicker writes the whole chat record with the new picker, so a repeat, or a retry after a crash, leaves the same saved state. With the write removed, 3 of the 4 session-picker tests fail.",
+            "cites": "Make Operations Idempotent 1",
+            "none": "The write is safe to repeat as built."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-make-operations-idempotent",
+            "source": "Skill",
+            "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01Dk6KpRvaDogHDmoXxpBPDY",
+            "time": "2026-10-06T03:45:47.623Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "EAg1OqzUYGjMKQzZ+wPh7ibcz9cLdAfOdGiTspBtvmjn3qz53VcOWbshthUnBWrARGCvIb6dufMsuQ40hG3dDA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-minimize-reader-load",
+        "findings": [
+          {
+            "finding": "Header.tsx grows to 318 lines and holds the pill, the scrim and the menu panel behind one open flag. Only Header owns that flag, so a reader finds every close path in one file.",
+            "cites": "Minimize Reader Load 2",
+            "none": "No layer or state to remove in this branch."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-minimize-reader-load",
+            "source": "Skill",
+            "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01TgxbJ6M9U8gJvdbMUNtnRh",
+            "time": "2026-10-06T03:45:48.185Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "Oc/HYtc3Es08vj0p0tYetRRtUekxAOo52BQozliyIuVmwauwFJl2TeLU+ctYYRRZ8uCCZRS1C94UcU8Eg66yCg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "At 446474e on Node 22.16.0, the app suite passes 103 of 103 and session-picker passes 4 of 4. Of 20 planted defects, 18 fail a test with the expected diff. Two pass: an effect-based reset, which behaves the same, and the shrink-style removal, because the test renderer runs no layout. The simulator screenshots from before and after 6026223 prove that fix. Lint needs the pinned Node and was not run in this review.",
+            "cites": "Prove It Works",
+            "none": "Checked on the real code. The layout fix rests on the simulator screenshots."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01XUgcqdVAGdCByU7BtRbNGj",
+            "time": "2026-10-06T03:45:48.314Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "HNN4qOQesrpbB3+PyWN3kUMR/XuKIBSitvS/dQfe5JVzam7w8OpEiG+hbFF+JGk4Cb8AJHd4yXLyb1MjjahADA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-sequence-verifiable-units",
+        "findings": [
+          {
+            "finding": "Each failing test lands before its fix. 6cd7cac comes before 325803b, 4a37487 before e728b42, and efd4ccd before fd7568c and 343df7d. 6026223 has no jest test, and its message says why.",
+            "cites": "Sequence work into verifiable units",
+            "none": "The commit order proves each fix."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-sequence-verifiable-units",
+            "source": "Skill",
+            "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01Mtt4LMjhGmzCRafZQA1ww9",
+            "time": "2026-10-06T03:45:51.287Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "zA5rFwLvIkHJ5cmjiSdcAda/tTXoDr3ukDuJgjTkfo2WR5Q2d9BTED4oIsHH8LJWfYa8J19L2DURsr/DJvb5CA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-subtract-before-you-add",
+        "findings": [
+          {
+            "finding": "RootDrawer replaces a ref and a useCallback with one piece of state, and 113f38d removes five comments. createChat keeps a default of 'auto' that only tests and the test harness reach.",
+            "cites": "Subtract Before You Add",
+            "none": "The default keeps existing tests unchanged. Removing it is a separate change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-subtract-before-you-add",
+            "source": "Skill",
+            "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_014fsmybwfMEMMUu4t7mRbYC",
+            "time": "2026-10-06T03:45:52.145Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "hK+IjBo+D0mntv43jf5ePnHE1uWkLPsh3PFU/WCn7BkBkeP8YyWIMCnabpb075w93J82Va+5mC9nY3/W9tTHBg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-test-behavior-not-implementation",
+        "findings": [
+          {
+            "finding": "No test checked the closed state of the scrim or the modal flag. A scrim that took touches while closed, or a header that stayed modal, passed all 103 tests. eea1db0 adds both absence checks, and each fails under its planted defect.",
+            "cites": "Test behavior, not implementation",
+            "commit": "eea1db0",
+            "patch": "ef7231f710718b9ea08c5f0ff021070298abc5ff"
+          },
+          {
+            "finding": "No test pressed a model row, the scrim, Recents or New chat. f51fb6d adds those tests, and 6a61e26 gives the pager mock the setPage method that the Recents check needs. The five planted defects from the earlier review (Recents, the saved pick, the selected state, the scrim and the pick close) now each fail a test.",
+            "cites": "Test behavior, not implementation",
+            "commit": "f51fb6d",
+            "patch": "ca9ee876461ea9f7987b0fd4e78dab8d1069bf3c"
+          },
+          {
+            "finding": "The one-line test checks the numberOfLines prop and cannot see layout. With the shrink style removed, all tests pass.",
+            "cites": "Test behavior, not implementation",
+            "none": "Layout needs a device. A test of style values would not catch the overflow, so the simulator screenshots are the check."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-test-behavior-not-implementation",
+            "source": "Skill",
+            "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01AxNBxZ5u3TDRohPuzyXSAn",
+            "time": "2026-10-06T03:45:52.323Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "44ZI3i8h5WxzRK0CA3tIUie0nmMrCOhz7QjjarAH4+KfcY68wFYYQHvhET464rwMG8q1b6uY8x+a/TFpl0rICA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-type-system-discipline",
+        "findings": [
+          {
+            "finding": "shown is a required boolean, picker is a Picker, and onPickModel takes a ModelKey, so the types let the pill show Auto but never pick it. createChat keeps an optional firstPicker.",
+            "cites": "Type System Discipline",
+            "none": "No illegal state is representable in the new props. The optional parameter is a separate change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-type-system-discipline",
+            "source": "Skill",
+            "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01TBibrsR5Ny7tYB2iJ5Tscu",
+            "time": "2026-10-06T03:45:52.922Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "9La3lhHY/fUIqCOpwN749EjNc5I3dTHoBMyihwozl3cosjyIeJ6CVTLt21f7mutNR0x5TKlUE2+zTgLXMVBTAA=="
+          }
+        ]
+      },
+      {
+        "skill": "react-native-best-practices",
+        "findings": [
+          {
+            "finding": "selectedPage moved from a ref to state, so each page change renders RootDrawer and ChatScreen once. Header is memoized, and no profile shows a problem.",
+            "cites": "Review Guardrails",
+            "none": "No memoization change without a measured problem."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "react-native-best-practices",
+            "source": "Skill",
+            "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01XuHfT6MuZXLkLszBeGSUjb",
+            "time": "2026-10-06T03:45:53.089Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "7GwfB0Rz5wwOkRpkcXF3EkYiogQ8V28PGDOEJWjshV/rESiLmHvSKHZgl0TSjx2YsmLJFkPl+vZA7ocaM6H2Bw=="
+          }
+        ]
+      },
+      {
+        "skill": "react-native-best-practices-sm",
+        "findings": [
+          {
+            "finding": "Header drives the press feedback, the chevron and the menu with Reanimated CSS transitions and Pressable state. It has no shared values, worklets or runOnJS.",
+            "cites": "Sub-skills",
+            "none": "This is the simplest Reanimated tool for state-driven motion."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "react-native-best-practices-sm",
+            "source": "Skill",
+            "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01X6ZjREFrLqq2isgF5CJmqP",
+            "time": "2026-10-06T03:45:56.516Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "LUTWCQkr8itwOSlADcKrIq4zYJsyHHUt4F3YZAe0c+wmn7tlU5heHN7oZ+BAx7HCEmOhHoKQOG/symRU/fg0Cw=="
+          }
+        ]
+      },
+      {
+        "skill": "review-animations",
+        "findings": [
+          {
+            "finding": "Reduce Motion still scaled the pill and turned the chevron. fd7568c keeps opacity and drops the movement.",
+            "cites": "The Ten Non-Negotiable Standards 8",
+            "commit": "fd7568c",
+            "patch": "bb3cf421a48ba554c3973910016a48f1ca0af268"
+          },
+          {
+            "finding": "The menu opened and closed in the same 200 ms. 343df7d closes it in 150 ms.",
+            "cites": "The Ten Non-Negotiable Standards 9",
+            "commit": "343df7d",
+            "patch": "0dd2c18f9bd6125e82925576933af4453709694a"
+          },
+          {
+            "finding": "The menu enters from scale 0.97 and translateY -8 with transformOrigin top center. It is left-aligned to the pill, so a menu wider than the pill scales from a point right of the pill's center. At scale 0.97 that moves its edges by about 1 pt.",
+            "cites": "The Ten Non-Negotiable Standards 5",
+            "none": "The offset is too small to see."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "review-animations",
+            "source": "Read",
+            "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01XGPrwdDyL2UfCppGKbD8Go",
+            "time": "2026-10-06T03:45:58.669Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "HALNklSo8e6gfTrRt8qdCkO4H8WqKEZTnAGuvpKTNvSp30hCsFHA8EQmZ4XT1r+MpkpuhyAVWHzh1crqWrV7CA=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "6026223 states the cause, the change and the simulator evidence, and says why no jest test covers it. eea1db0 names the failure each new assertion gives.",
+            "cites": "Voice and repo specifics",
+            "none": "The commit messages describe what each commit does."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01YCYH9ij9c8c4VdjxQgBACE",
+            "time": "2026-10-06T03:45:57.204Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "sBqr0ElDNOgUNCem7jfr7InNw3QRPE1ko/krw7EYLyiKNW3+62Hx9gCkWeb8PyeqCfqEV6NLI4eAIjrThWT2BA=="
+          }
+        ]
+      },
+      {
+        "skill": "test-prune",
+        "findings": [
+          {
+            "finding": "modelMenu.test.tsx drives RootDrawer, ChatScreen and Header with only leaf views and native modules mocked. session-picker.test.ts drives the chat view against the local server. Of 20 planted defects, 18 fail a test. Two pass: an effect-based reset, which behaves the same, and the shrink-style removal, which only layout shows.",
+            "cites": "Review questions",
+            "none": "Nothing to prune or add."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "test-prune",
+            "source": "Read",
+            "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01M84GjSpppou6gDGTzE3Psp",
+            "time": "2026-10-06T03:45:59.430Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "OdUfba1tOZhWZ00PGjQInsMDjU7PL3zKMDbhcH20e5yc6I3ItVK2xiiK8bU6Cui4mHilvfj2D+/HRg4zQ/jADQ=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "The largest simplification is the native UIMenu that AttachmentMenu.tsx already gets from zeego. It would delete the scrim, the panel, the pill measurement and the modal handling. Header.tsx is 318 lines, far under 1000.",
+            "cites": "Non-Negotiable Additional Standards 0",
+            "none": "The custom panel is a deliberate design, so the custom code stays."
+          },
+          {
+            "finding": "The first-chat picker has two defaults in two layers: firstChatPicker is 'deepseek' in chatView.ts, and createChat defaults to 'auto' in archive.ts. The app always passes firstChatPicker.",
+            "cites": "Non-Negotiable Additional Standards 6",
+            "none": "The app behavior is correct. One source for the default is a later change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_012KNFtyjvfmq6bLLxjgya3x",
+            "time": "2026-10-06T03:45:57.324Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "toWxb2/dwh1YXyjQ+dTdY2b6wnrl0TKl8DOKEQ02LNsQF/dTrDdm/peaw/mbR8sNWmgMjFH45dwOLwolhPSCBA=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "The branch adds no as casts, any, non-null assertions or suppressions. Picker and ModelKey come from zod schemas through z.infer, and modelLabels is a Record of ModelKey, so a new model fails the build until it has a label.",
+            "cites": "TypeScript best practices",
+            "none": "No finding."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_017Jwtx6ZfGX5mPBi1DMWBmM",
+            "time": "2026-10-06T03:45:58.006Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "2rxFF5sNUrN+2jK5nniQp8zzOduH3Kt0XNqeGB4ZepinIprl/xuEJLasgatRn5+b+/3q2iZYp+pLCBE1kbGeBg=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "The commit messages and this review name real components, values and commits, with no filler or AI vocabulary.",
+            "cites": "Plain speech 27",
+            "none": "No AI patterns found."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a9281165346248aa2",
+            "agentType": "pstack:poteto-agent-xhigh",
+            "toolUseId": "toolu_01Su56D4v9XpHBuDjcV1JT2c",
+            "time": "2026-10-06T03:45:58.121Z",
+            "cwd": "0df1fe32e40ae333ea2ad38d5af05b6eb90a3214dd4c0a487fa584c08a6bdef3",
+            "commonDir": "3cf50f4be1d6a40eb655a4059c5443cd1decb514286621002177bd3a2863973e",
+            "branch": null,
+            "head": "446474ec22943fcc870490799cd8675e3ca90fc1",
+            "headPatch": "b8272b80daed0643309eb9ce3cc1cfe52b5bc4c3",
+            "sig": "hMQSt1RYsf/s8chjZcQJaGQRFrmH0osCPwxN8Xic6qIc8yRAf/svkwDH4mhW4ySJc12Y2/rn2VLv8r7Mf/MJCQ=="
+          }
+        ]
+      }
+    ]
+  }
 }
