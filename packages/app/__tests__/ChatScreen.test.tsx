@@ -76,6 +76,7 @@ const followTail = { on: { dataChange: true, itemLayout: true } };
 function chatState(isStreaming: boolean): ChatViewState {
   return {
     chatId: 'chat',
+    picker: 'kimi',
     messages: [
       { id: 'question', role: 'user', text: 'Question', status: 'done' },
       {
@@ -89,6 +90,7 @@ function chatState(isStreaming: boolean): ChatViewState {
     recents: [],
     send: () => null,
     stop: () => undefined,
+    setPicker: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,
