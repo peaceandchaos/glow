@@ -12,12 +12,15 @@ import type { Database, SqlConnection } from './database';
 const pageRows = 200;
 const pageBytes = 1_000_000;
 const searchHits = 20;
+const titleWeight = 2;
 const indexedCharacters = 100_000;
 
-// The only producer of seq values. The counter row lock is held to commit, so
-// per owner seq order is commit order and a pull past k has seen all below k.
-// Lock order: advisory locks, then chat_jobs rows, then this counter, then
-// chats, chat_messages and deleted_chats.seq. Stamp once per transaction.
+// The only producer of seq values. The chat_owners row lock is held until
+// commit, so per-owner seq order is commit order and a pull cursor never
+// skips a seq that commits later. Returns the seq just below the reserved block.
+// Lock order: advisory locks, chat_jobs rows, the chat_owners row, then
+// writes to chats, chat_messages and deleted_chats.seq. Stamp once per
+// transaction.
 async function stamp(
   db: SqlConnection,
   owner: string,
@@ -32,7 +35,8 @@ async function stamp(
   return Number(result.rows[0].data) - ticks;
 }
 
-// Raw input never reaches tsquery syntax: each word becomes a prefix term.
+// Only to_tsquery supports prefix matching, and it rejects stray operators,
+// so just runs of letters and digits reach it.
 function prefixQuery(query: string): string {
   return (query.match(/[\p{L}\p{N}]+/gu) ?? [])
     .filter(word => word.length >= 2)
@@ -140,14 +144,14 @@ export class ChatRows {
   async search(owner: string, query: string): Promise<SearchResponse> {
     const terms = prefixQuery(query);
     if (!terms) return { hits: [] };
-    // A title match counts twice. Snippets run only on the returned hits.
+    // ts_headline reparses the whole text, so it runs only on the returned hits.
     const result = await this.database.query(
       `WITH query AS (SELECT to_tsquery('simple', $2) AS q),
        hits AS (
          SELECT chat_id, id AS message_id, ts_rank_cd(search, q) AS rank
          FROM chat_messages, query WHERE owner = $1 AND search @@ q
          UNION ALL
-         SELECT id, NULL, 2 * ts_rank_cd(search, q)
+         SELECT id, NULL, ${titleWeight} * ts_rank_cd(search, q)
          FROM chats, query WHERE owner = $1 AND search @@ q),
        best AS (
          SELECT DISTINCT ON (chat_id) chat_id, message_id, rank
@@ -169,8 +173,8 @@ export class ChatRows {
   }
 }
 
-// The stored job row supplies the reply's place and model choice. The terminal
-// text exists only in the snapshot here, before acknowledge purges the job.
+// Runs inside the terminal write because acknowledge later blanks the job's
+// text and nulls the input this row is built from.
 export async function storeReply(
   db: SqlConnection,
   owner: string,
