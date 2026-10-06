@@ -16,6 +16,7 @@ import { LiveProviders } from '../src/providers';
 import { ResponsesClient } from '../src/responses';
 import { runAttempt } from '../src/worker';
 import { testDatabase } from './database';
+import { exampleGatewayAuth } from './fixtures';
 import { signedIn } from './sessions';
 
 jest.setTimeout(30_000);
@@ -89,7 +90,7 @@ beforeAll(async () => {
       socketUrl: `ws://127.0.0.1:${address.port}`,
     }),
     new GatewayClient({
-      apiKey: 'example-key',
+      auth: exampleGatewayAuth,
       fetcher: (_url, init) => {
         upstream.push(typeof init?.body === 'string' ? init.body : '');
         return Promise.resolve(
@@ -101,7 +102,7 @@ beforeAll(async () => {
         );
       },
     }),
-    new JevClient('example-key', () =>
+    new JevClient(exampleGatewayAuth, () =>
       Promise.reject(new Error('Manual sends must not call Jev')),
     ),
   );

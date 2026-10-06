@@ -77,6 +77,21 @@ test('without a Gateway key, Jev authenticates through @ai-sdk/gateway in OIDC m
   ).toEqual([[`Bearer ${oidcToken}`, 'oidc']]);
 });
 
+test('an empty Gateway key counts as no key for both clients', async () => {
+  process.env.AI_GATEWAY_API_KEY = '';
+  await expect(sendToGateway()).rejects.toThrow('HTTP 500');
+  await expect(rankWithJev()).rejects.toThrow();
+  expect(
+    requests.map(headers => [
+      headers.get('Authorization'),
+      headers.get('ai-gateway-auth-method'),
+    ]),
+  ).toEqual([
+    [`Bearer ${oidcToken}`, null],
+    [`Bearer ${oidcToken}`, 'oidc'],
+  ]);
+});
+
 test('a Gateway key, when set, is used instead of the OIDC token', async () => {
   process.env.AI_GATEWAY_API_KEY = 'example-gateway-key';
   await expect(sendToGateway()).rejects.toThrow('HTTP 500');

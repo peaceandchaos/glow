@@ -30,8 +30,12 @@ export function gatewayMessages(items: ResponseInputItem[]): GatewayMessage[] {
   });
 }
 
+export type GatewayAuth =
+  | { kind: 'api-key'; apiKey: string }
+  | { kind: 'oidc' };
+
 type GatewayOptions = {
-  apiKey?: string;
+  auth: GatewayAuth;
   endpoint?: string;
   fetcher?: typeof fetch;
 };
@@ -51,7 +55,9 @@ export class GatewayClient {
       throw new ProviderFailure('This model does not run through AI Gateway.');
     const hosts = gatewayHosts[model];
     const messages = gatewayMessages(items);
-    const token = this.options.apiKey ?? (await getVercelOidcToken());
+    const { auth } = this.options;
+    const token =
+      auth.kind === 'api-key' ? auth.apiKey : await getVercelOidcToken();
     await beforeCall();
     signal.throwIfAborted();
     let response: Response;

@@ -4,11 +4,12 @@ import {
   type SearchRequest,
   type Submission,
 } from '../../../shared/contracts';
+import type { GatewayAuth } from './gateway';
 import type { BeforePaidCall } from './provider';
 
 export class JevClient {
   constructor(
-    private readonly apiKey: string | undefined,
+    private readonly auth: GatewayAuth,
     private readonly fetcher?: typeof fetch,
   ) {}
 
@@ -16,7 +17,12 @@ export class JevClient {
     const { createGateway } = await import('@ai-sdk/gateway');
     const { experimental_evaluate: evaluate } = await import('ai');
     return {
-      gateway: createGateway({ apiKey: this.apiKey, fetch: this.fetcher }),
+      // Without a key, the SDK reads AI_GATEWAY_API_KEY, which gatewayAuth()
+      // found empty, and then signs in with the Vercel OIDC token.
+      gateway: createGateway({
+        apiKey: this.auth.kind === 'api-key' ? this.auth.apiKey : undefined,
+        fetch: this.fetcher,
+      }),
       evaluate,
     };
   }

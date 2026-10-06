@@ -2,6 +2,7 @@ import type { ModelKey } from '../../../shared/contracts';
 import { textItem } from '../src/compaction/context';
 import { GatewayClient } from '../src/gateway';
 import { gatewayHosts, models } from '../src/models';
+import { exampleGatewayAuth } from './fixtures';
 
 const signal = new AbortController().signal;
 const before = () => Promise.resolve();
@@ -9,7 +10,7 @@ const before = () => Promise.resolve();
 async function sentBody(model: ModelKey): Promise<string> {
   const bodies: string[] = [];
   const client = new GatewayClient({
-    apiKey: 'example-key',
+    auth: exampleGatewayAuth,
     fetcher: (_url, init) => {
       if (typeof init?.body === 'string') bodies.push(init.body);
       return Promise.resolve(new Response(null, { status: 500 }));
@@ -47,7 +48,7 @@ test('only Gateway models have hosts, and a GPT model never reaches the Gateway'
     ),
   );
   const fetcher = jest.fn(() => Promise.resolve(new Response(null)));
-  const client = new GatewayClient({ apiKey: 'example-key', fetcher });
+  const client = new GatewayClient({ auth: exampleGatewayAuth, fetcher });
   await expect(
     client.generate(
       'gpt-6.1-sol',
