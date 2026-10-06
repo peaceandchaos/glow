@@ -98,6 +98,8 @@ export const Header = React.memo(function ({
             onOpenRecents();
           }}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Recents"
         >
           <Glass interactive style={styles.circle}>
             <Icon name="line.3.horizontal" />
@@ -148,6 +150,8 @@ export const Header = React.memo(function ({
             onNewChat();
           }}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="New chat"
         >
           <Glass interactive style={styles.circle}>
             <Icon name="square.and.pencil" />
