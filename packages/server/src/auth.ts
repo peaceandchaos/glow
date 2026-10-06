@@ -101,8 +101,13 @@ export function bearerToken(headers: Headers): SessionToken {
 
 export async function sessionOwner(
   headers: Headers,
-  allowedAppleUserIds: string,
-  sessions: () => Promise<SessionStore>,
+  {
+    allowedAppleUserIds,
+    sessions,
+  }: {
+    allowedAppleUserIds: string;
+    sessions: () => Promise<SessionStore>;
+  },
 ): Promise<string> {
   const token = bearerToken(headers);
   const user = await (await sessions()).user(token);

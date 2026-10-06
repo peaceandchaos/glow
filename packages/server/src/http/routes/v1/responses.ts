@@ -8,12 +8,7 @@ const connections = new Map<string, SocketConnection>();
 export default defineWebSocketHandler({
   // crossws awaits this hook and sends a thrown Response instead of upgrading.
   async upgrade(request) {
-    const runtime = services();
-    await sessionOwner(
-      request.headers,
-      runtime.allowedAppleUserIds,
-      runtime.sessions,
-    );
+    await sessionOwner(request.headers, services());
   },
   async message(peer, message) {
     let connection = connections.get(peer.id);
