@@ -1,8 +1,8 @@
 // App probe. Served only by tools/native-transport/app-metro.config.cjs in place
 // of index.js. It hides development toasts so screenshots show only app screens
 // and reports to the local app server:
-// - launch: the moment the boot splash is gone, which happens when ChatScreen
-//   first draws (the driver compares it with its own launch time);
+// - launch: the moment the boot splash is gone, which happens when the
+//   sign-in screen or ChatScreen first draws (the driver compares it with its own launch time);
 // - reply: from the user turn appearing to the first reply text, and the
 //   interval between text commits while the reply streams;
 // - frames: JS frame intervals, every two seconds.
@@ -168,7 +168,6 @@ function frame(time: number) {
   if (!launchReported && !BootSplash.isVisible()) {
     launchReported = true;
     post({ kind: 'launch' });
-    // The app's own session, shared once the probe's account is signed in.
     restoreAccount()
       .then(account => account && startAppSession(account.token))
       .then(

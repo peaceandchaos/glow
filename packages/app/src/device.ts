@@ -38,7 +38,6 @@ export function secureId(): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-// A Sign in with Apple nonce: 32 random bytes as base64url.
 export function secureNonce(): string {
   return randomBase64(32)
     .replace(/\+/gu, '-')

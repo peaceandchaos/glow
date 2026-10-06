@@ -12,8 +12,6 @@ import { validateServerAddress } from './network/client';
 import { nativeDrivers } from './network/nativeDrivers';
 import { TransportError } from './network/transport';
 
-// One Keychain item: the Apple user ID as its account, the server's session
-// token as its password.
 const service = 'personal-chat.session.v1';
 const requestTimeoutMs = 15_000;
 const notAllowed = 'This Apple account is not allowed.';
@@ -101,8 +99,6 @@ export async function signInWithApple(): Promise<SignInResult> {
   }
 }
 
-// Apple's own check that the user still allows this app. An unanswered check
-// keeps the session, because the server checks its allowlist on every request.
 async function revokedByApple(appleUserId: string): Promise<boolean> {
   try {
     const state = await appleAuth.getCredentialStateForUser(appleUserId);
@@ -134,9 +130,6 @@ export async function signOut(account: Account): Promise<void> {
         headers: { Authorization: `Bearer ${account.token}` },
       }),
     );
-  } catch {
-    // The phone forgets the token either way; an unreached server keeps an
-    // unused session row.
-  }
+  } catch {}
   await Keychain.resetGenericPassword({ service });
 }

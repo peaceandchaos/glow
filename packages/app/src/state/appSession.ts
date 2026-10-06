@@ -11,8 +11,6 @@ type Running = { store: ChatStore; stop: () => void };
 
 let started: Promise<Running> | null = null;
 
-// Starts the chat session for a signed-in account. Later calls share it until
-// stopAppSession.
 export async function startAppSession(token: string): Promise<ChatStore> {
   started ??= (async () => {
     const archive = openArchive();
@@ -38,7 +36,6 @@ export async function startAppSession(token: string): Promise<ChatStore> {
       lifecycle.remove();
       drafts.remove();
       store.getState().saveDraftsNow();
-      // Background saves partial replies and detaches every reader.
       session.setLifecycle('background');
     };
     return { store, stop };
@@ -51,8 +48,6 @@ export async function startAppSession(token: string): Promise<ChatStore> {
   }
 }
 
-// Ends the chat session at sign-out, so the next sign-in starts one with its
-// own token.
 export async function stopAppSession(): Promise<void> {
   const running = started;
   started = null;
