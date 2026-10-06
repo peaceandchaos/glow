@@ -1,4 +1,22 @@
 {
+  "https://github.com/advisories/GHSA-wr44-6hxh-3jwq": {
+    "package": "joi",
+    "range": "<17.13.8",
+    "severity": "moderate",
+    "reviewedAt": "2026-10-06",
+    "reviewBy": "2026-10-20",
+    "decision": "track",
+    "reason": "joi 17.13.8 is outside the affected range and fits the ^17.2.1 range that @react-native-community/cli-config and @react-native-community/cli-types 20.2.0 declare. The root package.json overrides pin joi to 17.13.7 for both parents, so a lockfile update cannot move it. joi comes in only through those two packages of @react-native-community/cli 20.2.0, a devDependency of packages/app. cli-config uses joi to validate the React Native CLI configuration. The release iOS bundle and the server build from 6 October contain no joi code."
+  },
+  "https://github.com/advisories/GHSA-hp3w-g68c-fv3c": {
+    "package": "sprintf-js",
+    "range": "<=1.1.3",
+    "severity": "moderate",
+    "reviewedAt": "2026-10-06",
+    "reviewBy": "2026-10-20",
+    "decision": "track",
+    "reason": "Every sprintf-js release, up to the latest 1.1.3, is in the affected range. sprintf-js comes in only through argparse 1.0.10, js-yaml 3.15.2, @istanbuljs/load-nyc-config 1.1.0, and babel-plugin-istanbul 6.1.1, which babel-jest 29.7.0 and @jest/transform 29.7.0 load for Jest. The release iOS bundle and the server build from 6 October contain no sprintf-js code."
+  },
   "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm": {
     "package": "braces",
     "range": "<=3.0.3",
