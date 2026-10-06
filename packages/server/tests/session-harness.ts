@@ -31,7 +31,7 @@ import type {
   ProviderChunk,
   Providers,
 } from '../src/provider';
-import type { RegistryKey } from '../src/models';
+import type { Effort, RegistryKey } from '../src/models';
 import { runAttempt } from '../src/worker';
 import { testDatabase } from './database';
 import { signedIn } from './sessions';
@@ -132,7 +132,11 @@ function providerChunk(model: RegistryKey, text: string): ProviderChunk {
 class FakeProviders implements Providers {
   selection: RegistryKey | 'fail' = 'deepseek';
   selections = 0;
-  readonly generations: { input: Submission; model: RegistryKey }[] = [];
+  readonly generations: {
+    input: Submission;
+    model: RegistryKey;
+    effort: Effort | null;
+  }[] = [];
   private readonly scripts = new Map<string, Script>();
 
   script(attemptId: string): Script {
@@ -166,9 +170,10 @@ class FakeProviders implements Providers {
     signal: AbortSignal,
     onChunk: (chunk: ProviderChunk) => Promise<void>,
     beforeCall: () => Promise<void>,
+    effort: Effort | null,
   ) {
     await beforeCall();
-    this.generations.push({ input, model });
+    this.generations.push({ input, model, effort });
     const script = this.script(input.attemptId);
     for (;;) {
       const step = await script.next(signal);

@@ -39,6 +39,7 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
   const store = createStore<ChatViewState>()(() => ({
     chatId: 'chat',
     picker: 'kimi',
+    level: undefined,
     catalog: bakedCatalog,
     messages: [],
     isStreaming: false,
@@ -46,6 +47,7 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
     send: () => null,
     stop: () => undefined,
     setPicker: () => undefined,
+    setLevel: () => undefined,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,
