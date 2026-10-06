@@ -142,21 +142,22 @@ class SocketConnection {
 
   private constructor(
     private readonly owner: string,
-    private readonly services: ApiServices,
+    private readonly services: () => ApiServices,
   ) {}
 
   static async admit(
     headers: Headers,
-    services: ApiServices,
+    services: () => ApiServices,
   ): Promise<SocketConnection> {
     return new SocketConnection(
-      await sessionOwner(headers, services),
+      await sessionOwner(headers, services()),
       services,
     );
   }
 
   async message(peer: SocketPeer, read: () => string): Promise<void> {
-    if (!allows(this.services.allowedAppleUserIds, this.owner)) {
+    const services = this.services();
+    if (!allows(services.allowedAppleUserIds, this.owner)) {
       peer.close(1008, 'Unauthorized');
       return;
     }
@@ -179,7 +180,7 @@ class SocketConnection {
         command.kind === 'submit'
           ? command.submission.attemptId
           : command.attemptId;
-      const result = await executeCommand(this.owner, command, this.services);
+      const result = await executeCommand(this.owner, command, services);
       if (peer.websocket.readyState !== 1) return;
       if (result.kind !== 'accepted') {
         await send(result);
@@ -190,7 +191,7 @@ class SocketConnection {
       this.readers.set(attemptId, controller);
       const replyId = attemptId;
       void deliverJob(
-        await this.services.jobs(),
+        await services.jobs(),
         this.owner,
         replyId,
         controller.signal,
@@ -249,7 +250,7 @@ export function socketRoute(services: () => ApiServices) {
     async upgrade(request: Request) {
       const connection = await SocketConnection.admit(
         request.headers,
-        services(),
+        services,
       );
       return { context: { connection } };
     },
