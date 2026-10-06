@@ -17,20 +17,16 @@ function sha256hex(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-export function allows(allowlist: string, user: string): boolean {
-  return allowlist.split(',').some(value => value.trim() === user);
+export function allows(allowedAppleUserIds: string, user: string): boolean {
+  return allowedAppleUserIds.split(',').some(value => value.trim() === user);
 }
 
-// jose is ESM-only and the server's Jest runs CommonJS, so jose loads on
-// first use, as jev.ts loads the AI SDK.
 async function verifiedClaims(
   identityToken: string,
   appleKeys: JWTVerifyGetKey,
 ): Promise<JWTPayload> {
   const { errors, jwtVerify } = await import('jose');
-  // Faults in the token itself. Anything else, such as Apple's key set timing
-  // out, is the server's failure and must not read as a refused sign-in.
-  const rejectedToken = [
+  const tokenFaults = [
     errors.JWSInvalid,
     errors.JWTInvalid,
     errors.JWSSignatureVerificationFailed,
@@ -49,7 +45,7 @@ async function verifiedClaims(
     });
     return payload;
   } catch (error) {
-    if (rejectedToken.some(type => error instanceof type)) throw unauthorized();
+    if (tokenFaults.some(type => error instanceof type)) throw unauthorized();
     throw error;
   }
 }
@@ -100,15 +96,13 @@ export function bearerToken(headers: Headers): SessionToken {
   return token.data;
 }
 
-// Malformed tokens never reach the database. This reads the allowlist on
-// every call, so removing a user and redeploying locks out their sessions.
 export async function sessionOwner(
   headers: Headers,
-  allowlist: string,
+  allowedAppleUserIds: string,
   sessions: () => Promise<SessionStore>,
 ): Promise<string> {
   const token = bearerToken(headers);
   const user = await (await sessions()).user(token);
-  if (user === null || !allows(allowlist, user)) throw unauthorized();
+  if (user === null || !allows(allowedAppleUserIds, user)) throw unauthorized();
   return user;
 }

@@ -54,13 +54,12 @@ export const models = {
 type GatewayModelKey = {
   [K in ModelKey]: (typeof models)[K]['wire'] extends 'gateway' ? K : never;
 }[ModelKey];
-type GatewayHost = 'bedrock' | 'baseten' | 'fireworks';
+type ZeroRetentionHost = 'bedrock' | 'baseten' | 'fireworks';
 
-// The only AI Gateway hosts each model may use, in the order tried.
 // docs/providers.md records the sources and reasons.
 export const gatewayHosts: Record<
   GatewayModelKey,
-  [GatewayHost, ...GatewayHost[]]
+  [ZeroRetentionHost, ...ZeroRetentionHost[]]
 > = {
   kimi: ['bedrock', 'fireworks'],
   deepseek: ['fireworks', 'baseten'],

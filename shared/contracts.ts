@@ -257,10 +257,9 @@ export const sessionTokenSchema = z
   .brand<'SessionToken'>();
 export type SessionToken = z.infer<typeof sessionTokenSchema>;
 
-// The app sends the raw nonce. Apple's identity token holds its SHA-256.
 export const sessionRequestSchema = z.strictObject({
   identityToken: z.string().min(1).max(10_000),
-  nonce: z.string().min(1).max(1_000),
+  rawNonce: z.string().min(1).max(1_000),
 });
 export const sessionResponseSchema = z.strictObject({
   token: sessionTokenSchema,

@@ -13,13 +13,10 @@ import { JobRepository } from '../src/jobs';
 import { testDatabase } from './database';
 import { signedIn } from './sessions';
 
-// Each server test starts its own PGlite database.
 jest.setTimeout(30_000);
 
-// A local RS256 key set stands in for Apple's, so no test calls Apple.
 const appleUserId = 'apple-user-1';
 const rawNonce = 'raw-nonce-from-the-app';
-// jose is ESM-only, so this CommonJS test loads it with import().
 let jose: typeof import('jose');
 let signingKey: CryptoKey;
 let appleKeys: JWTVerifyGetKey;
@@ -34,7 +31,6 @@ beforeAll(async () => {
   });
 });
 
-// Apple puts the SHA-256 of the app's raw nonce, as lowercase hex, in the token.
 function identityToken(
   claims: JWTPayload = {},
   key: CryptoKey | Uint8Array = signingKey,
@@ -113,9 +109,9 @@ test('the database keeps only a hash of each session token', async () => {
       createHash('sha256').update(token).digest('hex'),
     );
     const headers = new Headers({ Authorization: `Bearer ${token}` });
-    expect(await sessionOwner(headers, auth.allowlist, auth.sessions)).toBe(
-      appleUserId,
-    );
+    expect(
+      await sessionOwner(headers, auth.allowedAppleUserIds, auth.sessions),
+    ).toBe(appleUserId);
   } finally {
     await postgres.close();
   }
@@ -143,12 +139,12 @@ type Server = {
   close: () => Promise<void>;
 };
 
-async function startServer(allowlist = appleUserId): Promise<Server> {
+async function startServer(allowedAppleUserIds = appleUserId): Promise<Server> {
   const { database, postgres } = await testDatabase();
   const jobs = new JobRepository(database);
   return {
     services: {
-      allowlist,
+      allowedAppleUserIds,
       appleKeys,
       sessions: () => Promise.resolve(new SessionStore(database)),
       jobs: () => Promise.resolve(jobs),
@@ -165,7 +161,10 @@ async function signIn(server: Server, nonce = rawNonce): Promise<Response> {
     new Request('https://fixture.example/v1/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identityToken: await identityToken(), nonce }),
+      body: JSON.stringify({
+        identityToken: await identityToken(),
+        rawNonce: nonce,
+      }),
     }),
     server.services,
   );
@@ -231,7 +230,9 @@ test('an Apple user who is not on the allowlist gets 403, and the log names them
     const response = await signIn(server);
     expect(response.status).toBe(403);
     expect(warn.mock.calls).toEqual([
-      [`sign-in refused for Apple user ${appleUserId}`],
+      [
+        `sign-in refused: ALLOWED_APPLE_USER_IDS does not list Apple user ${appleUserId}`,
+      ],
     ]);
     expect(await sessionCount(server)).toBe(0);
   } finally {
@@ -290,7 +291,7 @@ test('removing a user from the allowlist locks out their existing sessions', asy
   const server = await startServer();
   try {
     const token = await sessionToken(server);
-    server.services.allowlist = '';
+    server.services.allowedAppleUserIds = '';
     expect(
       (await deleteChat(server, randomUUID(), `Bearer ${token}`)).status,
     ).toBe(401);
@@ -352,7 +353,7 @@ test('the socket admits a signed-in user until the user leaves the allowlist', a
     await connection.message(frame);
     expect(closed).toEqual([]);
     expect(sent).toHaveLength(1);
-    server.services.allowlist = '';
+    server.services.allowedAppleUserIds = '';
     await connection.message(frame);
     expect(closed).toEqual([1008]);
     expect(sent).toHaveLength(1);

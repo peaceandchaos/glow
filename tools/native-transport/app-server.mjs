@@ -6,10 +6,6 @@
 //        [--host <private LAN IPv4>]
 // --host adds one private address, so a phone on the same Wi-Fi can reach a
 // Debug build's server. The server still listens on loopback.
-// The app creates its device id in the Keychain at first launch and sends it
-// as X-Device-Id. Every id it sees becomes a session token for one harness
-// user, and requests reach the server with it as a bearer token. Logs never
-// contain the id.
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import http from 'node:http';
 import { createRequire } from 'node:module';
@@ -101,7 +97,7 @@ const owners = new Map();
 const harnessUser = 'app-harness-user';
 const sessions = new SessionStore(database);
 const services = {
-  allowlist: harnessUser,
+  allowedAppleUserIds: harnessUser,
   appleKeys: () =>
     Promise.reject(new Error('The harness never signs in with Apple.')),
   sessions: () => Promise.resolve(sessions),

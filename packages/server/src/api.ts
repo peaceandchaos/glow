@@ -26,8 +26,7 @@ import { InputParts } from './input-parts';
 import { staleAfterMs, type Dispatcher, type JobRepository } from './jobs';
 
 export type ApiServices = {
-  // Apple user IDs that may sign in, separated by commas.
-  allowlist: string;
+  allowedAppleUserIds: string;
   appleKeys: JWTVerifyGetKey;
   sessions: () => Promise<SessionStore>;
   jobs: () => Promise<JobRepository>;
@@ -154,14 +153,11 @@ export class SocketConnection {
     return Promise.resolve();
   }
 
-  // The connection looks up its session once, then re-reads the allowlist on
-  // every frame. A frame never waits for the database to authenticate, even
-  // while another frame holds a transaction open during dispatch.
   private async authenticate(runtime: ApiServices): Promise<string> {
-    if (this.owner === null || !allows(runtime.allowlist, this.owner))
+    if (this.owner === null || !allows(runtime.allowedAppleUserIds, this.owner))
       this.owner = await sessionOwner(
         this.headers,
-        runtime.allowlist,
+        runtime.allowedAppleUserIds,
         runtime.sessions,
       );
     return this.owner;
@@ -283,12 +279,13 @@ async function signIn(
   const body = decodeJson(sessionRequestSchema, await readBody(request));
   const user = await appleUser(
     body.identityToken,
-    body.nonce,
+    body.rawNonce,
     services.appleKeys,
   );
-  if (!allows(services.allowlist, user)) {
-    // The owner reads this line once to add their Apple user ID.
-    console.warn(`sign-in refused for Apple user ${user}`);
+  if (!allows(services.allowedAppleUserIds, user)) {
+    console.warn(
+      `sign-in refused: ALLOWED_APPLE_USER_IDS does not list Apple user ${user}`,
+    );
     throw new RequestError(403, 'This Apple account is not allowed.');
   }
   const token = newSessionToken();
@@ -305,7 +302,11 @@ async function handleSessionRoute(
   services: ApiServices,
 ): Promise<Response> {
   if (request.method === 'POST') return signIn(request, services);
-  await sessionOwner(request.headers, services.allowlist, services.sessions);
+  await sessionOwner(
+    request.headers,
+    services.allowedAppleUserIds,
+    services.sessions,
+  );
   if (request.method !== 'DELETE')
     throw new RequestError(404, 'Route not found.');
   await (await services.sessions()).revoke(bearerToken(request.headers));
@@ -322,7 +323,7 @@ export async function handleRequest(
       return await handleSessionRoute(request, services);
     const owner = await sessionOwner(
       request.headers,
-      services.allowlist,
+      services.allowedAppleUserIds,
       services.sessions,
     );
     if (path[0] !== 'v1') throw new RequestError(404, 'Route not found.');

@@ -72,8 +72,8 @@ export class GatewayClient {
             stream: true,
             max_tokens: maxOutput,
             // Per-request zeroDataRetention needs Pro or Enterprise, so it is
-            // not sent. The only list keeps requests on hosts with Vercel ZDR
-            // agreements.
+            // not sent:
+            // https://vercel.com/docs/ai-gateway/security-and-compliance/zdr
             providerOptions: {
               gateway: {
                 order: hosts,
