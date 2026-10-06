@@ -1,3 +1,4 @@
+import { bakedCatalog, type Catalog } from '../../../shared/catalog';
 import { TransportError } from '../src/network/transport';
 import {
   decodeJson,
@@ -135,7 +136,7 @@ function streamed(messages: ServerMessage[], split = 13): ClientResponse {
   return { ...response(''), body: { getReader: () => reader } };
 }
 
-function setup() {
+function setup(catalog: Catalog = bakedCatalog) {
   const calls: Array<{
     url: string;
     init: RequestInit & { stream?: boolean };
@@ -179,6 +180,7 @@ function setup() {
       'https://chat.example',
       deviceCredential,
       drivers,
+      () => catalog,
     ),
     reply: (next: ClientResponse) => {
       reply = next;
@@ -241,6 +243,49 @@ test.each(['auto', 'gpt-6.1-sol', 'gpt-6-astra'] as const)(
     fixture.transport.disconnect();
   },
 );
+
+const [deepseek, kimi, sol, astra] = bakedCatalog.models;
+test.each([
+  [
+    'a model the catalog sends over the socket',
+    'gpt-6-luna',
+    [deepseek, kimi, sol, astra, { ...sol, key: 'gpt-6-luna' }],
+    'socket',
+  ],
+  [
+    'a model the catalog no longer lists, which follows the first model',
+    'gpt-6-luna',
+    [deepseek, kimi, sol, astra],
+    'http',
+  ],
+  [
+    'DeepSeek once the catalog moves it to the socket',
+    'deepseek',
+    [{ ...deepseek, transport: 'socket' }, kimi],
+    'socket',
+  ],
+] as const)('%s', async (_name, picker, [first, ...rest], expected) => {
+  const fixture = setup({ auto: true, models: [first, ...rest] });
+  const promise = fixture.transport.submit(
+    input(picker),
+    () => undefined,
+    new AbortController().signal,
+  );
+  const socket = fixture.sockets.at(0);
+  if (socket) {
+    socket.open();
+    await settle();
+    socket.emit({ kind: 'accepted', snapshot: snapshot() });
+  }
+  await promise;
+  expect({
+    socket: fixture.sockets.length,
+    http: fixture.calls.length,
+  }).toEqual(
+    expected === 'socket' ? { socket: 1, http: 0 } : { socket: 0, http: 1 },
+  );
+  fixture.transport.disconnect();
+});
 
 test('parallel socket replies stay isolated and detaching one never sends Stop', async () => {
   const fixture = setup();

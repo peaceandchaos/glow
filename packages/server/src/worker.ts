@@ -114,9 +114,9 @@ export async function runAttempt(options: WorkerOptions): Promise<void> {
       // Jev's pick runs at that model's default level.
       choice = resolveChoice(catalog, pick, undefined);
     }
-    if (choice.kind === 'auto' || !isRegistryKey(choice.model))
+    if (choice.kind === 'auto' || !isRegistryKey(choice.model.key))
       throw new ProviderFailure('This model is not available.');
-    const model = choice.model;
+    const model = choice.model.key;
     const effort = effortFor(model, choice.level);
     // This write checks Stop again before compaction or generation can start.
     await jobs.update(owner, attemptId, claimId, {

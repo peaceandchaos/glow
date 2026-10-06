@@ -12,6 +12,7 @@ const levelOptionSchema = z.object({ key: levelKeySchema, label: labelSchema });
 const modelEntrySchema = z.object({
   key: modelKeySchema,
   label: labelSchema,
+  transport: z.enum(['http', 'socket']),
   levels: z.array(z.unknown()),
   defaultLevel: z.unknown(),
 });
@@ -23,6 +24,7 @@ const envelopeSchema = z.object({
 export type CatalogModel = {
   key: ModelKey;
   label: string;
+  transport: 'http' | 'socket';
   // Empty means the model has no level control.
   levels: z.infer<typeof levelOptionSchema>[];
   // Null means the provider default: the request omits the parameter.
@@ -58,6 +60,7 @@ export function parseCatalog(text: string): Catalog | null {
     kept.push({
       key: entry.data.key,
       label: entry.data.label,
+      transport: entry.data.transport,
       levels,
       defaultLevel: fallback?.key ?? null,
     });
@@ -68,7 +71,7 @@ export function parseCatalog(text: string): Catalog | null {
 
 type Choice =
   | { kind: 'auto' }
-  | { kind: 'model'; model: ModelKey; level: LevelKey | null };
+  | { kind: 'model'; model: CatalogModel; level: LevelKey | null };
 
 // Stored choices are never rewritten: a model or level the catalog no longer
 // offers resolves here, and comes back if the catalog offers it again.
@@ -83,7 +86,7 @@ export function resolveChoice(
   const kept = found?.levels.some(option => option.key === level)
     ? level
     : undefined;
-  return { kind: 'model', model: entry.key, level: kept ?? entry.defaultLevel };
+  return { kind: 'model', model: entry, level: kept ?? entry.defaultLevel };
 }
 
 const openLevels = [
@@ -107,19 +110,28 @@ export const bakedCatalog: Catalog = {
     {
       key: 'deepseek',
       label: 'DeepSeek V4.1 Flash',
+      transport: 'http',
       levels: openLevels,
       defaultLevel: null,
     },
-    { key: 'kimi', label: 'Kimi K3', levels: openLevels, defaultLevel: null },
+    {
+      key: 'kimi',
+      label: 'Kimi K3',
+      transport: 'http',
+      levels: openLevels,
+      defaultLevel: null,
+    },
     {
       key: 'gpt-6.1-sol',
       label: 'GPT-6.1 Sol',
+      transport: 'socket',
       levels: gptLevels,
       defaultLevel: 'medium',
     },
     {
       key: 'gpt-6-astra',
       label: 'GPT-6 Astra',
+      transport: 'socket',
       levels: gptLevels,
       defaultLevel: 'medium',
     },

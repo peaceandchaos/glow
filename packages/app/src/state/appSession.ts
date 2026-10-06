@@ -1,4 +1,5 @@
 import { Alert, AppState } from 'react-native';
+import { bakedCatalog } from '../../../../shared/catalog';
 import { PROXY_BASE_URL } from '../config';
 import { ServerTransport } from '../network/client';
 import { nativeDrivers } from '../network/nativeDrivers';
@@ -18,6 +19,7 @@ export async function startAppSession(token: string): Promise<ChatStore> {
       PROXY_BASE_URL,
       token,
       nativeDrivers,
+      () => bakedCatalog,
       __DEV__,
     );
     const session = new ChatSession({

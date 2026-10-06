@@ -12,6 +12,7 @@ import {
   type SocketCommand,
   type Submission,
 } from '../../../../shared/contracts';
+import { resolveChoice, type Catalog } from '../../../../shared/catalog';
 import { SseDecoder } from '../../../../shared/provider-events';
 import {
   ReaderConflict,
@@ -114,6 +115,7 @@ export class ServerTransport implements ChatTransport {
     baseUrl: string,
     private readonly token: string,
     private readonly drivers: ClientDrivers,
+    private readonly catalog: () => Catalog,
     allowLocal = false,
   ) {
     this.baseUrl = validateServerAddress(baseUrl, allowLocal);
@@ -201,8 +203,12 @@ export class ServerTransport implements ChatTransport {
     receive: Receive,
     signal: AbortSignal,
   ): Promise<void> {
-    const selected = input.retryModel ?? input.picker;
-    if (selected !== 'kimi' && selected !== 'deepseek') {
+    const choice = resolveChoice(
+      this.catalog(),
+      input.retryModel ?? input.picker,
+      undefined,
+    );
+    if (choice.kind === 'auto' || choice.model.transport === 'socket') {
       await this.socketFeed(
         input.attemptId,
         submissionCommands(input),

@@ -178,6 +178,7 @@ function catalogModel(entry: Menu['models'][number]): CatalogModel {
   return {
     key: entry.model,
     label: models[entry.model].label,
+    transport: isGatewayModel(entry.model) ? 'http' : 'socket',
     levels: entry.levels.map(level => ({
       key: level,
       label: levelLabels[level],
