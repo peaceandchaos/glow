@@ -57,6 +57,8 @@ export function ChatScreen({ onOpenRecents, openCount }: ChatScreenProps) {
   const send = useChatStore(state => state.send);
   const stop = useChatStore(state => state.stop);
   const newChat = useChatStore(state => state.newChat);
+  const picker = useChatStore(state => state.picker);
+  const setPicker = useChatStore(state => state.setPicker);
   const loadOlder = useChatStore(state => state.loadOlder);
   const chatId = useChatStore(state => state.chatId);
   const messagesLength = useChatStore(state => state.messages.length);
@@ -235,8 +237,6 @@ export function ChatScreen({ onOpenRecents, openCount }: ChatScreenProps) {
         <EmptyState composerHeight={composerHeight} />
       ) : null}
 
-      <Header onNewChat={newChat} onOpenRecents={onOpenRecents} />
-
       <KeyboardStickyView
         offset={keyboardOffset}
         style={[styles.scrollDown, { bottom: composerHeight + 10 }]}
@@ -257,6 +257,14 @@ export function ChatScreen({ onOpenRecents, openCount }: ChatScreenProps) {
           streaming={isStreaming}
         />
       </KeyboardStickyView>
+
+      {/* Last, so the open model menu's scrim covers the composer too. */}
+      <Header
+        picker={picker}
+        onPickModel={setPicker}
+        onNewChat={newChat}
+        onOpenRecents={onOpenRecents}
+      />
 
       {reasoning != null ? (
         <Suspense fallback={null}>
