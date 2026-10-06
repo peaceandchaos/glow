@@ -139,8 +139,8 @@ type Menu = z.infer<typeof menuSchema>;
 export const defaultMenu: Menu = {
   auto: true,
   models: [
-    { model: 'deepseek', levels: openLevels, defaultLevel: null },
-    { model: 'kimi', levels: openLevels, defaultLevel: null },
+    { model: 'deepseek', levels: openLevels, defaultLevel: 'low' },
+    { model: 'kimi', levels: openLevels, defaultLevel: 'low' },
     { model: 'gpt-6.1-sol', levels: gptLevels, defaultLevel: 'medium' },
     { model: 'gpt-6-astra', levels: gptLevels, defaultLevel: 'medium' },
   ],
