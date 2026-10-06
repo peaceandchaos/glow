@@ -250,6 +250,13 @@ export const searchRequestSchema = z.strictObject({
 });
 export type SearchRequest = z.infer<typeof searchRequestSchema>;
 
+// 32 random bytes as base64url. The server stores only their SHA-256.
+export const sessionTokenSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{43}$/u)
+  .brand<'SessionToken'>();
+export type SessionToken = z.infer<typeof sessionTokenSchema>;
+
 export function decode<T>(
   schema: Pick<z.ZodType<T>, 'parse'>,
   // oxlint-disable-next-line anti-slop/no-unknown-parameters -- This is the common boundary for untrusted JSON and storage values.
