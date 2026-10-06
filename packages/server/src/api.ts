@@ -246,7 +246,6 @@ function connectionOf({ context }: SocketPeer): SocketConnection | null {
 
 export function socketRoute(services: () => ApiServices) {
   return {
-    // crossws answers the handshake with a Response thrown from upgrade().
     async upgrade(request: Request) {
       const connection = await SocketConnection.admit(
         request.headers,

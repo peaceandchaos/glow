@@ -23,7 +23,6 @@ async function sentBody(model: ModelKey): Promise<string> {
   return bodies[0];
 }
 
-// docs/providers.md records the sources and reasons for these hosts.
 test.each<[ModelKey, string[]]>([
   ['kimi', ['bedrock', 'fireworks']],
   ['deepseek', ['fireworks', 'baseten']],
