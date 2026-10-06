@@ -22,6 +22,7 @@ import App from '../App';
 import type { ClientResponse, ClientSocket } from '../src/network/client';
 import { nativeDrivers } from '../src/network/nativeDrivers';
 import { stopAppSession } from '../src/state/appSession';
+import type { ChatViewState } from '../src/state/chatView';
 
 jest.mock('react-native-keychain', () => {
   const items = new Map<string, { username: string; password: string }>();
@@ -106,9 +107,14 @@ jest.mock('../src/screens/RootDrawer', () => {
       const send = useChatStore(
         (state: { send: (text: string) => void }) => state.send,
       );
+      const setPicker = useChatStore((state: ChatViewState) => state.setPicker);
       return (
         <>
           <MockText>Chats</MockText>
+          <MockPressable
+            accessibilityLabel="Use GPT"
+            onPress={() => setPicker('gpt-6.1-sol')}
+          />
           <MockPressable
             accessibilityLabel="Send Hello"
             onPress={() => send('Hello')}
@@ -357,6 +363,7 @@ test('a launch with an authorized session opens the chats, whose socket carries 
   expect(app.texts()).not.toContain(signInLabel);
   await enterForeground();
 
+  await app.press('Use GPT');
   await app.press('Send Hello');
   expect(socket.mock.calls).toEqual([
     [
@@ -371,6 +378,7 @@ test('signing out from the Recents settings button asks first, deletes the sessi
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
   const app = await launch();
   await enterForeground();
+  await app.press('Use GPT');
   await app.press('Send Hello');
   expect(sockets.map(opened => opened.readyState)).toEqual(['OPEN']);
 
@@ -426,6 +434,7 @@ test('after sign-out, the next sign-in starts chats that use its own token', asy
   );
   await app.press(signInLabel);
   await enterForeground();
+  await app.press('Use GPT');
   await app.press('Send Hello');
 
   expect(socket.mock.calls.at(-1)?.[1]).toEqual({
