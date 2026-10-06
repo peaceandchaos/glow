@@ -51,14 +51,22 @@ async function verifiedClaims(
   }
 }
 
-export async function appleUser(
+type AppleSignIn = {
+  user: string;
+  nonce: string;
+  expiresAt: number;
+};
+
+export async function appleSignIn(
   identityToken: string,
   rawNonce: string,
   appleKeys: JWTVerifyGetKey,
-): Promise<string> {
+): Promise<AppleSignIn> {
   const claims = await verifiedClaims(identityToken, appleKeys);
-  if (claims.nonce !== sha256hex(rawNonce) || !claims.sub) throw unauthorized();
-  return claims.sub;
+  const nonce = sha256hex(rawNonce);
+  if (claims.nonce !== nonce || !claims.sub || claims.exp === undefined)
+    throw unauthorized();
+  return { user: claims.sub, nonce, expiresAt: claims.exp };
 }
 
 export function newSessionToken(): SessionToken {
@@ -70,11 +78,27 @@ export function newSessionToken(): SessionToken {
 export class SessionStore {
   constructor(private readonly database: Database) {}
 
-  async create(token: SessionToken, user: string): Promise<void> {
-    await this.database.query(
-      'INSERT INTO sessions (token_hash, user_id) VALUES ($1, $2)',
-      [sha256hex(token), user],
-    );
+  async create(
+    token: SessionToken,
+    { user, nonce, expiresAt }: AppleSignIn,
+  ): Promise<void> {
+    await this.database.transaction(async db => {
+      await db.query(
+        'DELETE FROM sign_in_nonces WHERE expires_at <= to_timestamp($1)',
+        [Date.now() / 1000],
+      );
+      const claimed = await db.query(
+        `INSERT INTO sign_in_nonces (nonce_hash, expires_at)
+         VALUES ($1, to_timestamp($2))
+         ON CONFLICT DO NOTHING RETURNING nonce_hash AS data`,
+        [nonce, expiresAt],
+      );
+      if (claimed.rows.length === 0) throw unauthorized();
+      await db.query(
+        'INSERT INTO sessions (token_hash, user_id) VALUES ($1, $2)',
+        [sha256hex(token), user],
+      );
+    });
   }
 
   async user(token: SessionToken): Promise<string | null> {

@@ -8,7 +8,7 @@ import {
   type SocketPeer,
 } from '../src/api';
 import {
-  appleUser,
+  appleSignIn,
   newSessionToken,
   sessionOwner,
   SessionStore,
@@ -22,6 +22,8 @@ jest.setTimeout(30_000);
 
 const appleUserId = 'apple-user-1';
 const rawNonce = 'raw-nonce-from-the-app';
+const sha256 = (value: string) =>
+  createHash('sha256').update(value).digest('hex');
 let jose: typeof import('jose');
 let signingKey: CryptoKey;
 let appleKeys: JWTVerifyGetKey;
@@ -46,7 +48,7 @@ function identityToken(
     iss: 'https://appleid.apple.com',
     aud: 'com.peaceandchaos.glow',
     sub: appleUserId,
-    nonce: createHash('sha256').update(rawNonce).digest('hex'),
+    nonce: sha256(rawNonce),
     iat: now,
     exp: now + 600,
     ...claims,
@@ -55,10 +57,11 @@ function identityToken(
     .sign(key);
 }
 
-test('an Apple identity token for this app and nonce gives its Apple user ID', async () => {
-  expect(await appleUser(await identityToken(), rawNonce, appleKeys)).toBe(
-    appleUserId,
-  );
+test('an Apple identity token for this app and nonce gives its Apple user, nonce hash and expiry', async () => {
+  const exp = Math.floor(Date.now() / 1000) + 300;
+  expect(
+    await appleSignIn(await identityToken({ exp }), rawNonce, appleKeys),
+  ).toEqual({ user: appleUserId, nonce: sha256(rawNonce), expiresAt: exp });
 });
 
 test.each<[string, () => Promise<string>]>([
@@ -82,13 +85,13 @@ test.each<[string, () => Promise<string>]>([
     'the nonce of another sign-in',
     () =>
       identityToken({
-        nonce: createHash('sha256').update('another nonce').digest('hex'),
+        nonce: sha256('another nonce'),
       }),
   ],
   ['a token without a nonce', () => identityToken({ nonce: undefined })],
 ])('Sign in with Apple rejects %s', async (_name, token) => {
   await expect(
-    appleUser(await token(), rawNonce, appleKeys),
+    appleSignIn(await token(), rawNonce, appleKeys),
   ).rejects.toHaveProperty('status', 401);
 });
 
@@ -96,7 +99,7 @@ test('an unreachable Apple key set is a server failure, not a rejected token', a
   const timeout: JWTVerifyGetKey = () =>
     Promise.reject(new jose.errors.JWKSTimeout());
   await expect(
-    appleUser(await identityToken(), rawNonce, timeout),
+    appleSignIn(await identityToken(), rawNonce, timeout),
   ).rejects.toBeInstanceOf(jose.errors.JWKSTimeout);
 });
 
@@ -110,9 +113,7 @@ test('the database keeps only a hash of each session token', async () => {
     );
     expect(rows.rows).toHaveLength(1);
     expect(rows.rows[0].data).not.toContain(token);
-    expect(rows.rows[0].data).toContain(
-      createHash('sha256').update(token).digest('hex'),
-    );
+    expect(rows.rows[0].data).toContain(sha256(token));
     const headers = new Headers({ Authorization: `Bearer ${token}` });
     expect(await sessionOwner(headers, auth)).toBe(appleUserId);
   } finally {
@@ -159,22 +160,31 @@ async function startServer(allowedAppleUserIds = appleUserId): Promise<Server> {
   };
 }
 
-async function signIn(server: Server, nonce = rawNonce): Promise<Response> {
+type AppleCredential = { identityToken: string; rawNonce: string };
+
+async function appleCredential(nonce = randomUUID()): Promise<AppleCredential> {
+  return {
+    identityToken: await identityToken({ nonce: sha256(nonce) }),
+    rawNonce: nonce,
+  };
+}
+
+function signIn(
+  server: Server,
+  credential: AppleCredential,
+): Promise<Response> {
   return handleRequest(
     new Request('https://fixture.example/v1/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        identityToken: await identityToken(),
-        rawNonce: nonce,
-      }),
+      body: JSON.stringify(credential),
     }),
     server.services,
   );
 }
 
 async function sessionToken(server: Server): Promise<string> {
-  const response = await signIn(server);
+  const response = await signIn(server, await appleCredential());
   expect(response.status).toBe(200);
   return decodeJson(sessionResponseSchema, await response.text()).token;
 }
@@ -199,7 +209,7 @@ async function sessionCount(server: Server): Promise<number> {
 test('a session from Sign in with Apple authorizes requests as that Apple user', async () => {
   const server = await startServer();
   try {
-    const response = await signIn(server);
+    const response = await signIn(server, await appleCredential());
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     const { token } = decodeJson(sessionResponseSchema, await response.text());
@@ -219,8 +229,45 @@ test('a session from Sign in with Apple authorizes requests as that Apple user',
 test('a refused identity token gets 401 and no session', async () => {
   const server = await startServer();
   try {
-    expect((await signIn(server, 'another nonce')).status).toBe(401);
+    const credential = await appleCredential();
+    const refused = { ...credential, rawNonce: 'another nonce' };
+    expect((await signIn(server, refused)).status).toBe(401);
     expect(await sessionCount(server)).toBe(0);
+  } finally {
+    await server.close();
+  }
+});
+
+test('a replayed identity token and nonce get 401 and no second session, while a fresh nonce still signs in', async () => {
+  const server = await startServer();
+  try {
+    const credential = await appleCredential();
+    expect((await signIn(server, credential)).status).toBe(200);
+    expect((await signIn(server, credential)).status).toBe(401);
+    expect(await sessionCount(server)).toBe(1);
+    expect((await signIn(server, await appleCredential())).status).toBe(200);
+    expect(await sessionCount(server)).toBe(2);
+  } finally {
+    await server.close();
+  }
+});
+
+test('a sign-in prunes expired nonces and keeps live ones', async () => {
+  const server = await startServer();
+  try {
+    await server.database.query(
+      `INSERT INTO sign_in_nonces (nonce_hash, expires_at) VALUES
+        ('expired', now() - interval '1 second'),
+        ('live', now() + interval '10 minutes')`,
+    );
+    const credential = await appleCredential();
+    expect((await signIn(server, credential)).status).toBe(200);
+    const { rows } = await server.database.query(
+      'SELECT nonce_hash AS data FROM sign_in_nonces',
+    );
+    expect(rows.map(row => row.data).sort()).toEqual(
+      [sha256(credential.rawNonce), 'live'].sort(),
+    );
   } finally {
     await server.close();
   }
@@ -230,7 +277,7 @@ test('an Apple user who is not on the allowlist gets 403, and the log names them
   const server = await startServer('apple-user-not-allowed');
   const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   try {
-    const response = await signIn(server);
+    const response = await signIn(server, await appleCredential());
     expect(response.status).toBe(403);
     expect(warn.mock.calls).toEqual([
       [

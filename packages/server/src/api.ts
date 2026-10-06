@@ -14,7 +14,7 @@ import {
 } from '../../../shared/contracts';
 import {
   allows,
-  appleUser,
+  appleSignIn,
   bearerToken,
   newSessionToken,
   sessionOwner,
@@ -299,19 +299,19 @@ async function signIn(
   services: ApiServices,
 ): Promise<Response> {
   const body = decodeJson(sessionRequestSchema, await readBody(request));
-  const user = await appleUser(
+  const apple = await appleSignIn(
     body.identityToken,
     body.rawNonce,
     services.appleKeys,
   );
-  if (!allows(services.allowedAppleUserIds, user)) {
+  if (!allows(services.allowedAppleUserIds, apple.user)) {
     console.warn(
-      `sign-in refused: ALLOWED_APPLE_USER_IDS does not list Apple user ${user}`,
+      `sign-in refused: ALLOWED_APPLE_USER_IDS does not list Apple user ${apple.user}`,
     );
     throw new RequestError(403, 'This Apple account is not allowed.');
   }
   const token = newSessionToken();
-  await (await services.sessions()).create(token, user);
+  await (await services.sessions()).create(token, apple);
   return Response.json({ token } satisfies SessionResponse, {
     headers: { 'Cache-Control': 'no-store' },
   });
