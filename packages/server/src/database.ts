@@ -11,8 +11,20 @@ export interface Database extends SqlConnection {
   ): Promise<T>;
 }
 
+// pg already treats these modes as verify-full and warns that it does;
+// naming verify-full keeps that TLS check and drops the warning.
+export function explicitSslMode(connectionString: string): string {
+  return connectionString.replace(
+    /([?&]sslmode=)(?:prefer|require|verify-ca)(?=&|$)/gu,
+    '$1verify-full',
+  );
+}
+
 export function postgresDatabase(connectionString: string): Database {
-  const pool = new Pool({ connectionString, max: 4 });
+  const pool = new Pool({
+    connectionString: explicitSslMode(connectionString),
+    max: 4,
+  });
   return {
     async query(sql, values) {
       return pool.query<{ data: string }>(sql, values);
