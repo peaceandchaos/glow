@@ -17,6 +17,8 @@ const signal = new AbortController().signal;
 const before = () => Promise.resolve();
 const config: ModelConfig = {
   id: 'fixture',
+  label: 'Fixture',
+  levels: [],
   wire: 'gateway',
   window: 120_000,
   maxOutput: 8192,
