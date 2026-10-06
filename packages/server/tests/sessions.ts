@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { JWTVerifyGetKey } from 'jose';
 import type { SessionToken } from '../../../shared/contracts';
 import { SessionStore } from '../src/auth';
@@ -11,7 +12,12 @@ export async function signedIn(
   sessions: [SessionToken, string][],
 ) {
   const store = new SessionStore(database);
-  for (const [token, user] of sessions) await store.create(token, user);
+  for (const [token, user] of sessions)
+    await store.create(token, {
+      user,
+      nonce: randomUUID(),
+      expiresAt: Date.now() / 1000 + 600,
+    });
   return {
     allowedAppleUserIds: sessions.map(([, user]) => user).join(','),
     appleKeys: noAppleKeys,

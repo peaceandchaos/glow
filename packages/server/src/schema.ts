@@ -49,4 +49,8 @@ CREATE TABLE IF NOT EXISTS sessions (
   user_id text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS sign_in_nonces (
+  nonce_hash text PRIMARY KEY,
+  expires_at timestamptz NOT NULL
+);
 `;
