@@ -56,7 +56,6 @@ type GatewayModelKey = {
 }[ModelKey];
 type ZeroRetentionHost = 'bedrock' | 'baseten' | 'fireworks';
 
-// docs/providers.md records the sources and reasons.
 export const gatewayHosts: Record<
   GatewayModelKey,
   [ZeroRetentionHost, ...ZeroRetentionHost[]]
