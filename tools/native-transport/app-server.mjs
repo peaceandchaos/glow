@@ -102,7 +102,6 @@ const services = {
     Promise.reject(new Error('The harness never signs in with Apple.')),
   sessions: () => Promise.resolve(sessions),
   jobs: () => Promise.resolve(jobs),
-  rank: () => Promise.resolve([]),
   async dispatch(owner, attemptId) {
     dispatches.set(attemptId, (dispatches.get(attemptId) ?? 0) + 1);
     owners.set(attemptId, owner);
