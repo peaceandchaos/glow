@@ -14,7 +14,7 @@ const signatures = [
   ['Apple team ID', /\bDEVELOPMENT_TEAM\s*=\s*"?[A-Z0-9]{10}\b/u],
   [
     'embedded credential',
-    /\b(?:OPENAI_API_KEY|AI_GATEWAY_API_KEY|PINECONE_API_KEY|ALLOWED_DEVICE_IDS|DEVICE_ID)\b\s*[:=]\s*['"][A-Za-z0-9_,.-]{24,}['"]/u,
+    /\b(?:OPENAI_API_KEY|AI_GATEWAY_API_KEY|PINECONE_API_KEY|ALLOWED_APPLE_USER_IDS|DEVICE_ID)\b\s*[:=]\s*['"][A-Za-z0-9_,.-]{24,}['"]/u,
   ],
 ];
 

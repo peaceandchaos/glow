@@ -18,6 +18,11 @@ test.each([
     'embedded credential',
   ],
   [
+    'packages/server/src/services.ts',
+    `const ALLOWED_APPLE_USER_IDS = '${'0'.repeat(6)}.${'a'.repeat(32)}.${'0'.repeat(4)}';`,
+    'embedded credential',
+  ],
+  [
     'packages/app/ios/MargeloChat.xcodeproj/project.pbxproj',
     '\t\t\t\tDEVELOPMENT_TEAM = ABCDE12345;',
     'Apple team ID',
