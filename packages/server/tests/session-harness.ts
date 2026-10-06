@@ -550,7 +550,7 @@ export function reopen(storage: MemoryStorage): ChatArchive {
 }
 
 export function createChat(phone: Phone, picker: Picker) {
-  const chat = phone.archive.createChat();
+  const chat = phone.archive.createChat('auto');
   phone.archive.setPicker(chat.id, picker);
   return phone.archive.chat(chat.id);
 }

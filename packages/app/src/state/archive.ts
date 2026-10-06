@@ -199,7 +199,7 @@ export class ChatArchive {
     return chats.sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
-  createChat(firstPicker: Picker = 'auto'): ChatRecord {
+  createChat(firstPicker: Picker): ChatRecord {
     const meta = this.metadata();
     const picker = meta.currentChatId
       ? this.chat(meta.currentChatId).picker

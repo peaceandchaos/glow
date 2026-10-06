@@ -5,7 +5,7 @@ type SeedTurn = { question: string; answer: string };
 // Saves finished turns the way a settled reply ends up on disk: completed,
 // acknowledged, and off the job list, so the session has nothing to resume.
 export function seedChat(archive: ChatArchive, turns: SeedTurn[]): string {
-  const chat = archive.createChat();
+  const chat = archive.createChat('auto');
   for (const turn of turns) {
     const reply = archive.createTurn(chat.id, turn.question, []);
     archive.saveMessages([
