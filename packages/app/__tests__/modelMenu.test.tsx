@@ -6,16 +6,27 @@ import { RootDrawer } from '../src/screens/RootDrawer';
 import { ChatStoreContext } from '../src/state/chatStore';
 import type { ChatViewState } from '../src/state/chatView';
 
+const mockSetPage = jest.fn<void, [number]>();
 jest.mock('react-native-pager-view', () => {
+  const { useImperativeHandle } = require('react');
   const { View } = require('react-native');
-  return {
-    __esModule: true,
-    default: ({ children, ...props }: { children: React.ReactNode }) => (
+  function PagerView({
+    ref,
+    children,
+    ...props
+  }: {
+    ref: React.Ref<{ setPage: (page: number) => void }>;
+    children: React.ReactNode;
+  }) {
+    'use no memo';
+    useImperativeHandle(ref, () => ({ setPage: mockSetPage }));
+    return (
       <View testID="pager" {...props}>
         {children}
       </View>
-    ),
-  };
+    );
+  }
+  return { __esModule: true, default: PagerView };
 });
 jest.mock('react-native-keyboard-controller', () => ({
   KeyboardController: { dismiss: () => undefined },
@@ -171,5 +182,6 @@ test('the scrim, Recents, and New chat each close the open menu', async () => {
       expanded: false,
     });
   }
+  expect(mockSetPage.mock.calls).toEqual([[recents]]);
   expect(newChat).toHaveBeenCalledTimes(1);
 });
