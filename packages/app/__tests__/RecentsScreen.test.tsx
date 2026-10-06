@@ -2,6 +2,7 @@ import React from 'react';
 import { AppState, Text, type AppStateStatus } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
+import { bakedCatalog } from '../../../shared/catalog';
 import { RecentsScreen } from '../src/screens/RecentsScreen';
 import type { ChatRecord } from '../src/state/archive';
 import { ChatStoreContext } from '../src/state/chatStore';
@@ -46,6 +47,7 @@ function renderRecents(): () => string[] {
   const store = createStore<ChatViewState>()(() => ({
     chatId: chat.id,
     picker: 'kimi',
+    catalog: bakedCatalog,
     messages: [],
     isStreaming: false,
     recents: [chat],
@@ -58,6 +60,7 @@ function renderRecents(): () => string[] {
     draftText: () => '',
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
+    receiveCatalog: () => undefined,
   }));
   const rendered = React.createRef<ReactTestRenderer>();
   act(() => {

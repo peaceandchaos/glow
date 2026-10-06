@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createStore, type StoreApi } from 'zustand/vanilla';
+import { parseCatalog, type Catalog } from '../../../../shared/catalog';
 import type { Picker } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
 import type { ChatArchive, ChatRecord, SavedMessage } from './archive';
@@ -23,6 +24,7 @@ export type Message = {
 export type ChatViewState = {
   chatId: string;
   picker: Picker;
+  catalog: Catalog;
   // The newest part of the chat's path. loadOlder() adds earlier messages.
   messages: Message[];
   isStreaming: boolean;
@@ -38,11 +40,12 @@ export type ChatViewState = {
   draftText: (chatId: string) => string;
   saveDraftAfterPause: (chatId: string, text: string) => void;
   saveDraftsNow: () => void;
+  // Takes a fetched catalog body; an unreadable one keeps the current catalog.
+  receiveCatalog: (body: string) => void;
 };
 
 export const historyPage = 50;
 export const draftPauseMs = 500;
-const firstChatPicker: Picker = 'deepseek';
 
 export type ChatStore = StoreApi<ChatViewState>;
 
@@ -192,9 +195,11 @@ export function createChatView(
     if (changed || isStreaming !== streaming(next)) show(chatId, next);
   };
 
+  const catalog = archive.catalog();
   const store: ChatStore = createStore<ChatViewState>()(() => ({
     chatId: '',
-    picker: firstChatPicker,
+    picker: catalog.models[0].key,
+    catalog,
     messages: [],
     isStreaming: false,
     recents: [],
@@ -237,7 +242,7 @@ export function createChatView(
       attempt(() => {
         const current = archive.chat(store.getState().chatId);
         if (current.leafId === null) return;
-        const chat = archive.createChat(firstChatPicker);
+        const chat = archive.createChat(store.getState().catalog.models[0].key);
         showPage(chat, newestPage(chat));
       }),
     openChat: chatId =>
@@ -276,12 +281,20 @@ export function createChatView(
     saveDraftsNow: () => {
       for (const [chatId, { text }] of pendingDrafts) storeDraft(chatId, text);
     },
+    receiveCatalog: body => {
+      const next = parseCatalog(body);
+      if (!next) return;
+      try {
+        archive.saveCatalog(body);
+        store.setState({ catalog: next });
+      } catch {}
+    },
   }));
 
   const currentId = archive.metadata().currentChatId;
   const opened = currentId
     ? archive.chat(currentId)
-    : archive.createChat(firstChatPicker);
+    : archive.createChat(catalog.models[0].key);
   showPage(opened, newestPage(opened));
   store.setState({ recents: archive.recents() });
   session.subscribe(refresh);

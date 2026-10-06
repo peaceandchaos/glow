@@ -132,6 +132,7 @@ jest.mock('../src/screens/RootDrawer', () => {
 
 const service = 'personal-chat.session.v1';
 const sessionUrl = 'https://chat.example/v1/session';
+const modelsUrl = 'https://chat.example/v1/models';
 const signInLabel = 'Sign in with Apple';
 
 const fetch = jest.mocked(nativeDrivers.fetch);
@@ -348,6 +349,7 @@ test('the sign-in screen goes from request to failure, retries, and opens the ch
     [sessionUrl, 'POST'],
     [sessionUrl, 'POST'],
     [sessionUrl, 'POST'],
+    [modelsUrl, 'GET'],
   ]);
 });
 
@@ -389,6 +391,11 @@ test('signing out from the Recents settings button asks first, deletes the sessi
   await app.press('Use GPT');
   await app.press('Send Hello');
   expect(sockets.map(opened => opened.readyState)).toEqual(['OPEN']);
+  expect(fetch.mock.calls.map(([url, init]) => [url, init.method])).toEqual([
+    [modelsUrl, 'GET'],
+    [modelsUrl, 'GET'],
+  ]);
+  fetch.mockClear();
 
   await app.press('Settings');
   expect(alert).toHaveBeenCalledTimes(1);

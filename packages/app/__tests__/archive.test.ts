@@ -1,3 +1,4 @@
+import { bakedCatalog } from '../../../shared/catalog';
 import {
   ChatArchive,
   type ArchiveStorage,
@@ -303,4 +304,17 @@ test('Retry reuses a model saved only as a retry model and refuses to swap a kno
     'This reply already has a model. Retry uses deepseek.',
   );
   expect(archive.retry(second.id, 'deepseek').retryModel).toBe('deepseek');
+});
+
+test('a catalog cached before the first chat keeps the archive readable, and a missing or corrupt cache gives the baked catalog', () => {
+  const storage = new MemoryStorage();
+  const archive = new ChatArchive(storage, randomUUID);
+  expect(archive.catalog()).toEqual(bakedCatalog);
+  const cached = { auto: false, models: [bakedCatalog.models[2]] };
+  archive.saveCatalog(JSON.stringify(cached));
+  archive.recover();
+  expect(archive.createChat('deepseek').picker).toBe('deepseek');
+  expect(new ChatArchive(storage, randomUUID).catalog()).toEqual(cached);
+  archive.saveCatalog('{"auto":');
+  expect(archive.catalog()).toEqual(bakedCatalog);
 });

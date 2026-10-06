@@ -1,5 +1,4 @@
 import { Alert, AppState } from 'react-native';
-import { bakedCatalog } from '../../../../shared/catalog';
 import { PROXY_BASE_URL } from '../config';
 import { ServerTransport } from '../network/client';
 import { nativeDrivers } from '../network/nativeDrivers';
@@ -19,7 +18,7 @@ export async function startAppSession(token: string): Promise<ChatStore> {
       PROXY_BASE_URL,
       token,
       nativeDrivers,
-      () => bakedCatalog,
+      () => archive.catalog(),
       __DEV__,
     );
     const session = new ChatSession({
@@ -31,12 +30,28 @@ export async function startAppSession(token: string): Promise<ChatStore> {
       Alert.alert('Something went wrong', message),
     );
     const lifecycle = followAppState(session);
-    const drafts = AppState.addEventListener('change', state => {
-      if (state !== 'active') store.getState().saveDraftsNow();
+    let catalogRequest: AbortController | null = null;
+    const refreshCatalog = () => {
+      if (catalogRequest) return;
+      const request = new AbortController();
+      catalogRequest = request;
+      transport
+        .models(request.signal)
+        .then(body => store.getState().receiveCatalog(body))
+        .catch(() => undefined)
+        .finally(() => {
+          catalogRequest = null;
+        });
+    };
+    refreshCatalog();
+    const appState = AppState.addEventListener('change', state => {
+      if (state === 'active') refreshCatalog();
+      else store.getState().saveDraftsNow();
     });
     const stop = () => {
+      catalogRequest?.abort();
       lifecycle.remove();
-      drafts.remove();
+      appState.remove();
       store.getState().saveDraftsNow();
       session.setLifecycle('background');
     };
