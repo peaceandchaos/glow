@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { JWTPayload, JWTVerifyGetKey } from 'jose';
 import {
+  sessionTokenBytes,
   sessionTokenSchema,
   type SessionToken,
 } from '../../../shared/contracts';
@@ -61,7 +62,9 @@ export async function appleUser(
 }
 
 export function newSessionToken(): SessionToken {
-  return sessionTokenSchema.parse(randomBytes(32).toString('base64url'));
+  return sessionTokenSchema.parse(
+    randomBytes(sessionTokenBytes).toString('base64url'),
+  );
 }
 
 export class SessionStore {
