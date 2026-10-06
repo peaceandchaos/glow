@@ -8,7 +8,7 @@ import {
   type Submission,
 } from '../../../shared/contracts';
 import { handleRequest, type ApiServices } from '../src/api';
-import { deviceOwner } from '../src/auth';
+import { newSessionToken } from '../src/auth';
 import { GatewayClient } from '../src/gateway';
 import { JevClient } from '../src/jev';
 import { JobRepository } from '../src/jobs';
@@ -16,12 +16,16 @@ import { LiveProviders } from '../src/providers';
 import { ResponsesClient } from '../src/responses';
 import { runAttempt } from '../src/worker';
 import { testDatabase } from './database';
+import { signedIn } from './sessions';
 
 jest.setTimeout(30_000);
 
-const device = randomBytes(32).toString('base64url');
-const headers = { 'Content-Type': 'application/json', 'X-Device-Id': device };
-const owner = deviceOwner(new Headers(headers), device);
+const token = newSessionToken();
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${token}`,
+};
+const owner = 'apple-user-1';
 // The size the app picker commonly produces at 2,048 px and quality 0.9.
 const photo = `data:image/jpeg;base64,${randomBytes(750_000).toString('base64')}`;
 
@@ -102,7 +106,7 @@ beforeAll(async () => {
     ),
   );
   services = {
-    allowlist: device,
+    ...(await signedIn(fixture.database, [[token, owner]])),
     jobs: () => Promise.resolve(jobs),
     rank: () => Promise.resolve([]),
     dispatch(dispatchOwner, attemptId) {

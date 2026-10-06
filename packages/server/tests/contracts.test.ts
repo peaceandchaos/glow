@@ -4,7 +4,6 @@ import {
   submissionSchema,
   validateAncestry,
 } from '../../../shared/contracts';
-import { deviceOwner } from '../src/auth';
 import { submission } from './fixtures';
 
 test('network input rejects malformed JSON, unknown models and an old contract', () => {
@@ -33,13 +32,4 @@ test('ancestry validation rejects context from a sibling branch', () => {
     summary: '',
   });
   expect(() => validateAncestry(input)).toThrow('does not belong');
-});
-
-test('device admission requires the exact secure id and returns only its digest', () => {
-  const device = 'a'.repeat(43);
-  const headers = new Headers({ 'X-Device-Id': device });
-  expect(() => deviceOwner(new Headers(), device)).toThrow();
-  expect(() => deviceOwner(headers, 'b'.repeat(43))).toThrow();
-  expect(deviceOwner(headers, device)).toMatch(/^[a-f0-9]{64}$/u);
-  expect(deviceOwner(headers, device)).not.toContain(device);
 });

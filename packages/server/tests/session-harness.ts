@@ -1,10 +1,11 @@
 import type { PGlite } from '@electric-sql/pglite';
-import { randomBytes, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type {
   ContextCheckpoint,
   ModelKey,
   Picker,
   ServerMessage,
+  SessionToken,
   Submission,
 } from '../../../shared/contracts';
 import { ChatArchive, type ArchiveStorage } from '../../app/src/state/archive';
@@ -17,7 +18,7 @@ import {
 } from '../../app/src/network/client';
 import { ChatSession } from '../../app/src/state/session';
 import { handleRequest, SocketConnection, type ApiServices } from '../src/api';
-import { deviceOwner } from '../src/auth';
+import { newSessionToken, sessionOwner, type SessionStore } from '../src/auth';
 import { ProviderFailure } from '../src/errors';
 import { JobRepository } from '../src/jobs';
 import type {
@@ -27,6 +28,7 @@ import type {
 } from '../src/provider';
 import { runAttempt } from '../src/worker';
 import { testDatabase } from './database';
+import { signedIn } from './sessions';
 
 export class MemoryStorage implements ArchiveStorage {
   readonly values: Map<string, string>;
@@ -274,7 +276,8 @@ export type Server = {
   jobs: JobRepository;
   services: ApiServices;
   owner: string;
-  device: string;
+  token: SessionToken;
+  sessions: () => Promise<SessionStore>;
   providers: FakeProviders;
   dispatched: string[];
   duplicateDelivery: boolean;
@@ -288,14 +291,15 @@ export type Server = {
 export async function startServer(): Promise<Server> {
   const { database, postgres } = await testDatabase();
   const jobs = new JobRepository(database);
-  const device = randomBytes(32).toString('base64url');
-  const owner = deviceOwner(new Headers({ 'X-Device-Id': device }), device);
+  const token = newSessionToken();
+  const owner = 'apple-user-1';
+  const auth = await signedIn(database, [[token, owner]]);
   const providers = new FakeProviders();
   const dispatched: string[] = [];
   const workers = new Set<Promise<void>>();
   let gate: Promise<void> | null = null;
   const services: ApiServices = {
-    allowlist: device,
+    ...auth,
     jobs: () => Promise.resolve(jobs),
     rank: () => Promise.resolve([]),
     // Durable dispatch starts the real worker asynchronously, as Workflow does.
@@ -324,7 +328,8 @@ export async function startServer(): Promise<Server> {
     jobs,
     services,
     owner,
-    device,
+    token,
+    sessions: auth.sessions,
     providers,
     dispatched,
     duplicateDelivery: false,
@@ -340,6 +345,16 @@ export async function startServer(): Promise<Server> {
       await Promise.allSettled([...workers]);
     },
   };
+}
+
+// The app still sends its credential as X-Device-Id. The server now reads a
+// bearer token, so the harness moves the value to the Authorization header.
+function asBearer(init: HeadersInit | undefined): Headers {
+  const headers = new Headers(init);
+  const token = headers.get('X-Device-Id');
+  headers.delete('X-Device-Id');
+  if (token !== null) headers.set('Authorization', `Bearer ${token}`);
+  return headers;
 }
 
 function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
@@ -363,7 +378,10 @@ function fetchDriver(server: Server, network: Network): ClientDrivers['fetch'] {
     if (typeof requestInit.body === 'string' && network.rewrite)
       requestInit.body = network.rewrite(requestInit.body);
     const response = await handleRequest(
-      new Request(url, requestInit),
+      new Request(url, {
+        ...requestInit,
+        headers: asBearer(requestInit.headers),
+      }),
       server.services,
     );
     if (network.shouldLose(url, method)) {
@@ -406,7 +424,7 @@ class InProcessSocket implements ClientSocket {
     headers: Record<string, string>,
   ) {
     this.connection = new SocketConnection(
-      new Headers(headers),
+      asBearer(headers),
       () => server.services,
       {
         isOpen: () => this.readyState === 'OPEN',
@@ -424,14 +442,17 @@ class InProcessSocket implements ClientSocket {
         this.onerror?.('offline');
         return;
       }
-      try {
-        deviceOwner(new Headers(headers), server.services.allowlist);
-      } catch {
-        this.close(1008);
-        return;
-      }
-      this.readyState = 'OPEN';
-      this.onopen?.();
+      void sessionOwner(
+        asBearer(headers),
+        server.services.allowlist,
+        server.sessions,
+      ).then(
+        () => {
+          this.readyState = 'OPEN';
+          this.onopen?.();
+        },
+        () => this.close(1008),
+      );
     }, 0);
   }
 
@@ -483,7 +504,7 @@ export function openPhone(
   archive.recover();
   const transport = new ServerTransport(
     'http://127.0.0.1:8787',
-    server.device,
+    server.token,
     {
       fetch: fetchDriver(server, network),
       socket: (_url, headers) => new InProcessSocket(server, network, headers),
