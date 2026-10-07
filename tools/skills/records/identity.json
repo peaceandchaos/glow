@@ -1,0 +1,592 @@
+{
+  "change": "identity",
+  "base": {
+    "commit": "c28456d6eb26c0146760a88284daccacf48efe56",
+    "patch": "f3bdf582794c03cabd98687f578948b50f315a5f"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": ["docs/providers.md"],
+      "findings": [
+        {
+          "finding": "The change is safe because the identity line never enters context.items or the Responses input, so no checkpoint stores it and no later turn replays it. providers.ts builds the Gateway checkpoint from context.items plus the assistant text and puts the line only in the request array. responses.ts sends the line as the top-level instructions field, outside the input that trimCompacted keeps. A mutation in the lane proved the Gateway half. With the line added to the Gateway checkpoint, identity.test.ts failed only the test that a kimi reply never saves its identity into the checkpoint, with the diff 'Expected substring: not \"running in the Glow app\"', and the received checkpoint JSON held the system item. After the file was restored to the committed version, all 7 tests passed.",
+          "cites": "How sure are you 4",
+          "none": "The fact holds at the committed head."
+        },
+        {
+          "finding": "Grep stops at the wire, so the request shape was read in the source. context.items never holds a system item, because the only other system textItem is the Kimi summary request in compaction/context.ts, and the summary comes back into the context as a user item. A Gateway reply therefore sends exactly one system message. The Kimi summary already sends a system message with array content through the same gatewayMessages mapping. DeepSeek replies send a system message for the first time. Whether every Gateway upstream accepts it, and whether Gateway chunks carry a top-level model, is unverified live. A chunk without a model only makes the log show answered=-.",
+          "cites": "Steps 3",
+          "none": "The fakes cover the request shape, and a live check needs a paid call that this change may not make. The next approved live check covers it."
+        },
+        {
+          "finding": "docs/providers.md is the controls path that routed this skill. No tool or workflow parses it. A grep of tools/ and .github/ finds it only as a path fixture in tools/__tests__/routing-committed.test.js and in skill records, so the docs change cannot change what any check passes.",
+          "cites": "Steps 4",
+          "none": "Prose only, with no reader in the checks."
+        },
+        {
+          "finding": "The answered value is logged as the provider sends it. A model string with a newline would split the log line. The likelihood is low because the value is a provider model id, and the cost is a misleading log line, never a failed reply.",
+          "cites": "Steps 4",
+          "none": "Log-only impact with a low likelihood. A follow-up can restrict the value to an id pattern if wanted."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Jyq5hqZPVuLY7vY8idt7xY",
+          "time": "2026-10-07T07:31:29.428Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "nHtjJYLqEmyZF7TERporTdqkj17uqlIUc4msJ95JB0GZJmLFnNu/j9hnIsSn9TljIri2IL6K2goWwjDiAuleDw=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The try/catch around JSON.parse in reportedModel is not defensive slop. Every raw chunk passes through the reader, and the Gateway stream ends with a [DONE] record that is not JSON. The diff adds no comments, no any casts, and no nesting beyond the style of the file.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01F8VdMjCrmy5EJHtxSoJfLZ",
+          "time": "2026-10-07T07:31:29.757Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "fCEWY5P8NfIV6DLo97Zteszg/FGAyiJ3jcJMmnhyzS4wCuHwl9qQCca2o6Ow5u5lsIrGSqQ7CqP3oYNuPuQLAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "comment-sicko was not spawned, because the rules for this lane allow only one subagent type. The same scope, the diff against origin/main, was checked directly.",
+          "cites": "Steps 1",
+          "none": "The direct check below covers the scope."
+        },
+        {
+          "finding": "A grep of the added lines for line comments, block comments, lint disables, and TypeScript suppressions found none. The only match was a ws:// URL in the test fixture.",
+          "cites": "Steps 2",
+          "none": "The diff adds no comments."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01XWfGjwJrSxDGuUxbF3CC6g",
+          "time": "2026-10-07T07:31:30.080Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "S8mmcW9IV95P38Pls4ytzS7masFq1QrvU7FrWD3+TAJSfVA97ilR6LzXxIqfSSeBvySxX7JthZ4t0wAAZWoTDQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "identity.test.ts was run on the committed head and passed 7 of 7. The mutation red quoted above names the predicted disagreement, the checkpoint holding the identity line, and not an exception or an empty result.",
+          "cites": "Prove It Works",
+          "none": "The tests prove the claims they name."
+        },
+        {
+          "finding": "The docs say the label is the one the phone shows. models.ts builds each catalog entry with label: models[entry.model].label, so the identity line and the picker read the same registry field.",
+          "cites": "Prove It Works",
+          "none": "The claim matches the source."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_018aMqjjC5V5napJSAwv2u4s",
+          "time": "2026-10-07T07:31:30.316Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "c2gVaHAygPfI8xikxCoRurucetxADn4J/O64X3m9IevGMSE13SmI3xbPmkqRau85wTZ89O2J7HNbqo0nzVSmBg=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": ["docs/providers.md"],
+      "findings": [
+        {
+          "finding": "The new section in docs/providers.md is reference. It describes the request contents and the log format, with no instruction and no opinion, and it uses the real field names instructions, system, and response.model.",
+          "cites": "Pick the mode first (Diátaxis)",
+          "none": "The mode fits the page."
+        },
+        {
+          "finding": "One parenthesis lists where the model id comes from as two noun phrases rather than a full sentence. It reads one way and does not mislead.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "none": "Cosmetic, and rewording it would churn an accurate sentence."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_017hgsQkjyDoanMozFfjR4v8",
+          "time": "2026-10-07T07:31:32.259Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "0sVwT9yr2WK2OgIDux3Knfa3ulP5kJZeQ7XAdW8CG4xn09tiXhdBj+gu56UD7HSEcY4pIM9EpCaz4zTmcpMbCg=="
+        }
+      ]
+    },
+    {
+      "skill": "thermo-nuclear-code-quality-review",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "One alternative was to add a model field to ProviderChunk and fill it where gateway.ts and responses.ts already parse each chunk. That would drop modelReportSchema and the second parse. It also changes a shared type and both clients, and the current reader stops parsing after the first chunk that reports a model. The saving is small, so it is not a missed simplification.",
+          "cites": "Primary Review Questions",
+          "none": "The current shape is smaller and keeps the change in one file."
+        },
+        {
+          "finding": "The private reply method repeats the seven parameters of generate. The alternatives were a mutable completion across both wire branches or a log call in each branch. No file nears 1000 lines (providers.ts has 155), and no branch was added to an unrelated flow.",
+          "cites": "Approval Bar",
+          "none": "No blocker. The wrapper is the smallest way to log once after both branches."
+        },
+        {
+          "finding": "Two log tests share the title \"a finished kimi reply logs the requested and answered model, never message text\". The second covers the case with no reported model. Jest runs and reports both, so the coverage is intact.",
+          "cites": "Primary Review Questions",
+          "none": "Cosmetic. A follow-up can give the no-model case its own title."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "thermo-nuclear-code-quality-review",
+          "source": "Skill",
+          "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_019e9kww3DakBPq2ZvERmJC7",
+          "time": "2026-10-07T07:31:32.685Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "efMQigQXRmWUCI6jZMyu6Qufh5gVnTYqyDe2FXNFUhnML7fXDfnKNXkOdp/H9U35M2t8ev0DBgewCB0qh9CzAg=="
+        }
+      ]
+    },
+    {
+      "skill": "typescript-best-practices",
+      "files": [
+        "packages/server/src/models.ts",
+        "packages/server/src/providers.ts",
+        "packages/server/src/responses.ts",
+        "packages/server/tests/identity.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "Chunk data is parsed as unknown and validated with a zod safeParse in reportedModel, and the test parses request bodies with zod. A grep of the diff and identity.test.ts found no as casts, no any, and no non-null assertions.",
+          "cites": "TypeScript best practices",
+          "none": "The boundary already parses its input."
+        },
+        {
+          "finding": "The log uses console.info with a fixed key=value line. The server has no structured logger and already logs through console.warn in api.ts and console.error in models.ts, so the line follows local style and holds only ids.",
+          "cites": "TypeScript best practices",
+          "none": "Matches the existing server logging."
+        },
+        {
+          "finding": "reply and generate take seven positional parameters. That is the existing Providers.generate interface in provider.ts, and the new method copies it.",
+          "cites": "TypeScript best practices",
+          "none": "Changing the shared interface is outside this change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "typescript-best-practices",
+          "source": "Skill",
+          "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_017UZJGdYyxba6qBNnb9oCiR",
+          "time": "2026-10-07T07:31:32.950Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "HYLCy+GATZCMJxesWMnNBybxy6SHvocucwgQ6cog+V7nNtBFN71z8swezKLRQJfe0RPFFfKR67BXq0JvUW81CA=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": ["docs/providers.md"],
+      "findings": [
+        {
+          "finding": "The only colon in the new docs section introduces the log format example, which the rule allows. The section has no dashes as separators.",
+          "cites": "Style 14",
+          "none": "Nothing to fix."
+        },
+        {
+          "finding": "The section names its actors in the active voice: the server logs one line, and a Responses request sends the line as instructions. The one passive-style sentence says the line is not part of the input items, which describes a state, not an action.",
+          "cites": "Plain speech 29",
+          "none": "Nothing to fix."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "4093e694-015f-4f10-a114-d4b70088d910",
+          "agent": "a791f6bff495fce9c",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01DK4oYHgNhzJ6pPZQTXUUQU",
+          "time": "2026-10-07T07:31:33.312Z",
+          "cwd": "12bf2e2f644427f71b702db7b8fd9d22d50845a71cfe45f6390c4ed283a9dabf",
+          "commonDir": "4b91900763451d83cdfed2268fef3d34a8fbcafac14b058aa14adbdc6063ac08",
+          "branch": "submission/identity",
+          "head": "d6d991e9b9fb932b679cefea43dadae3786d44b8",
+          "headPatch": "a7a852e66fde4c3ea9d05e06038b5c6593a50a2c",
+          "sig": "xy39ORRZZPwM5UKrwn5JpN9Kla2Z0f+TuDsdD14ncuXosgIS6Mv0iiHKDJ8pWWdUxauwomipCt1ELuPbZAzzAA=="
+        }
+      ]
+    }
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "The change is safe because the identity line never enters context.items or the Responses input. providers.ts:140 puts the line only in the Gateway request array, and providers.ts:147-151 builds the Gateway checkpoint from context.items plus the assistant text. responses.ts:167 sends the line as the top-level instructions field, and responses.ts:204 builds the returned items from trimCompacted([...input, ...output]), which never sees it. The reviewer reran identity.test.ts inside verify:commit at 56345b1, and the two checkpoint tests passed with a non-empty checkpoint that does not contain the line. The author's mutation red ('Expected substring: not \"running in the Glow app\"') shows the absence assertion catches a leak. The reviewer made no source edit, so its own proof stops at level 3 plus the passing tests.",
+            "cites": "How sure are you 3",
+            "none": "The fact holds at 56345b1."
+          },
+          {
+            "finding": "Auto uses the routed model's label. worker.ts resolves Jev's pick with resolveChoice and passes choice.model.key to providers.generate (worker.ts:139), the only caller, and identityInstruction reads that key's registry label. The phone shows the same label (models.ts:182, shared/catalog.ts:56). Summaries, standalone compaction, and Jev do not send the line: prepare() calls gateway.generate and responses.compact directly, and jev.select is a separate client. context.items holds no system item, because the only other system textItem is the Kimi summary request (compaction/context.ts:141-144) and the summary returns as a user item (compaction/context.ts:163). A Gateway reply therefore sends exactly one system message.",
+            "cites": "Steps 3",
+            "none": "Checked in the source. No defect."
+          },
+          {
+            "finding": "Live acceptance is unverified. No live call has sent instructions on the WebSocket response.create, an array-content system message to the DeepSeek Gateway upstreams, or confirmed that Gateway chunks carry a top-level model. A missing model only makes the log show answered=-. The answered value is logged as the provider sends it, so a newline in it would split the log line, with a log-only cost.",
+            "cites": "Steps 4",
+            "none": "Documented limit. A live check needs a paid call that this review may not make, so the next approved live check covers it."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01R1DeUhQWnaeGMtk1MJ917z",
+            "time": "2026-10-07T07:42:18.782Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "TL8C0xGsy010QO0oWPYISXc6dVQWGLnrrJYDTksYx1703SzGvxqUUTDZYnC7yQOBCvFHxpXpJrZeMADWKVg/Bg=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "The one new try/catch, around JSON.parse in reportedModel (providers.ts:26-37), is needed because the Gateway stream ends with the non-JSON [DONE] record. The diff adds no casts, no any, and no defensive guards on trusted paths.",
+            "cites": "Focus Areas",
+            "none": "Nothing to remove."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01GN3sWzxxsPBPS6BkyWoLWY",
+            "time": "2026-10-07T07:42:19.156Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "h9b6W6WUyeZumnk5ELCkJVbHlVepC9bxis4ldSAp+LcAVNpKCK/6OEXYTBazzPq+gjym+a8hAF1RRf0d6AQSBg=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "A grep of the added lines in packages/server finds no comments and no lint or TypeScript suppressions. comment-sicko was not spawned, because the lane rules allow only one subagent type, so the reviewer applied the check directly.",
+            "cites": "Steps 2",
+            "none": "No comment to judge."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_0195zjeoqc15h7b14NmSvsJU",
+            "time": "2026-10-07T07:42:19.360Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "+Qo8qOnPQ09Oo4Bb8QrnTLuO6vpv7naFjDtGqOcgRaUNMve11u5EOJvowFBCiZIYx/nJ9sDOj+oS/eaXn+OyCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "The reviewer reran the decisive checks on the real artifact instead of the author's report. npm run verify:commit -- HEAD at 56345b1 passed all 16 checks, and tests.log shows PASS tests/identity.test.ts with 215 of 215 server tests passing. The log tests assert console.info was called exactly once with the full expected line, so an extra field such as message text would fail them. The three docs claims that the tests do not pin were read in the source: the phone label, the Auto label, and the excluded summary paths.",
+            "cites": "Prove It Works",
+            "none": "Verified at 56345b1."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01HNthgjGBwVdyDHH43T2LRM",
+            "time": "2026-10-07T07:42:19.604Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "A+9qza+KGSW4p4lVavxaAR1+p1GjGsHoQLDNsP1kzVCwQTjB4lTESKcGjL5kW4wlJryc93afvuQg4VeuNfpGDg=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "The new docs/providers.md section is reference mode and each claim matches the code. The line format matches models.ts:92-94, the 8-character attempt prefix and the answered=- fallback match providers.ts:98-100, and the success-only log matches the await before console.info. The 2026-10-01 live-call paragraph above it lists the payload fields of that day and does not name instructions. The new section does not say that the instructions field and the Gateway system message are unverified live.",
+            "cites": "Pick the mode first (Diátaxis)",
+            "none": "No claim is wrong. The missing unverified-live note is a documented limit that the blast-radius finding records."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01DJF4e4W3RRsMPHfjCZQWeF",
+            "time": "2026-10-07T07:42:21.185Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "A6BdK+/Ho7cJHv1ltKRFS9skSlgP/F2Dg2TBZxBnREOs1pROhYE8HtHt/wo795QDnjKe7QEL4t09+zbP5wzQCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "No structural regression. providers.ts grows to 155 lines. The private reply method repeats the seven positional parameters of generate so that the log line sits in one place for both wires. A model field on ProviderChunk would remove the second JSON.parse, but it changes a shared type and both clients for a small gain. The ??= stops parsing after the first chunk that carries a model, which is the first chunk on both wires in the fixtures.",
+            "cites": "Approval Bar",
+            "none": "Accepted as the smallest change. The extra parse per chunk when a provider reports no model is a documented limit."
+          },
+          {
+            "finding": "In identity.test.ts the two kimi log cases share one test.each title, so a failure names the model but not which case failed. Jest runs both.",
+            "cites": "Primary Review Questions",
+            "none": "Cosmetic. Recorded as a documented limit."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01YcK2NU74yGbeKezybV6v1T",
+            "time": "2026-10-07T07:42:21.610Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "Sw6TXCyoniYa/z9111owMJYIV3iElGKWXcNshff96p/wKCSWfsCqv7SCxSUBJpSTxH7rDqbWoKI6uyA2jpjHBA=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "reportedModel parses provider chunks from unknown with a zod safeParse (providers.ts:21-37), and the tests parse request bodies with zod. The diff adds no as casts. console.info is not a structured logger, but it matches the server's existing console.warn and console.error use (api.ts:310, models.ts:172). The positional parameters are the existing Providers.generate interface.",
+            "cites": "TypeScript best practices",
+            "none": "Matches the existing server logging. A structured logger is out of scope."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_018GiXAL8T3AWuBB6zrYVceP",
+            "time": "2026-10-07T07:42:21.863Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "vU7TbkWH279N4V2zbtuVGZlJFlK5u/LAOr31+NsHHm10F5yT5rEIrAFDWL/Q5tGbSd2eikSC+0Bb3wWk67gdCA=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "The docs section uses active voice and has no dashes. Its two colons introduce an example (the quoted line and the log format), which rule 14 allows.",
+            "cites": "Style 14",
+            "none": "Nothing to change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01WARzoNurDiUpsUWX4u1L3r",
+            "time": "2026-10-07T07:42:22.103Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "dsVpt/bKJd500VJT+bntM2HAQJSjCnrdQqrwjY8ICElrvzPLBRzNJlPaCzX3cqiAHZ97EsG7PsLFFuYlLVdmDA=="
+          }
+        ]
+      }
+    ]
+  }
+}

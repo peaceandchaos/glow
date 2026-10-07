@@ -7,7 +7,11 @@ import {
 } from '../../../shared/contracts';
 import { parseResponsesEvent } from '../../../shared/provider-events';
 import { ProviderFailure } from './errors';
-import type { Effort, ResponsesModel } from './models';
+import {
+  identityInstruction,
+  type Effort,
+  type ResponsesModel,
+} from './models';
 import type { BeforePaidCall, ProviderChunk } from './provider';
 
 // Strip API-only fields (annotations, item status) while preserving every replay item.
@@ -160,6 +164,7 @@ export class ResponsesClient {
           JSON.stringify({
             type: 'response.create',
             model: config.id,
+            instructions: identityInstruction(config),
             input,
             store: false,
             max_output_tokens: config.maxOutput,

@@ -39,6 +39,21 @@ Jev operations set `maxRetries: 0`. The pinned Gateway adapter passes `abortSign
 to its HTTP call. A local fixture checks that cancellation reaches that call and
 that HTTP 500 does not cause a second evaluation. Billing cessation is unverified.
 
+## Model identity in each reply request
+
+Each reply request tells the model which model it is: "You are <label>, running
+in the Glow app." The label is the registry `label` that the phone shows. Under
+Auto, it is the label of the model that Jev chose. A Responses request sends the
+line as `instructions`. A Gateway request sends it as the first `system`
+message. The line is not part of the input items, so checkpoints never store it.
+Context summaries, standalone compaction, and Jev do not send it.
+
+After a reply completes, the server logs one line with the first 8 characters of
+the attempt id, the requested upstream id, and the model id that the provider
+reported (`model` on a Gateway chunk, `response.model` on a Responses event):
+`reply model attempt=<id> requested=<id> answered=<id>`. If the provider reports
+no model, the log shows `answered=-`. The line never contains message text.
+
 ## Reasoning levels and the model menu
 
 Each registry entry in `packages/server/src/models.ts` lists the reasoning
