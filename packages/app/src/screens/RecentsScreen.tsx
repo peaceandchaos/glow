@@ -25,6 +25,7 @@ import { Icon } from '../components/Icon';
 import { useChatStore } from '../state/chatStore';
 import { filterRecents, recentTime, type Recent } from '../state/recents';
 import { SignOutContext } from '../state/signOut';
+import type { SearchHit } from '../../../../shared/contracts';
 import { theme } from '../theme';
 
 // The time the day labels count from. It moves at the next midnight and when
@@ -55,6 +56,8 @@ type RecentsScreenProps = {
 export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
   const insets = useSafeAreaInsets();
   const chats = useChatStore(state => state.recents);
+  const serverHits = useChatStore(state => state.serverHits);
+  const searchServer = useChatStore(state => state.searchServer);
   const [query, setQuery] = useState('');
   // Typing stays responsive while a long list filters.
   const deferredQuery = useDeferredValue(query);
@@ -74,6 +77,19 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
       })),
     [chats, deferredQuery, now],
   );
+  // Server hits for the submitted query, below the title matches. A chat that
+  // is already listed, or is not on this phone, is left out.
+  const hits = useMemo(() => {
+    if (serverHits.query !== query.trim()) return [];
+    const listed = new Set(recents.map(recent => recent.id));
+    const local = new Map(chats.map(chat => [chat.id, chat.title]));
+    return serverHits.hits.flatMap((hit): SearchHit[] => {
+      const title = local.get(hit.chatId);
+      return title === undefined || listed.has(hit.chatId)
+        ? []
+        : [{ ...hit, title }];
+    });
+  }, [serverHits, query, recents, chats]);
 
   const renderRecent = useCallback(
     ({ item }: LegendListRenderItemProps<Recent>) => (
@@ -100,6 +116,8 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
             placeholderTextColor={theme.textSecondary}
             value={query}
             onChangeText={setQuery}
+            returnKeyType="search"
+            onSubmitEditing={() => searchServer(query)}
           />
         </View>
       </View>
@@ -114,6 +132,31 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         renderItem={renderRecent}
+        ListFooterComponent={
+          hits.length > 0 ? (
+            <View>
+              <Text style={styles.section}>Messages</Text>
+              {hits.map(hit => (
+                <Pressable
+                  key={hit.chatId}
+                  style={styles.row}
+                  onPress={() => onOpenChat(hit.chatId)}
+                >
+                  <View style={styles.rowText}>
+                    <Text style={styles.title} numberOfLines={1}>
+                      {hit.title}
+                    </Text>
+                    {hit.snippet ? (
+                      <Text style={styles.time} numberOfLines={2}>
+                        {hit.snippet}
+                      </Text>
+                    ) : null}
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          ) : null
+        }
       />
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 8 }]}>

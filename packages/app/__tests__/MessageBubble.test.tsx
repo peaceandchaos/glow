@@ -83,6 +83,8 @@ test('a user turn sent after a model switch shows the switch with catalog labels
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
     synced: () => undefined,
+    serverHits: { query: '', hits: [] },
+    searchServer: () => undefined,
   }));
   const turn = (modelSwitch?: Message['modelSwitch']) => {
     const rendered = createRef<ReactTestRenderer>();

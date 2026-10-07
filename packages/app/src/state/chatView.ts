@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { parseCatalog, type Catalog } from '../../../../shared/catalog';
-import type { LevelKey, Picker } from '../../../../shared/contracts';
+import type { LevelKey, Picker, SearchHit } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
 import type {
   ChatArchive,
@@ -38,6 +38,8 @@ export type ChatViewState = {
   isStreaming: boolean;
   // Chats with a sent message, most recently updated first.
   recents: ChatRecord[];
+  // The server's matches for the last submitted search.
+  serverHits: { query: string; hits: SearchHit[] };
   // Returns the saved user turn's id, or null when nothing was saved.
   send: (text: string, attachments?: Attachment[]) => string | null;
   stop: () => void;
@@ -53,6 +55,8 @@ export type ChatViewState = {
   receiveCatalog: (body: string) => void;
   // Shows what a sync pull changed. A streaming chat repaints when it settles.
   synced: (change: RemoteChange) => void;
+  // A failed search changes nothing, so only the local title matches show.
+  searchServer: (query: string) => void;
 };
 
 export const historyPage = 50;
@@ -131,10 +135,12 @@ export function createChatView(
   archive: ChatArchive,
   session: ChatSession,
   report: (error: string) => void,
+  search: (query: string, signal: AbortSignal) => Promise<SearchHit[]>,
 ): ChatStore {
   const rows = new Map<string, { saved: SavedMessage; view: Message }>();
   const sentImages = new Map<string, string[]>();
   const storedDrafts = new Map<string, string>();
+  let searchRequest: AbortController | null = null;
   const pendingDrafts = new Map<
     string,
     { text: string; timer: ReturnType<typeof setTimeout> }
@@ -226,6 +232,7 @@ export function createChatView(
     messages: [],
     isStreaming: false,
     recents: [],
+    serverHits: { query: '', hits: [] },
     send: (text, attachments = []) => {
       const { chatId } = store.getState();
       // Only a new turn's images can fail the saved-message schema.
@@ -331,6 +338,20 @@ export function createChatView(
         }
         store.setState({ recents: archive.recents() });
       }),
+    searchServer: query => {
+      const trimmed = query.trim();
+      searchRequest?.abort();
+      if (!trimmed) return;
+      const request = new AbortController();
+      searchRequest = request;
+      search(trimmed, request.signal).then(
+        hits => {
+          if (searchRequest === request)
+            store.setState({ serverHits: { query: trimmed, hits } });
+        },
+        () => undefined,
+      );
+    },
   }));
 
   function currentOrNew(): ChatRecord {

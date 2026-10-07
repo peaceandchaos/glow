@@ -191,7 +191,12 @@ test('start-up and opening a chat render from this phone when every network call
   });
   session.setLifecycle('active');
   const reports: string[] = [];
-  const view = createChatView(archive, session, report => reports.push(report));
+  const view = createChatView(
+    archive,
+    session,
+    report => reports.push(report),
+    transport.search,
+  );
   const sync = new ChatSync(archive, transport, change =>
     view.getState().synced(change),
   );

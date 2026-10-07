@@ -21,9 +21,14 @@ beforeEach(async () => {
 afterEach(() => shutdown(server));
 
 function openView(phone: Phone) {
-  const view = createChatView(phone.archive, phone.session, error => {
-    throw new Error(error);
-  });
+  const view = createChatView(
+    phone.archive,
+    phone.session,
+    error => {
+      throw new Error(error);
+    },
+    (query, signal) => phone.transport.search(query, signal),
+  );
   return () => view.getState();
 }
 
@@ -92,8 +97,11 @@ test('a saved chat that cannot be read does not open, so it is not saved as the 
   const { storage, a, unsent } = seededStorage();
   const phone = openPhone(server, storage);
   const reports: string[] = [];
-  const view = createChatView(phone.archive, phone.session, error =>
-    reports.push(error),
+  const view = createChatView(
+    phone.archive,
+    phone.session,
+    error => reports.push(error),
+    (query, signal) => phone.transport.search(query, signal),
   );
   const leafId = phone.archive.chat(a).leafId ?? '';
   storage.values.set(`archive/message/${leafId}`, '{"broken":true}');

@@ -30,8 +30,11 @@ export async function startAppSession(account: Account): Promise<ChatStore> {
       transport,
       scheduleFrame: callback => requestAnimationFrame(callback),
     });
-    const store = createChatView(archive, session, message =>
-      Alert.alert('Something went wrong', message),
+    const store = createChatView(
+      archive,
+      session,
+      message => Alert.alert('Something went wrong', message),
+      (query, signal) => transport.search(query, signal),
     );
     sync = new ChatSync(archive, transport, change =>
       store.getState().synced(change),

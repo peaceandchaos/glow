@@ -104,6 +104,8 @@ function chatState(): ChatViewState {
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
     synced: () => undefined,
+    serverHits: { query: '', hits: [] },
+    searchServer: () => undefined,
   };
 }
 

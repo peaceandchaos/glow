@@ -21,8 +21,11 @@ afterEach(() => shutdown(server));
 
 function openView(phone: Phone) {
   const errors: string[] = [];
-  const store = createChatView(phone.archive, phone.session, error =>
-    errors.push(error),
+  const store = createChatView(
+    phone.archive,
+    phone.session,
+    error => errors.push(error),
+    (query, signal) => phone.transport.search(query, signal),
   );
   return { errors, state: () => store.getState(), store };
 }
