@@ -1,5 +1,6 @@
 import { bakedCatalog, type Catalog } from '../../../shared/catalog';
-import { createChatView } from '../../app/src/state/chatView';
+import { ChatArchive } from '../../app/src/state/archive';
+import { createChatView, type Message } from '../../app/src/state/chatView';
 import {
   MemoryStorage,
   createChat,
@@ -8,6 +9,7 @@ import {
   settled,
   shutdown,
   startServer,
+  uuid,
   type Phone,
   type Server,
 } from './session-harness';
@@ -195,5 +197,70 @@ test('a level picked for the chat is saved, shown again on reopen, and reaches t
 
   state().setPicker('gpt-6-astra');
   expect(state().level).toBeUndefined();
+  expect(errors).toEqual([]);
+});
+
+const switches = (messages: Message[]) =>
+  messages.flatMap(message =>
+    message.role === 'user' ? [[message.text, message.modelSwitch]] : [],
+  );
+
+test('a turn sent after a model switch carries the switch, Auto’s own picks and a switch undone before sending do not, and the switches show again after a relaunch', async () => {
+  const phone = openPhone(server);
+  createChat(phone, 'auto');
+  const { errors, state } = openView(phone);
+  const turn = async (text: string) => {
+    state().send(text);
+    const { messages } = state();
+    await answer(phone, messages[messages.length - 1].id);
+  };
+
+  server.providers.selection = 'kimi';
+  await turn('One');
+  server.providers.selection = 'deepseek';
+  await turn('Two');
+  state().setPicker('kimi');
+  state().setPicker('auto');
+  await turn('Three');
+  state().setPicker('gpt-6.1-sol');
+  await turn('Four');
+  state().setPicker('kimi');
+  await turn('Five');
+
+  const expected = [
+    ['One', undefined],
+    ['Two', undefined],
+    ['Three', undefined],
+    ['Four', { from: 'auto', to: 'gpt-6.1-sol' }],
+    ['Five', { from: 'gpt-6.1-sol', to: 'kimi' }],
+  ];
+  expect(switches(state().messages)).toEqual(expected);
+  const relaunched = openView(openPhone(server, phone.storage.snapshot()));
+  expect(switches(relaunched.state().messages)).toEqual(expected);
+  expect(errors).toEqual([]);
+});
+
+test('a switch on the oldest shown turn appears once the page before it loads', () => {
+  const storage = new MemoryStorage();
+  const archive = new ChatArchive(storage, uuid);
+  const chat = archive.createChat('kimi');
+  for (let turn = 1; turn <= 26; turn++) {
+    if (turn === 2) archive.setPicker(chat.id, 'gpt-6.1-sol');
+    const reply = archive.createTurn(chat.id, `Question ${turn}`, []);
+    archive.saveMessages([
+      { ...reply, status: 'completed', accepted: true, text: 'Answer' },
+    ]);
+    archive.acknowledge(reply.id);
+  }
+  const { errors, state } = openView(openPhone(server, storage));
+  expect(state().messages[0]).toMatchObject({ text: 'Question 2' });
+  expect(state().messages[0].modelSwitch).toBeUndefined();
+
+  state().loadOlder();
+  expect(switches(state().messages).slice(0, 3)).toEqual([
+    ['Question 1', undefined],
+    ['Question 2', { from: 'kimi', to: 'gpt-6.1-sol' }],
+    ['Question 3', undefined],
+  ]);
   expect(errors).toEqual([]);
 });
