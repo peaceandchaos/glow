@@ -6,6 +6,20 @@ const routing = require('../skills/routing.json');
 
 const repo = resolve(__dirname, '../..');
 const owner = '@peaceandchaos';
+const records = 'tools/skills/records/';
+const sourceDirs = [
+  'packages/app/src/',
+  'packages/app/__tests__/',
+  'packages/app/harness/',
+  'packages/app/assets/',
+  'packages/app/ios/',
+  'packages/server/src/',
+  'packages/server/workflows/',
+  'packages/server/tests/',
+  'packages/server/scripts/',
+  'shared/',
+  records,
+];
 
 function codeownersPattern(pattern) {
   const anchored =
@@ -29,54 +43,70 @@ const entries = readFileSync(resolve(repo, '.github/CODEOWNERS'), 'utf8')
   });
 
 // GitHub applies the last matching CODEOWNERS line, and a line without owners clears them.
-function ownersOf(file) {
-  let owners = [];
-  for (const entry of entries)
-    if (entry.pattern.test(file)) owners = entry.owners;
-  return owners;
-}
+const isOwned = file =>
+  entries.findLast(entry => entry.pattern.test(file))?.owners.includes(owner) ??
+  false;
 
 const controls = routing.rules.find(rule => rule.id === 'controls');
 const isControl = file =>
   controls.paths.some(glob => globPattern(glob).test(file)) &&
   !controls.excludePaths.some(glob => globPattern(glob).test(file));
 
-test('the owner owns every tracked file that the controls rule routes', () => {
-  const tracked = execFileSync('git', ['ls-files'], {
-    cwd: repo,
-    encoding: 'utf8',
-  })
-    .split('\n')
-    .filter(Boolean);
-  const controlFiles = tracked.filter(isControl);
-  expect(controlFiles.length).toBeGreaterThan(0);
-  expect(controlFiles.filter(file => !ownersOf(file).includes(owner))).toEqual(
-    [],
-  );
-});
-
-test.each([
-  'packages/app/.rnsec.json',
-  'packages/app/.rnsec.jsonc',
+const tracked = execFileSync('git', ['ls-files'], {
+  cwd: repo,
+  encoding: 'utf8',
+})
+  .split('\n')
+  .filter(Boolean);
+const configs = [
+  '.npmrc',
+  'packages/server/src/.gitignore',
+  'packages/app/src/.npmrc',
+  'packages/app/src/.eslintignore',
+  'packages/server/.prettierignore',
   'packages/app/src/.oxlintrc.json',
-  'packages/server/.oxfmtrc.json',
-  'packages/app/metro.config.js',
+  'packages/server/nitro.config.ts',
   'packages/app/ios/Podfile',
   'packages/app/ios/Podfile.lock',
-  'packages/app/Gemfile',
+  'packages/app/ios/.xcode.env',
+  'packages/app/__tests__/.oxlintrc.json',
+  'packages/server/tests/jest.config.js',
+  'packages/server/scripts/package.json',
+  'shared/tsconfig.json',
+  'packages/app/src/.cache/rules.json',
+  'packages/app/.rnsec.jsonc',
   'packages/server/Gemfile.lock',
-  'packages/app/.bundle/config',
-])('%s is a control path and the owner owns it', file => {
-  expect({ control: isControl(file), owners: ownersOf(file) }).toEqual({
-    control: true,
-    owners: [owner],
-  });
+];
+const added = ['docs/new.md', 'packages/app/android/build.gradle.kts'];
+const sources = [
+  'packages/app/src/screens/ChatScreen.tsx',
+  'packages/server/src/api.ts',
+  'packages/app/ios/MargeloChat.xcodeproj/project.pbxproj',
+  'shared/contracts.ts',
+];
+
+test('the owner owns every file outside the source directories', () => {
+  const outside = [...tracked, ...added].filter(
+    file => !sourceDirs.some(dir => file.startsWith(dir)),
+  );
+  expect(outside.length).toBeGreaterThan(100);
+  expect(outside.filter(file => !isOwned(file))).toEqual([]);
 });
 
-test.each([
-  'packages/app/src/screens/ChatScreen.tsx',
-  'packages/app/ios/MargeloChat.xcodeproj/project.pbxproj',
-  'tools/skills/records/control-paths.json',
-])('%s has no code owner', file => {
-  expect(ownersOf(file)).toEqual([]);
+test.each(configs)('the owner owns the dotfile or config %s', file => {
+  expect(isOwned(file)).toBe(true);
+});
+
+test.each([...sources, `${records}control-paths.json`])(
+  '%s has no code owner',
+  file => {
+    expect(isOwned(file)).toBe(false);
+  },
+);
+
+test('the controls rule routes exactly the owned files outside records', () => {
+  const files = [
+    ...new Set([...tracked, ...added, ...configs, ...sources]),
+  ].filter(file => !file.startsWith(records));
+  expect(files.filter(file => isOwned(file) !== isControl(file))).toEqual([]);
 });

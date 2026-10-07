@@ -1,24 +1,24 @@
-/.github/ @peaceandchaos
-/.husky/ @peaceandchaos
-/.agents/ @peaceandchaos
-/.claude/ @peaceandchaos
-/tools/ @peaceandchaos
-/AGENTS.md @peaceandchaos
-/.gitignore @peaceandchaos
-/.node-version @peaceandchaos
-**/.oxlintrc* @peaceandchaos
-**/.oxfmtrc* @peaceandchaos
-**/.rnsec* @peaceandchaos
-/package-lock.json @peaceandchaos
-package.json @peaceandchaos
-tsconfig.json @peaceandchaos
-jest.config.* @peaceandchaos
-babel.config.* @peaceandchaos
-**/metro.config.* @peaceandchaos
+* @peaceandchaos
+
+/packages/app/src/
+/packages/app/__tests__/
+/packages/app/harness/
+/packages/app/assets/
+/packages/app/ios/
+/packages/server/src/
+/packages/server/workflows/
+/packages/server/tests/
+/packages/server/scripts/
+/shared/
+/tools/skills/records/
+
+**/.* @peaceandchaos
+**/.*/ @peaceandchaos
+**/*.config.* @peaceandchaos
+**/package.json @peaceandchaos
+**/package-lock.json @peaceandchaos
+**/tsconfig*.json @peaceandchaos
 **/Podfile @peaceandchaos
 **/Podfile.lock @peaceandchaos
 **/Gemfile @peaceandchaos
 **/Gemfile.lock @peaceandchaos
-**/.bundle/config @peaceandchaos
-/packages/app/patches/ @peaceandchaos
-/tools/skills/records/
