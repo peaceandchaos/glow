@@ -14,6 +14,7 @@
     "secrets": "node tools/check-credentials.cjs",
     "secrets:staged": "node tools/check-credentials.cjs --staged",
     "security": "node tools/security-check.cjs",
+    "ignored:check": "node tools/ignored-check.cjs",
     "typecheck": "npm run typecheck --workspaces",
     "typecheck:range": "node tools/range-typecheck.cjs",
     "exports:check": "node tools/exports-check.cjs",

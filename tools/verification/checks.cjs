@@ -8,6 +8,7 @@ const checks = {
   tests: ['run', 'test:verified'],
   credentials: ['run', 'secrets'],
   security: ['run', 'security'],
+  'ignored-files': ['run', 'ignored:check'],
   dependencies: ['run', 'audit:check'],
   'server-build': ['run', 'build:server'],
   'ios-js-bundle': ['run', 'build:ios-js'],
