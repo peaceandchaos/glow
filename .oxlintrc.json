@@ -76,6 +76,7 @@
     "typescript/switch-exhaustiveness-check": "error",
     "typescript/no-base-to-string": "error",
     "typescript/restrict-template-expressions": "error",
+    "typescript/ban-ts-comment": "error",
     "oxc/no-accumulating-spread": "error",
     "oxc/no-map-spread": "error",
     "import/no-cycle": "error",
