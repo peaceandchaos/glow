@@ -8,8 +8,6 @@ import {
 } from '../../../../shared/contracts';
 import type { ChatRecord, SavedMessage } from './archive';
 
-// How saved records become the rows the server stores.
-
 const encoder = new TextEncoder();
 export const bytesOf = (row: MessageRow | ChatRow): number =>
   encoder.encode(JSON.stringify(row)).byteLength;

@@ -120,7 +120,6 @@ function renderRecents(): () => string[] {
   return () => textsOf(renderer);
 }
 
-// A real archive and view with no network; search answers from `answer`.
 function searchableRecents(answer: () => Promise<SearchHit[]>) {
   const values = new Map<string, string>();
   const storage: ArchiveStorage = {

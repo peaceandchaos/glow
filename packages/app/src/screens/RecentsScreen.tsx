@@ -77,8 +77,8 @@ export function RecentsScreen({ onNewChat, onOpenChat }: RecentsScreenProps) {
       })),
     [chats, deferredQuery, now],
   );
-  // Server hits for the submitted query, below the title matches. A chat that
-  // is already listed, or is not on this phone, is left out.
+  // A hit for a chat this phone does not hold cannot open, and one already
+  // listed is not repeated.
   const hits = useMemo(() => {
     if (serverHits.query !== query.trim()) return [];
     const listed = new Set(recents.map(recent => recent.id));

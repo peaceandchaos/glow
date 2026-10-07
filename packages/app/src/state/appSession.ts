@@ -16,7 +16,6 @@ let started: Promise<Running> | null = null;
 export async function startAppSession(account: Account): Promise<ChatStore> {
   started ??= (async () => {
     let sync: ChatSync | null = null;
-    // A send, a model or title change, or a settled reply.
     const archive = openArchive(account.appleUserId, () => void sync?.run());
     const transport = new ServerTransport(
       PROXY_BASE_URL,

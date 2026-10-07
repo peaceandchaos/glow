@@ -258,9 +258,9 @@ export const chatPushSchema = z.strictObject({
   ...chatRowSchema.shape,
   dirty: z.array(chatFieldSchema).min(1),
 });
-// Attachments arrive with P1.6. Until then a row may carry their metadata,
-// and nothing stores it. Extra keys and an unreadable list are dropped, so a
-// newer phone's rows never stop this build's sync.
+// A newer phone may send attachment metadata, which this build does not
+// store. Unknown attachment keys and an unreadable list are dropped, so those
+// rows still sync.
 const attachmentMetaSchema = z.object({
   id: idSchema,
   kind: z.string().max(32),

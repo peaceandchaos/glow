@@ -1,9 +1,8 @@
 import type { SyncTransport } from '../network/transport';
 import type { ChatArchive, RemoteChange } from './archive';
 
-// Pulls every server change, then pushes the outbox. There are no timers: the
-// app runs it on foreground, sign-in and each local change. A failed run
-// leaves the cursor and the outbox as they were for the next trigger.
+// Pulls every server change, then pushes the outbox. A failed run keeps what
+// it saved so far, and the next run continues from the saved cursor and outbox.
 export class ChatSync {
   private flight: Promise<void> | null = null;
   private controller: AbortController | null = null;

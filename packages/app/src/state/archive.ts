@@ -93,7 +93,6 @@ export type SavedMessage = z.infer<typeof messageSchema>;
 type ArchiveMetadata = z.infer<typeof metadataSchema>;
 type Outbox = z.infer<typeof outboxSchema>;
 type Write = z.infer<typeof journalSchema>[number];
-// What one pulled page changed, for the views that show it.
 export type RemoteChange = { chats: Set<string>; deleted: string[] };
 
 const metaKey = 'archive/index';
@@ -108,9 +107,9 @@ const draftKey = (chatId: string) => `archive/draft/${chatId}`;
 const messagePrefix = 'archive/message/';
 const cursorKey = 'archive/sync/cursor';
 const outboxKey = 'archive/outbox';
-// Pulled chats whose leaf has not arrived yet.
+// Pulled chat rows held until every message on their leaf's path has arrived.
 const heldKey = 'archive/sync/held';
-// Rows the server would refuse. They stay on this phone only.
+// Ids dropped from the outbox because the server would refuse them.
 const unsyncedKey = 'archive/sync/unsynced';
 const pushBytes = 3_000_000;
 const pushMessages = 500;
@@ -119,7 +118,8 @@ const allFields = chatFieldSchema.options;
 // Outside archive/, so a catalog cached before the first chat never reads as
 // a chat archive without its index.
 const catalogKey = 'catalog/v1';
-// Outside archive/ for the same reason: the Apple user whose chats these are.
+// Outside archive/, so a store holding only the owner stamp never reads as an
+// archive missing its index.
 const ownerKey = 'owner';
 const write = (
   key: string,
@@ -177,9 +177,9 @@ export class ChatArchive {
       this.seedOutbox(metadata);
   }
 
-  // A store from before sync queues everything it holds except unsettled
-  // replies, which acknowledge queues later. The index is written too, so a
-  // store holding only sync keys still reads as an archive.
+  // A store with no cursor queues every chat with a turn and every message
+  // except unsettled replies, which acknowledge queues later. The index is
+  // written too, so a store holding only sync keys still reads as an archive.
   private seedOutbox(metadata: ArchiveMetadata): void {
     const jobs = new Set(metadata.jobIds);
     const chats: Outbox['chats'] = {};
@@ -453,7 +453,7 @@ export class ChatArchive {
       : [...(text || 'Image conversation').replace(/\s+/gu, ' ')]
           .slice(0, 60)
           .join('');
-    // The first turn sends every field, so a picker chosen before it arrives too.
+    // Edits before the first turn were never queued, so it sends every field.
     const fields: ChatField[] = chat.leafId ? ['leaf'] : [...allFields];
     this.commitMarked([
       ...this.addChild(user),
@@ -610,7 +610,7 @@ export class ChatArchive {
     return this.metadata().jobIds.map(id => this.message(id));
   }
 
-  // Every reply leaves jobIds here, settled, so this is where it is queued.
+  // A reply that settles leaves jobIds here, so this is where it is queued.
   acknowledge(id: string): void {
     const message = this.message(id);
     const meta = this.metadata();
@@ -742,8 +742,8 @@ export class ChatArchive {
     });
   }
 
-  // Rows are built from the records as they are now. Messages go first, so a
-  // chat's leaf reaches the server no later than the chat row.
+  // Rows are built from the records as they are now. Chat rows wait until
+  // every queued message fits, so a chat's leaf usually arrives first.
   outboxBatch(maxBytes = pushBytes): SyncPush | null {
     const outbox = this.outbox();
     const batch: SyncPush = { chats: [], messages: [] };
@@ -764,7 +764,8 @@ export class ChatArchive {
       return null;
     };
     for (const id of outbox.messages) {
-      if (full || batch.messages.length === pushMessages) break;
+      full ||= batch.messages.length === pushMessages;
+      if (full) break;
       const row = take(id, messageRow(this.message(id)));
       if (row) batch.messages.push(row);
     }
@@ -810,6 +811,7 @@ export class ChatArchive {
 
   applyRemote(page: SyncPage): RemoteChange {
     return this.inOneCommit(() => {
+      // Replies this phone is still settling belong to the session.
       const jobs = new Set(this.metadata().jobIds);
       const pulled = page.messages.filter(row => !jobs.has(row.id));
       for (const row of pulled) this.receiveMessage(row);
@@ -819,17 +821,17 @@ export class ChatArchive {
       for (const id of page.deletedChatIds) this.removeChat(id, false);
       const held = { ...this.held() };
       for (const row of page.chats) held[row.id] = row;
+      const queuedFields = this.outbox().chats;
       const chats = new Set<string>();
       for (const row of Object.values(held))
-        if (this.receiveChat(row, chats)) delete held[row.id];
+        if (this.receiveChat(row, queuedFields[row.id] ?? [], chats))
+          delete held[row.id];
       this.commit([write(heldKey, held), write(cursorKey, page.cursor)]);
       return { chats, deleted: page.deletedChatIds };
     });
   }
 
-  // Replies this phone is still settling belong to the session, so the
-  // caller skips them. A known message takes the server's outcome and keeps
-  // its local images.
+  // A known message takes the server's outcome and keeps its local images.
   private receiveMessage(row: MessageRow): void {
     if (this.readAfterJournal(messageKey(row.id)) !== undefined) {
       const local = this.message(row.id);
@@ -893,11 +895,14 @@ export class ChatArchive {
 
   // Fields still queued here keep their local values. Returns false while the
   // leaf's path is incomplete on this phone, so the row stays held.
-  private receiveChat(row: ChatRow, changed: Set<string>): boolean {
+  private receiveChat(
+    row: ChatRow,
+    queued: ChatField[],
+    changed: Set<string>,
+  ): boolean {
     const local = this.hasChat(row.id) ? this.chat(row.id) : null;
-    const dirty = new Set(local ? this.outbox().chats[row.id] : []);
     const pick = (field: ChatField) =>
-      local && dirty.has(field) ? local : row;
+      local && queued.includes(field) ? local : row;
     const model = pick('model');
     const leaf = pick('leaf');
     const chat: ChatRecord = {

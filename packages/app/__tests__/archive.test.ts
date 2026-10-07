@@ -621,3 +621,17 @@ test("a second Apple user gets an empty store and leaves the first user's chats 
   const again = opened(ownerStorage('001.aaa.1', open));
   expect(again.recents().map(saved => saved.id)).toEqual([chat.id]);
 });
+
+test('a chat row waits while its messages fill a batch', () => {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  for (let turn = 0; turn < 251; turn += 1)
+    complete(archive, archive.createTurn(chat.id, `Turn ${turn}`, []));
+  const first = pushAll(archive);
+  expect([first.messages.length, first.chats.length]).toEqual([500, 0]);
+  const second = pushAll(archive);
+  expect(second.messages.map(row => row.id)).toContain(
+    archive.chat(chat.id).leafId,
+  );
+  expect(second.chats.map(row => row.id)).toEqual([chat.id]);
+});

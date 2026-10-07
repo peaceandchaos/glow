@@ -38,7 +38,7 @@ export type ChatViewState = {
   isStreaming: boolean;
   // Chats with a sent message, most recently updated first.
   recents: ChatRecord[];
-  // The server's matches for the last submitted search.
+  // The server's matches for the last search that answered, with its query.
   serverHits: { query: string; hits: SearchHit[] };
   // Returns the saved user turn's id, or null when nothing was saved.
   send: (text: string, attachments?: Attachment[]) => string | null;
@@ -53,9 +53,9 @@ export type ChatViewState = {
   saveDraftsNow: () => void;
   // Takes a fetched catalog body; an unreadable one keeps the current catalog.
   receiveCatalog: (body: string) => void;
-  // Shows what a sync pull changed. A streaming chat repaints when it settles.
+  // Shows what a sync pull changed. A streaming chat is not repainted.
   synced: (change: RemoteChange) => void;
-  // A failed search changes nothing, so only the local title matches show.
+  // A failed search is silent and keeps the last answered hits.
   searchServer: (query: string) => void;
 };
 
