@@ -359,6 +359,22 @@ test('a chat deleted while its reply runs keeps no message rows', async () => {
   });
 });
 
+test('a reply over the row limit stores no row, and later replies still pull', async () => {
+  const longText = await running();
+  await jobs.update(owner, longText.attemptId, 'claim', {
+    text: 'x'.repeat(1_000_000),
+    status: 'completed',
+  });
+  const longReasoning = await running();
+  await jobs.update(owner, longReasoning.attemptId, 'claim', {
+    reasoning: 'x'.repeat(1_000_000),
+    status: 'completed',
+  });
+  const next = await running();
+  await jobs.update(owner, next.attemptId, 'claim', { status: 'completed' });
+  expect((await pull(0)).messages).toMatchObject([{ id: next.attemptId }]);
+});
+
 test('a stop before acceptance stores no reply', async () => {
   expect(await jobs.requestCancellation(owner, randomUUID())).toBeNull();
   expect((await pull(0)).messages).toEqual([]);

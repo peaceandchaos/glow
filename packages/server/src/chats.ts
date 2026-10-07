@@ -1,5 +1,6 @@
 import {
   decodeJson,
+  messageRowSchema,
   searchResponseSchema,
   syncPageSchema,
   type AttemptSnapshot,
@@ -14,6 +15,7 @@ const pageBytes = 1_000_000;
 const searchHits = 20;
 const titleWeight = 2;
 const indexedCharacters = 100_000;
+const pullableReply = messageRowSchema.pick({ text: true, reasoning: true });
 
 // The only producer of seq values. The chat_owners row lock is held until
 // commit, so per-owner seq order is commit order and a pull cursor never
@@ -180,6 +182,8 @@ export async function storeReply(
   owner: string,
   snapshot: AttemptSnapshot,
 ): Promise<void> {
+  const { text, reasoning } = snapshot;
+  if (!pullableReply.safeParse({ text, reasoning }).success) return;
   const seq = (await stamp(db, owner, 1)) + 1;
   await db.query(
     `INSERT INTO chat_messages (owner, id, seq, chat_id, parent_id, path_id,
