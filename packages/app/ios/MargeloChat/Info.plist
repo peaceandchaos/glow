@@ -39,10 +39,14 @@
 	<string>Glow uses the camera only when you choose to take a photo to attach to a message.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Glow uses Face ID only if you turn on a feature that needs it.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Glow uses the microphone only while you dictate a message.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Glow saves an image to your photo library only when you choose to save it.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Glow opens your photo library when you choose photos to attach to a message.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Glow turns your speech into text while you dictate a message.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

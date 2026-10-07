@@ -19,6 +19,8 @@ const SF_TO_MDI: Record<string, string> = {
   'arrow.up': 'arrow-up',
   'arrow.down': 'arrow-down',
   'stop.fill': 'stop',
+  mic: 'microphone-outline',
+  waveform: 'waveform',
   sparkles: 'creation',
   'text.bubble': 'message-outline',
   clock: 'clock-outline',
