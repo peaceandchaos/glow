@@ -9,7 +9,12 @@ const { tmpdir } = require('node:os');
 const { dirname, join } = require('node:path');
 const { git } = require('../verification/snapshot.cjs');
 const { trackedIgnored } = require('../ignored-check.cjs');
-const { scannerSkips, scannerGaps } = require('../security-check.cjs');
+const {
+  scanAll,
+  evaluate,
+  scannerSkips,
+  scannerGaps,
+} = require('../security-check.cjs');
 
 test('the ignored-file check lists tracked files under ignored paths only', () => {
   const fixture = mkdtempSync(join(tmpdir(), 'ignored-fixture-'));
@@ -62,4 +67,30 @@ test('the security check fails source in a path that rnsec skips', () => {
     'tools/__tests__/token.test.js',
   ];
   expect(scannerGaps([...scanned, ...hidden])).toEqual(hidden);
+});
+
+test('the security check scans shared source with the app', () => {
+  const fixture = mkdtempSync(join(tmpdir(), 'shared-fixture-'));
+  try {
+    for (const folder of ['packages/app', 'shared'])
+      mkdirSync(join(fixture, folder), { recursive: true });
+    writeFileSync(
+      join(fixture, 'packages/app/plain.ts'),
+      'export const probe = 1;\n',
+    );
+    writeFileSync(
+      join(fixture, 'shared/decode.ts'),
+      'export const decode = (t: string) => eval(t);\n',
+    );
+    const report = scanAll(fixture);
+    expect(report.scannedFiles).toBe(2);
+    expect(evaluate(report, {}, '2026-10-06', fixture)).toEqual([
+      'EVAL_USAGE shared/decode.ts:1: HIGH has no exceptions',
+      'INSECURE_DESERIALIZATION shared/decode.ts:1: HIGH has no exceptions',
+    ]);
+    rmSync(join(fixture, 'shared/decode.ts'));
+    expect(() => scanAll(fixture)).toThrow('rnsec scanned no files in shared.');
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
