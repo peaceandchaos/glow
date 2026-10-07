@@ -19,6 +19,7 @@ import { EffortGauge } from './EffortGauge';
 import { Glass } from './Glass';
 import { Icon } from './Icon';
 import { useAttachments } from '../hooks/useAttachments';
+import { useDictation } from '../hooks/useDictation';
 import { useDraft } from '../hooks/useDraft';
 import type { Attachment } from '../state/chatStore';
 import { theme } from '../theme';
@@ -31,6 +32,11 @@ const THUMBS_ANIM_MS = 220;
 
 // The composer keeps its input when the message was not saved.
 export type SendResult = 'saved' | 'unsaved';
+
+const afterText = (text: string, transcript: string) =>
+  text.length === 0 || /\s$/u.test(text)
+    ? text + transcript
+    : `${text} ${transcript}`;
 
 type ComposerProps = {
   chatId: string;
@@ -54,6 +60,8 @@ export const Composer = React.memo(function ({
   const setValue = (text: string) => changeDraft(draft => ({ ...draft, text }));
   const { pickImages, removeAttachment } = useAttachments(changeDraft);
   const canSend = value.trim().length > 0 || attachments.length > 0;
+  const dictation = useDictation();
+  const listening = dictation?.listening ?? false;
 
   const onSend = () => {
     if (!canSend) {
@@ -146,12 +154,34 @@ export const Composer = React.memo(function ({
             onChangeText={setValue}
             onLayout={onInputLayout}
             autoFocus
-            placeholder="Ask anything"
+            placeholder={listening ? 'Listening…' : 'Ask anything'}
             placeholderTextColor={theme.textSecondary}
             style={[styles.input, collapsedInputStyle]}
             multiline
           />
           <EffortGauge />
+          {dictation ? (
+            <BarButton
+              onPress={() =>
+                dictation.toggle(transcript =>
+                  setValue(afterText(value, transcript)),
+                )
+              }
+              accessibilityRole="button"
+              accessibilityLabel={listening ? 'Stop dictation' : 'Dictate'}
+              accessibilityState={{ selected: listening }}
+            >
+              <Animated.View
+                style={[styles.circle, listening && styles.recording, fill]}
+              >
+                <Icon
+                  name={listening ? 'waveform' : 'mic'}
+                  size={17}
+                  color={theme.text}
+                />
+              </Animated.View>
+            </BarButton>
+          ) : null}
           {/* While a reply streams, the send arrow becomes a stop button. */}
           <BarButton
             onPress={streaming ? onStop : onSend}
@@ -216,6 +246,9 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE / 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  recording: {
+    backgroundColor: theme.recording,
   },
   sendActive: {
     backgroundColor: theme.sendActive,

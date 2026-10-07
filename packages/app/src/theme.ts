@@ -11,6 +11,7 @@ export const theme = {
   sendActive: '#FFFFFF',
   sendInactive: '#48484A',
   gaugeOff: 'rgba(255, 255, 255, 0.22)',
+  recording: '#FF453A',
   menuBackground: '#1A1A1C',
   menuText: '#EAEAEA',
 } as const;

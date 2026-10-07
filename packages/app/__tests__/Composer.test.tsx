@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, View } from 'react-native';
+import { Alert, TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
@@ -31,6 +31,25 @@ jest.mock('../src/components/AttachmentMenu', () => ({
     mockPickPhotos = onPickPhotos;
     const { View: MenuButton } = require('react-native');
     return <MenuButton accessibilityLabel="Attach" />;
+  },
+}));
+let mockRecognizer: {
+  onText: (text: string) => void;
+  onEnd: () => void;
+} | null = null;
+const mockDictation = {
+  start: jest.fn(async () => undefined),
+  stop: jest.fn(),
+  listen: (onText: (text: string) => void, onEnd: () => void) => {
+    mockRecognizer = { onText, onEnd };
+    return () => {
+      mockRecognizer = null;
+    };
+  },
+};
+jest.mock('../src/dictation', () => ({
+  get dictation() {
+    return mockDictation;
   },
 }));
 jest.mock('../src/components/Glass', () => ({
@@ -267,7 +286,7 @@ function mountComposer(picker: Picker = 'gpt-6.1-sol') {
   };
 }
 
-test('the bar holds the plus, the text field, the effort gauge and the send button, in that order', () => {
+test('the bar holds the plus, the text field, the effort gauge, the microphone and the send button, in that order', () => {
   const { renderer } = mountComposer();
   const order = renderer.root
     .findAll(
@@ -276,7 +295,13 @@ test('the bar holds the plus, the text field, the effort gauge and the send butt
         (node.props.accessibilityLabel || node.props.placeholder),
     )
     .map(node => node.props.accessibilityLabel ?? node.props.placeholder);
-  expect(order).toEqual(['Attach', 'Ask anything', 'Reasoning effort', 'Send']);
+  expect(order).toEqual([
+    'Attach',
+    'Ask anything',
+    'Reasoning effort',
+    'Dictate',
+    'Send',
+  ]);
 });
 
 test('a tap on the gauge steps the chat’s level up one, wraps to the lowest after the highest, and saves each pick', () => {
@@ -315,6 +340,54 @@ test('the gauge is hidden under Auto and for a model with no levels', () => {
     }),
   );
   expect(kimi.shows('Reasoning effort')).toBe(false);
+});
+
+test('dictation adds its transcript after the draft as it arrives, shows the recording state, and a second tap stops it', async () => {
+  mockDictation.start.mockClear();
+  mockDictation.stop.mockClear();
+  const { renderer, input } = mountComposer();
+  act(() => {
+    input().props.onChangeText('Draft');
+  });
+  await act(async () => button(renderer, 'Dictate').props.onPress());
+  expect(mockDictation.start).toHaveBeenCalledTimes(1);
+  expect(input().props.placeholder).toBe('Listening…');
+  expect(button(renderer, 'Stop dictation').props.accessibilityState).toEqual({
+    selected: true,
+  });
+
+  act(() => mockRecognizer?.onText('hello'));
+  expect(input().props.value).toBe('Draft hello');
+  act(() => mockRecognizer?.onText('hello world.'));
+  expect(input().props.value).toBe('Draft hello world.');
+
+  act(() => {
+    button(renderer, 'Stop dictation').props.onPress();
+  });
+  expect(mockDictation.stop).toHaveBeenCalledTimes(1);
+  act(() => mockRecognizer?.onEnd());
+  expect(mockRecognizer).toBeNull();
+  expect(input().props.placeholder).toBe('Ask anything');
+  expect(input().props.value).toBe('Draft hello world.');
+  expect(button(renderer, 'Dictate').props.accessibilityState).toEqual({
+    selected: false,
+  });
+});
+
+test('a refused dictation explains why and leaves the microphone ready', async () => {
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+  mockDictation.start.mockRejectedValueOnce(
+    new Error('Microphone access is off for Glow.'),
+  );
+  const { renderer, input } = mountComposer();
+  await act(async () => button(renderer, 'Dictate').props.onPress());
+  expect(alert).toHaveBeenCalledWith(
+    'Dictation is unavailable',
+    'Microphone access is off for Glow.',
+  );
+  expect(mockRecognizer).toBeNull();
+  expect(input().props.placeholder).toBe('Ask anything');
+  alert.mockRestore();
 });
 
 test('a long press lists the levels with the chat’s level checked, and a pick saves it', () => {
