@@ -9,21 +9,29 @@
       "skill": "blast-radius",
       "files": [
         ".github/CODEOWNERS",
+        ".oxfmtrc.json",
+        ".oxlintrc.json",
         "AGENTS.md",
         "README.md",
         "docs/github-controls.md",
         "docs/skills.md",
         "package.json",
         "tools/__tests__/codeowners.test.js",
+        "tools/__tests__/hidden-source.test.js",
+        "tools/__tests__/lint-policy.test.js",
         "tools/__tests__/motion-lines.cjs",
         "tools/__tests__/routing-committed.test.js",
         "tools/github/integration-rules.json",
+        "tools/ignored-check.cjs",
+        "tools/lint-policy.mjs",
+        "tools/security-check.cjs",
         "tools/skills/routing.json",
+        "tools/verification/checks.cjs",
         "tools/verify.cjs"
       ],
       "findings": [
         {
-          "finding": "The change is safe because the owner owns every file by default. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, and Gemfile at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, packages/app/src/.eslintignore, packages/server/.prettierignore, and packages/server/nitro.config.ts. It fails when the default owner line, the dotfile line, or the config line is removed, when tools/ loses its owner, or when packages/app/ios/ gains one. git ls-files with the same patterns as an exclude file gives the same 162 owned files out of 303 as the test's matcher.",
+          "finding": "The change is safe because a change to unowned files alone cannot hide source from a check. Ownership is half of that fact. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, Gemfile, and packages/app/src/config.example.ts at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, and packages/server/nitro.config.ts. The guards are the other half, because a check's own ignore list can skip unowned paths: verify.cjs pins the npm registry, npm run lint passes --disable-nested-config, the ignored-files check fails on a tracked file under a .gitignore path, the security check fails on source in a path that rnsec skips, and lint bans @ts-nocheck, @ts-ignore, and inline disables of typescript/ban-ts-comment. Two exceptions remain and docs/github-controls.md names them. The unowned project.pbxproj can add a Swift package, and the suppression policy allows a named inline lint disable with a reason in unowned source for other rules.",
           "cites": "How sure are you 4",
           "commit": "135fe0ebd492",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
@@ -62,6 +70,35 @@
           "cites": "Steps 3",
           "commit": "4285d26694a9",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
+        },
+        {
+          "finding": "oxlint and oxfmt skip every path that .gitignore names, and **/coverage/** matched at any depth, so a tracked file in packages/server/src/coverage/, build/, or node_modules/ escaped lint and format. The coverage patterns now name only coverage/, packages/app/coverage/, and packages/server/coverage/, and a probe in packages/server/src/coverage/ is reported by both tools while packages/app/coverage/ stays ignored. The new ignored-files check runs git ls-files --cached --ignored --exclude-standard with an empty core.excludesFile, so a personal global ignore list cannot change its result. It lists no file on the clean head.",
+          "cites": "How sure are you 4",
+          "commit": "09da1f2222a5",
+          "patch": "d58c2c083fdc81156b92c8accc10fda8d30d549a"
+        },
+        {
+          "finding": "rnsec 1.3.0 skips a fixed list of paths (dist/core/fileWalker.js defaultIgnore) that no option removes, and the list is a local constant, so the check cannot import it. tools/security-check.cjs copies it, and hidden-source.test.js reads the list from rnsec's source and fails when the two differ. The check fails on tracked .js, .jsx, .ts, or .tsx files that match the list outside packages/app/__tests__/, packages/server/tests/, and tools/__tests__/. The guard lists the whole repo, although rnsec scans only packages/app, because the brief names the server and tools test folders. On the clean head no file matches.",
+          "cites": "How sure are you 4",
+          "commit": "7e9c7b5f3af6",
+          "patch": "f5f85d233f147d5843726c1d032f6190a570af53"
+        },
+        {
+          "finding": "oxlint applies an inline disable of a built-in rule under any plugin prefix or none. typescript/ban-ts-comment, @typescript-eslint/ban-ts-comment, typescript-eslint/ban-ts-comment, xyz/ban-ts-comment, and bare ban-ts-comment each turned the rule off. A JS plugin rule such as project/no-type-assertion needs its exact name. require-disable-reason therefore matches ban-ts-comment as the last part of any listed rule name, and lint-policy.test.js covers the prefixed, the @typescript-eslint, and the bare comma-joined forms.",
+          "cites": "Steps 3",
+          "commit": "0255018eaa31",
+          "patch": "7ce880548de9f903ef6508882c83be5c382658a7"
+        },
+        {
+          "finding": "A described @ts-expect-error in unowned source still suppresses the type error on its next line. The decided policy keeps it, because the one existing use in packages/server/tests/models.test.ts has a description, and tsc fails when the next line has no error. docs/github-controls.md says each @ts-expect-error needs a description.",
+          "cites": "Steps 4",
+          "none": "Allowed by the decided suppression policy, and the doc names it."
+        },
+        {
+          "finding": "packages/app/src/config.example.ts is the allow-list that check-app-config.cjs applies to the gitignored config.ts before every bundle. It now has a code owner, and the controls rule lists it. With its CODEOWNERS line removed, codeowners.test.js fails the owned-config case for the file and the controls-match case.",
+          "cites": "How sure are you 4",
+          "commit": "663fc6cd6fcf",
+          "patch": "41e4806a67b3a675a1ee363f2ba1bac25aedc16e"
         }
       ],
       "receipts": [
@@ -92,6 +129,11 @@
       "findings": [
         {
           "finding": "The range adds one test, data lines in CODEOWNERS, routing.json, and the ruleset, one environment variable in verify.cjs, one lint flag, and doc sentences. The test has no casts, guards, or try/catch.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        },
+        {
+          "finding": "The B6 to B9 commits add one 30-line check script, one guard function, one lint table, two data lines, and tests. The new code has no casts, no try/catch, and no defensive checks on internal values. ignored-check.cjs reuses the git helper from verification/snapshot.cjs, and security-check.cjs reuses globPattern from skills/routing.cjs instead of a new matcher.",
           "cites": "Focus Areas",
           "none": "Nothing to remove."
         }
@@ -126,6 +168,11 @@
           "finding": "The range adds two comments. tools/__tests__/codeowners.test.js states that GitHub applies the last matching CODEOWNERS line, which the repo cannot change. tools/verify.cjs states that the registry variable overrides a candidate's own .npmrc, which the code cannot show. The comments were checked by hand instead of with the comment-sicko subagent.",
           "cites": "Steps",
           "none": "Both comments explain a why the code cannot show."
+        },
+        {
+          "finding": "The B6 to B9 commits add three comments. lint-policy.mjs says that oxlint applies a disable of a built-in rule under any plugin prefix, which a probe measured and the regex depends on. ignored-check.cjs says why lint and format need the check and why core.excludesFile is empty. security-check.cjs names the rnsec file that the copied list comes from. The comments were checked by hand, because the standing orders allow only poteto-agent-high subagents.",
+          "cites": "Steps",
+          "none": "Each comment explains a why the code cannot show."
         }
       ],
       "receipts": [
@@ -147,6 +194,38 @@
           "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
           "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
           "sig": "ammljgOWgI7bSV9ps4HRACBtVZjIgN1Ojwcx6VvTLRFcVzPjJ1BE4NVmc0iCRWImExGEabghTRwPaV+UE6psAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-boundary-discipline",
+      "files": ["tools/security-check.cjs"],
+      "findings": [
+        {
+          "finding": "tools/security-check.cjs reads two inputs from outside the check, the tracked file list from git and rnsec's fixed skip list. It reads the file list once in main(), and scannerGaps is a pure function over that list, so the test calls it with plain paths. The copied skip list is checked against rnsec's own source at the boundary by hidden-source.test.js, not at run time.",
+          "cites": "Boundary Discipline",
+          "none": "The guard keeps its inputs at the edge and its logic pure."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-boundary-discipline",
+          "source": "Skill",
+          "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a78fcf7914e22f2cf",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01DWe4ednx4BcPyAr7NmBZWh",
+          "time": "2026-10-07T01:33:06.956Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "053360f9cbfbc5ecb1ca3e8b3783189dc6c490a3",
+          "headPatch": "02a752c18b67be36eccb6a4ed656d2f7187915fd",
+          "sig": "i4S4v+HP8tVsZ4thFUQCTrlhTZ7cEdlZoUIiQ929d0TFO8TGUYzf/YGRtOa12UL6m/qKbFBqR/O9gjK4vqdfCQ=="
         }
       ]
     },
@@ -177,6 +256,12 @@
           "cites": "Prove It Works",
           "commit": "4285d26694a9",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
+        },
+        {
+          "finding": "Each new guard was proven on the real check command and mutation-checked. The B6 probe went through node tools/verify.cjs commit HEAD with probe files in packages/server/src/coverage/ and packages/server/src/build/. lint and format failed on the coverage file, ignored-files failed on the build file, and security failed on both. The B7 probe ran node tools/security-check.cjs with the same file in plain/, e2e/, dist/, and test/, and every run exits 1. The B8 probe ran npm run lint with @ts-nocheck, @ts-ignore, and two disable spellings. Removing a guard line made its tests fail: the excludesFile pin, the --ignored flag, the e2e pattern, the ban-ts-comment lock, and the config.example.ts CODEOWNERS line.",
+          "cites": "Script the check when you can",
+          "commit": "7e9c7b5f3af6",
+          "patch": "f5f85d233f147d5843726c1d032f6190a570af53"
         }
       ],
       "receipts": [
@@ -221,6 +306,12 @@
           "cites": "Leave no sentence open to two readings (Global English)",
           "commit": "e737ca7f31d4",
           "patch": "af58f26f95e956c3f635d4e9f9655fa19c1a7d5e"
+        },
+        {
+          "finding": "docs/github-controls.md now names the two exceptions to code-owner review in plain sentences, the unowned project.pbxproj and named inline lint disables in unowned source. It then states each guard as the cause and the check that answers it. README.md adds one sentence about the scanner-skip guard next to the scanner description.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "aa3b067225b3",
+          "patch": "f72d52d30c065e56925590805b01dccd1dbff0b5"
         }
       ],
       "receipts": [
@@ -251,6 +342,11 @@
       "findings": [
         {
           "finding": "The range removes more than it adds. routing.json goes from 22 rules to 10, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. The two app entry files are named once in CODEOWNERS and once in the controls rule's excludePaths, and the test fails if the two lists differ. No file passes 1000 lines.",
+          "cites": "Approval Bar",
+          "none": "No structural regression."
+        },
+        {
+          "finding": "The B6 to B9 commits add one small check script and keep each guard in the check it protects. The ban-ts-comment lock replaces an else-if with a two-entry table, so a third locked rule is one line. The scanner guard is one pure filter in security-check.cjs. No file passes 1000 lines; verification.test.js stays at 799 lines because the new tests live in hidden-source.test.js.",
           "cites": "Approval Bar",
           "none": "No structural regression."
         }
@@ -291,6 +387,11 @@
           "finding": "The changed doc sentences and the controls rule's why use plain words and state one rule each, with no dashes and no colon connectors. One long guard sentence was split in two before the docs commit.",
           "cites": "Style",
           "none": "Nothing left to rewrite."
+        },
+        {
+          "finding": "The new doc sentences and check messages use plain words, one fact per sentence, and no colon connectors or dashes.",
+          "cites": "Style",
+          "none": "Nothing left to rewrite."
         }
       ],
       "receipts": [
@@ -323,6 +424,11 @@
           "finding": "AGENTS.md states the ownership rule once in Checks and repairs and the merge rule once in Completion evidence, as positives, and points at .github/CODEOWNERS for the full list. The controls rule's why says it mirrors CODEOWNERS instead of naming a stale subset.",
           "cites": "Pruning",
           "none": "One source of truth for the owned paths."
+        },
+        {
+          "finding": "routing.json gains one controls path and AGENTS.md is unchanged. AGENTS.md already says the owner owns every config inside the source folders, which now includes config.example.ts.",
+          "cites": "Pruning",
+          "none": "No new agent-facing text to prune."
         }
       ],
       "receipts": [
