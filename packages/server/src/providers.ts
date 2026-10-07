@@ -43,7 +43,7 @@ export class LiveProviders implements Providers {
           abort,
           before,
           () => Promise.resolve(),
-          null,
+          models[key].levels[0] ?? null,
           maxOutput,
         ),
     });
