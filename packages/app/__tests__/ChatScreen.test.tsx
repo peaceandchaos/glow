@@ -102,6 +102,9 @@ function chatState(isStreaming: boolean): ChatViewState {
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
+    synced: () => undefined,
+    serverHits: { query: '', hits: [] },
+    searchServer: () => undefined,
   };
 }
 

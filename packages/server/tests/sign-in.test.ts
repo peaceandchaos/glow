@@ -15,6 +15,7 @@ import {
   SessionStore,
 } from '../src/auth';
 import type { Database } from '../src/database';
+import { ChatRows } from '../src/chats';
 import { JobRepository } from '../src/jobs';
 import { testDatabase } from './database';
 import { signedIn } from './sessions';
@@ -153,8 +154,8 @@ async function startServer(allowedAppleUserIds = appleUserId): Promise<Server> {
       appleKeys,
       sessions: () => Promise.resolve(new SessionStore(database)),
       jobs: () => Promise.resolve(jobs),
+      chats: () => Promise.resolve(new ChatRows(database)),
       dispatch: () => Promise.reject(new Error('Must not dispatch')),
-      rank: () => Promise.resolve([]),
       catalog: bakedCatalog,
     },
     database,

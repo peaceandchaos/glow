@@ -1,8 +1,10 @@
 import type {
   AttemptSnapshot,
-  SearchRequest,
+  SearchHit,
   ServerMessage,
   Submission,
+  SyncPage,
+  SyncPush,
 } from '../../../../shared/contracts';
 
 export class TransportError extends Error {
@@ -39,6 +41,11 @@ export interface ChatTransport {
   stop(id: string, signal: AbortSignal): Promise<AttemptSnapshot | null>;
   acknowledge(id: string, sequence: number, signal: AbortSignal): Promise<void>;
   deleteChat(id: string, signal: AbortSignal): Promise<void>;
-  rank(input: SearchRequest, signal: AbortSignal): Promise<string[]>;
   disconnect(): void;
+}
+
+export interface SyncTransport {
+  pull(after: number, signal: AbortSignal): Promise<SyncPage>;
+  push(batch: SyncPush, signal: AbortSignal): Promise<void>;
+  search(query: string, signal: AbortSignal): Promise<SearchHit[]>;
 }

@@ -512,17 +512,6 @@ test('server-address validation requires TLS except explicit private development
     expect(() => validateServerAddress(address, false)).toThrow();
 });
 
-test('ranking rejects IDs outside the provided title candidates', async () => {
-  const fixture = setup();
-  fixture.reply(response(JSON.stringify({ ids: [otherAttempt] })));
-  await expect(
-    fixture.transport.rank(
-      { query: 'hello', candidates: [{ id: chatId, title: 'Hello' }] },
-      new AbortController().signal,
-    ),
-  ).rejects.toThrow('Invalid title ranking');
-});
-
 test('server event runtime validation rejects invalid HTTP status values', () => {
   expect(() =>
     decodeJson(
@@ -659,4 +648,65 @@ test('a late close from an old socket cannot detach a replacement connection', a
   await replacement;
   expect(received).toEqual([{ kind: 'accepted', snapshot: snapshot() }]);
   fixture.transport.disconnect();
+});
+
+test('a pulled page keeps sync working when a newer build sends attachment details', async () => {
+  const fixture = setup();
+  const row = {
+    id: attemptId,
+    chatId: '00000000-0000-4000-8000-000000000010',
+    parentId: '00000000-0000-4000-8000-000000000001',
+    pathId: '00000000-0000-4000-8000-000000000011',
+    role: 'user',
+    status: 'completed',
+    text: 'See the file',
+    reasoning: '',
+    imageCount: 0,
+    picker: 'auto',
+    retryModel: null,
+    actualModel: null,
+    error: null,
+    createdAt: 1,
+  };
+  const file = {
+    id: '00000000-0000-4000-8000-000000000020',
+    kind: 'pdf',
+    mediaType: 'application/pdf',
+    name: 'notes.pdf',
+    bytes: 1200,
+    pages: 3,
+  };
+  fixture.reply(
+    response(
+      JSON.stringify({
+        chats: [],
+        messages: [
+          { ...row, attachments: [file] },
+          {
+            ...row,
+            id: '00000000-0000-4000-8000-000000000021',
+            attachments: 'not a list',
+          },
+        ],
+        deletedChatIds: [],
+        cursor: 7,
+        more: false,
+      }),
+    ),
+  );
+  const page = await fixture.transport.pull(3, new AbortController().signal);
+  expect(fixture.calls[0].url).toBe('https://chat.example/v1/sync?after=3');
+  expect(page.messages.map(message => message.attachments)).toEqual([
+    [
+      {
+        id: file.id,
+        kind: 'pdf',
+        mediaType: 'application/pdf',
+        name: 'notes.pdf',
+        bytes: 1200,
+      },
+    ],
+    undefined,
+  ]);
+  expect(page.cursor).toBe(7);
 });

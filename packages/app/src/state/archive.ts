@@ -6,6 +6,8 @@ import {
 } from '../../../../shared/catalog';
 import {
   attemptStatusSchema,
+  chatFieldSchema,
+  chatRowSchema,
   checkpointSchema,
   decodeJson,
   idSchema,
@@ -14,12 +16,19 @@ import {
   levelKeySchema,
   modelKeySchema,
   pickerSchema,
+  seqSchema,
+  type ChatField,
+  type ChatRow,
   type HistoryEntry,
   type LevelKey,
+  type MessageRow,
   type ModelKey,
   type Picker,
   type Submission,
+  type SyncPage,
+  type SyncPush,
 } from '../../../../shared/contracts';
+import { bytesOf, chatRow, fieldHolds, messageRow } from './syncRows';
 
 export interface ArchiveStorage {
   getString(key: string): string | undefined;
@@ -69,6 +78,10 @@ const messageSchema = z.strictObject({
   reasoning: z.string(),
   checkpoint: checkpointSchema.nullable(),
 });
+const outboxSchema = z.strictObject({
+  chats: z.record(idSchema, z.array(chatFieldSchema)),
+  messages: z.array(idSchema),
+});
 const journalSchema = z.array(
   z.strictObject({
     key: z.string().startsWith('archive/'),
@@ -78,7 +91,9 @@ const journalSchema = z.array(
 export type ChatRecord = z.infer<typeof chatSchema>;
 export type SavedMessage = z.infer<typeof messageSchema>;
 type ArchiveMetadata = z.infer<typeof metadataSchema>;
+type Outbox = z.infer<typeof outboxSchema>;
 type Write = z.infer<typeof journalSchema>[number];
+export type RemoteChange = { chats: Set<string>; deleted: string[] };
 
 const metaKey = 'archive/index';
 const journalKey = 'archive/journal';
@@ -89,13 +104,49 @@ const childrenKey = (chatId: string, parentId: string | null) =>
 const selectedKey = (chatId: string, parentId: string | null) =>
   `archive/selected/${chatId}/${parentId ?? 'root'}`;
 const draftKey = (chatId: string) => `archive/draft/${chatId}`;
+const messagePrefix = 'archive/message/';
+const cursorKey = 'archive/sync/cursor';
+const outboxKey = 'archive/outbox';
+// Pulled chat rows held until every message on their leaf's path has arrived.
+const heldKey = 'archive/sync/held';
+// Ids dropped from the outbox because the server would refuse them.
+const unsyncedKey = 'archive/sync/unsynced';
+const pushBytes = 3_000_000;
+const pushMessages = 500;
+const pushChats = 200;
+const allFields = chatFieldSchema.options;
 // Outside archive/, so a catalog cached before the first chat never reads as
 // a chat archive without its index.
 const catalogKey = 'catalog/v1';
+// Outside archive/, so a store holding only the owner stamp never reads as an
+// archive missing its index.
+const ownerKey = 'owner';
 const write = (
   key: string,
-  value: ChatRecord | SavedMessage | ArchiveMetadata | string[] | string,
+  value:
+    | ChatRecord
+    | SavedMessage
+    | ArchiveMetadata
+    | Outbox
+    | Record<string, ChatRow>
+    | string[]
+    | string
+    | number,
 ): Write => ({ key, value: JSON.stringify(value) });
+
+// The first Apple user to open the shared store adopts it. Anyone else gets a
+// store of their own, so no one sees or pushes another user's chats.
+export function ownerStorage(
+  owner: string,
+  open: (id: string) => ArchiveStorage,
+): ArchiveStorage {
+  const shared = open('personal-chat.archive.v1');
+  const stamp = shared.getString(ownerKey);
+  if (stamp === undefined) shared.set(ownerKey, owner);
+  return stamp === undefined || stamp === owner
+    ? shared
+    : open(`personal-chat.archive.v1.${owner}`);
+}
 
 function isActive(message: SavedMessage): boolean {
   return (
@@ -106,11 +157,15 @@ function isActive(message: SavedMessage): boolean {
 
 export class ChatArchive {
   private halfAppliedJournal = false;
+  // Writes collected by inOneCommit. Reads see them before they are saved.
+  private staged: Map<string, string | null> | null = null;
 
   constructor(
     private readonly storage: ArchiveStorage,
     private readonly uuid: () => string,
     private readonly now: () => number = Date.now,
+    // Runs after a commit that adds to the outbox.
+    private readonly onDirty: () => void = () => undefined,
   ) {}
 
   recover(): void {
@@ -118,6 +173,29 @@ export class ChatArchive {
     // Validate the index before creating or selecting anything.
     const metadata = this.metadata();
     for (const id of metadata.chatIds) this.chat(id);
+    if (this.readAfterJournal(cursorKey) === undefined)
+      this.seedOutbox(metadata);
+  }
+
+  // A store with no cursor queues every chat with a turn and every message
+  // except unsettled replies, which acknowledge queues later. The index is
+  // written too, so a store holding only sync keys still reads as an archive.
+  private seedOutbox(metadata: ArchiveMetadata): void {
+    const jobs = new Set(metadata.jobIds);
+    const chats: Outbox['chats'] = {};
+    for (const id of metadata.chatIds)
+      if (this.chat(id).leafId) chats[id] = [...allFields];
+    const messages = this.storage
+      .getAllKeys()
+      .filter(key => key.startsWith(messagePrefix))
+      .map(key => key.slice(messagePrefix.length))
+      .filter(id => !jobs.has(id));
+    this.commit([
+      write(metaKey, metadata),
+      write(outboxKey, { chats, messages }),
+      write(heldKey, {}),
+      write(cursorKey, 0),
+    ]);
   }
 
   private replayJournal(): void {
@@ -127,6 +205,7 @@ export class ChatArchive {
   }
 
   private readAfterJournal(key: string): string | undefined {
+    if (this.staged?.has(key)) return this.staged.get(key) ?? undefined;
     if (this.halfAppliedJournal) this.replayJournal();
     return this.storage.getString(key);
   }
@@ -142,8 +221,30 @@ export class ChatArchive {
   }
 
   private commit(writes: Write[]): void {
-    if (writes.length === 1) this.writeOneKey(writes[0]);
+    if (this.staged)
+      for (const change of writes) this.staged.set(change.key, change.value);
+    else if (writes.length === 1) this.writeOneKey(writes[0]);
     else this.writeJournaled(writes);
+  }
+
+  private commitMarked(writes: Write[]): void {
+    this.commit(writes);
+    if (writes.some(change => change.key === outboxKey)) this.onDirty();
+  }
+
+  // Every commit inside body lands in one journaled write, or none does.
+  private inOneCommit<T>(body: () => T): T {
+    const staged = new Map<string, string | null>();
+    this.staged = staged;
+    let result: T;
+    try {
+      result = body();
+    } finally {
+      this.staged = null;
+    }
+    if (staged.size > 0)
+      this.writeJournaled([...staged].map(([key, value]) => ({ key, value })));
+    return result;
   }
 
   private writeJournaled(writes: Write[]): void {
@@ -192,14 +293,21 @@ export class ChatArchive {
     return result;
   }
 
-  children(chatId: string, parentId: string | null): string[] {
-    const raw = this.readAfterJournal(childrenKey(chatId, parentId));
-    return raw === undefined ? [] : decodeJson(z.array(idSchema), raw);
+  private read<T>(
+    key: string,
+    schema: Pick<z.ZodType<T>, 'parse'>,
+    absent: T,
+  ): T {
+    const raw = this.readAfterJournal(key);
+    return raw === undefined ? absent : decodeJson(schema, raw);
   }
 
-  private selected(chatId: string, parentId: string): string | null {
-    const raw = this.readAfterJournal(selectedKey(chatId, parentId));
-    return raw === undefined ? null : decodeJson(idSchema, raw);
+  children(chatId: string, parentId: string | null): string[] {
+    return this.read(childrenKey(chatId, parentId), z.array(idSchema), []);
+  }
+
+  private selected(chatId: string, parentId: string | null): string | null {
+    return this.read(selectedKey(chatId, parentId), idSchema, null);
   }
 
   recents(): ChatRecord[] {
@@ -242,18 +350,24 @@ export class ChatArchive {
   }
   // A level means something different on each model, so a new pick drops it.
   setPicker(id: string, picker: Picker): void {
-    this.commit([
-      write(chatKey(id), { ...this.chat(id), picker, level: undefined }),
-    ]);
+    this.saveChat({ ...this.chat(id), picker, level: undefined }, 'model');
   }
   setLevel(id: string, level: LevelKey): void {
-    this.commit([write(chatKey(id), { ...this.chat(id), level })]);
+    this.saveChat({ ...this.chat(id), level }, 'model');
   }
   rename(id: string, title: string): void {
     const trimmed = title.trim();
     if (!trimmed || trimmed.length > 120)
       throw new Error('Use a name between 1 and 120 characters.');
-    this.commit([write(chatKey(id), { ...this.chat(id), title: trimmed })]);
+    this.saveChat({ ...this.chat(id), title: trimmed }, 'title');
+  }
+
+  // A chat with no turn yet stays on this phone; its first turn sends it all.
+  private saveChat(chat: ChatRecord, field: ChatField): void {
+    this.commitMarked([
+      write(chatKey(chat.id), chat),
+      ...(chat.leafId ? [this.marked({ [chat.id]: [field] }, [])] : []),
+    ]);
   }
 
   ancestry(
@@ -339,7 +453,9 @@ export class ChatArchive {
       : [...(text || 'Image conversation').replace(/\s+/gu, ' ')]
           .slice(0, 60)
           .join('');
-    this.commit([
+    // Edits before the first turn were never queued, so it sends every field.
+    const fields: ChatField[] = chat.leafId ? ['leaf'] : [...allFields];
+    this.commitMarked([
       ...this.addChild(user),
       ...this.addChild(reply),
       write(chatKey(chatId), {
@@ -349,6 +465,7 @@ export class ChatArchive {
         updatedAt: this.now(),
       }),
       write(metaKey, { ...meta, jobIds: [...meta.jobIds, reply.id] }),
+      this.marked({ [chatId]: fields }, [user.id]),
     ]);
     return reply;
   }
@@ -396,7 +513,7 @@ export class ChatArchive {
     reply.level = previous.level;
     reply.retryModel = known;
     const meta = this.metadata();
-    this.commit([
+    this.commitMarked([
       ...this.addChild(reply),
       write(chatKey(chat.id), {
         ...chat,
@@ -404,6 +521,7 @@ export class ChatArchive {
         updatedAt: this.now(),
       }),
       write(metaKey, { ...meta, jobIds: [...meta.jobIds, reply.id] }),
+      this.marked({ [chat.id]: ['leaf'] }, []),
     ]);
     return reply;
   }
@@ -425,12 +543,13 @@ export class ChatArchive {
         throw new Error('Saved continuation identity mismatch.');
       leaf = child;
     }
-    this.commit([
+    this.commitMarked([
       write(selectedKey(reply.chatId, reply.parentId), id),
       write(chatKey(reply.chatId), {
         ...this.chat(reply.chatId),
         leafId: leaf.id,
       }),
+      this.marked({ [reply.chatId]: ['leaf'] }, []),
     ]);
   }
 
@@ -491,21 +610,22 @@ export class ChatArchive {
     return this.metadata().jobIds.map(id => this.message(id));
   }
 
+  // A reply that settles leaves jobIds here, so this is where it is queued.
   acknowledge(id: string): void {
     const message = this.message(id);
     const meta = this.metadata();
-    this.commit([
+    this.commitMarked([
       write(messageKey(id), { ...message, acknowledged: true }),
       write(metaKey, {
         ...meta,
         jobIds: meta.jobIds.filter(job => job !== id),
       }),
+      this.marked({}, [id]),
     ]);
   }
 
   draft(chatId: string): string {
-    const raw = this.readAfterJournal(draftKey(chatId));
-    return raw === undefined ? '' : decodeJson(z.string(), raw);
+    return this.read(draftKey(chatId), z.string(), '');
   }
 
   saveDraft(chatId: string, text: string): void {
@@ -528,6 +648,12 @@ export class ChatArchive {
 
   deleteChat(id: string): void {
     this.chat(id);
+    this.removeChat(id, true);
+  }
+
+  // Walks children/ from the root and never reads the chat record, which a
+  // pulled tombstone may name before the record ever arrived.
+  private removeChat(id: string, tombstone: boolean): void {
     const writes: Write[] = [
       { key: chatKey(id), value: null },
       { key: draftKey(id), value: null },
@@ -551,6 +677,9 @@ export class ChatArchive {
     );
     const meta = this.metadata();
     const chatIds = meta.chatIds.filter(chatId => chatId !== id);
+    const held = Object.fromEntries(
+      Object.entries(this.held()).filter(([chatId]) => chatId !== id),
+    );
     this.commit([
       ...writes,
       write(metaKey, {
@@ -561,8 +690,12 @@ export class ChatArchive {
             ? (chatIds.at(-1) ?? null)
             : meta.currentChatId,
         jobIds: meta.jobIds.filter(job => !messageIds.has(job)),
-        deletions: [...new Set([...meta.deletions, id])],
+        deletions: tombstone
+          ? [...new Set([...meta.deletions, id])]
+          : meta.deletions,
       }),
+      this.unmarked([id], messageIds),
+      write(heldKey, held),
     ]);
   }
 
@@ -574,5 +707,238 @@ export class ChatArchive {
         deletions: meta.deletions.filter(chatId => chatId !== id),
       }),
     ]);
+  }
+
+  cursor(): number {
+    return this.read(cursorKey, seqSchema, 0);
+  }
+
+  private outbox(): Outbox {
+    return this.read(outboxKey, outboxSchema, { chats: {}, messages: [] });
+  }
+
+  private held(): Record<string, ChatRow> {
+    return this.read(heldKey, z.record(idSchema, chatRowSchema), {});
+  }
+
+  private marked(chats: Outbox['chats'], messages: string[]): Write {
+    const outbox = this.outbox();
+    const merged = { ...outbox.chats };
+    for (const [id, fields] of Object.entries(chats))
+      merged[id] = [...new Set([...(merged[id] ?? []), ...fields])];
+    return write(outboxKey, {
+      chats: merged,
+      messages: [...new Set([...outbox.messages, ...messages])],
+    });
+  }
+
+  private unmarked(chatIds: Iterable<string>, messageIds: Set<string>): Write {
+    const outbox = this.outbox();
+    const chats = { ...outbox.chats };
+    for (const id of chatIds) delete chats[id];
+    return write(outboxKey, {
+      chats,
+      messages: outbox.messages.filter(id => !messageIds.has(id)),
+    });
+  }
+
+  // Rows are built from the records as they are now. Chat rows wait until
+  // every queued message fits, so a chat's leaf usually arrives first.
+  outboxBatch(maxBytes = pushBytes): SyncPush | null {
+    const outbox = this.outbox();
+    const batch: SyncPush = { chats: [], messages: [] };
+    const refused: string[] = [];
+    let bytes = 0;
+    let full = false;
+    const take = <T extends MessageRow | ChatRow>(
+      id: string,
+      row: T | null,
+    ): T | null => {
+      const size = row ? bytesOf(row) : Number.POSITIVE_INFINITY;
+      if (size > maxBytes) refused.push(id);
+      else if (bytes + size > maxBytes) full = true;
+      else {
+        bytes += size;
+        return row;
+      }
+      return null;
+    };
+    for (const id of outbox.messages) {
+      full ||= batch.messages.length === pushMessages;
+      if (full) break;
+      const row = take(id, messageRow(this.message(id)));
+      if (row) batch.messages.push(row);
+    }
+    for (const [id, dirty] of Object.entries(outbox.chats)) {
+      if (full || batch.chats.length === pushChats) break;
+      const row = take(id, chatRow(this.chat(id), dirty));
+      if (row) batch.chats.push(row);
+    }
+    if (refused.length > 0)
+      this.commit([
+        this.unmarked(refused, new Set(refused)),
+        write(unsyncedKey, [...this.unsynced(), ...refused]),
+      ]);
+    return batch.messages.length + batch.chats.length > 0 ? batch : null;
+  }
+
+  private unsynced(): string[] {
+    return this.read(unsyncedKey, z.array(idSchema), []);
+  }
+
+  // A field edited while the batch was in flight stays queued.
+  clearPushed(batch: SyncPush): void {
+    const outbox = this.outbox();
+    const chats = { ...outbox.chats };
+    for (const row of batch.chats) {
+      const chat = this.hasChat(row.id) ? this.chat(row.id) : null;
+      const left = (chats[row.id] ?? []).filter(
+        field =>
+          chat !== null &&
+          !(row.dirty.includes(field) && fieldHolds[field](chat, row)),
+      );
+      if (left.length > 0) chats[row.id] = left;
+      else delete chats[row.id];
+    }
+    const pushed = new Set(batch.messages.map(row => row.id));
+    this.commit([
+      write(outboxKey, {
+        chats,
+        messages: outbox.messages.filter(id => !pushed.has(id)),
+      }),
+    ]);
+  }
+
+  applyRemote(page: SyncPage): RemoteChange {
+    return this.inOneCommit(() => {
+      // Replies this phone is still settling belong to the session.
+      const jobs = new Set(this.metadata().jobIds);
+      const pulled = page.messages.filter(row => !jobs.has(row.id));
+      for (const row of pulled) this.receiveMessage(row);
+      const queued = new Set(this.outbox().messages);
+      if (pulled.some(row => queued.has(row.id)))
+        this.commit([this.unmarked([], new Set(pulled.map(row => row.id)))]);
+      for (const id of page.deletedChatIds) this.removeChat(id, false);
+      const held = { ...this.held() };
+      for (const row of page.chats) held[row.id] = row;
+      const queuedFields = this.outbox().chats;
+      const chats = new Set<string>();
+      for (const row of Object.values(held))
+        if (this.receiveChat(row, queuedFields[row.id] ?? [], chats))
+          delete held[row.id];
+      this.commit([write(heldKey, held), write(cursorKey, page.cursor)]);
+      return { chats, deleted: page.deletedChatIds };
+    });
+  }
+
+  // A known message takes the server's outcome and keeps its local images.
+  private receiveMessage(row: MessageRow): void {
+    if (this.readAfterJournal(messageKey(row.id)) !== undefined) {
+      const local = this.message(row.id);
+      if (
+        local.status === row.status &&
+        local.text === row.text &&
+        local.reasoning === row.reasoning &&
+        local.actualModel === row.actualModel &&
+        local.error === row.error
+      )
+        return;
+      this.commit([
+        write(messageKey(row.id), {
+          ...local,
+          status: row.status,
+          text: row.text,
+          reasoning: row.reasoning,
+          actualModel: row.actualModel,
+          error: row.error,
+        }),
+      ]);
+      return;
+    }
+    const settled = row.role === 'assistant';
+    const message: SavedMessage = {
+      version: 1,
+      id: row.id,
+      chatId: row.chatId,
+      parentId: row.parentId,
+      pathId: row.pathId,
+      role: row.role,
+      text: row.text,
+      images: [],
+      createdAt: row.createdAt,
+      status: row.status,
+      picker: row.picker,
+      level: row.level,
+      retryModel: row.retryModel,
+      actualModel: row.actualModel,
+      accepted: settled,
+      acknowledged: settled,
+      sequence: 0,
+      cancelPending: false,
+      error: row.error,
+      reasoning: row.reasoning,
+      checkpoint: null,
+    };
+    const siblings = this.children(row.chatId, row.parentId);
+    this.commit([
+      write(messageKey(row.id), message),
+      ...(siblings.includes(row.id)
+        ? []
+        : [
+            write(childrenKey(row.chatId, row.parentId), [...siblings, row.id]),
+          ]),
+      ...(this.selected(row.chatId, row.parentId)
+        ? []
+        : [write(selectedKey(row.chatId, row.parentId), row.id)]),
+    ]);
+  }
+
+  // Fields still queued here keep their local values. Returns false while the
+  // leaf's path is incomplete on this phone, so the row stays held.
+  private receiveChat(
+    row: ChatRow,
+    queued: ChatField[],
+    changed: Set<string>,
+  ): boolean {
+    const local = this.hasChat(row.id) ? this.chat(row.id) : null;
+    const pick = (field: ChatField) =>
+      local && queued.includes(field) ? local : row;
+    const model = pick('model');
+    const leaf = pick('leaf');
+    const chat: ChatRecord = {
+      version: 1,
+      id: row.id,
+      title: pick('title').title,
+      picker: model.picker,
+      level: model.level,
+      createdAt: local?.createdAt ?? row.createdAt,
+      updatedAt: leaf.updatedAt,
+      basePathId: row.basePathId,
+      leafId: leaf.leafId,
+    };
+    if (chat.leafId !== local?.leafId) {
+      let path: SavedMessage[];
+      try {
+        path = this.ancestry(chat.leafId);
+      } catch {
+        return false;
+      }
+      this.commit(
+        path.map(message =>
+          write(selectedKey(chat.id, message.parentId), message.id),
+        ),
+      );
+    }
+    if (local && allFields.every(field => fieldHolds[field](local, chat)))
+      return true;
+    const meta = this.metadata();
+    this.commit([
+      write(chatKey(chat.id), chat),
+      ...(local
+        ? []
+        : [write(metaKey, { ...meta, chatIds: [...meta.chatIds, chat.id] })]),
+    ]);
+    changed.add(chat.id);
+    return true;
   }
 }

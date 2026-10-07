@@ -107,6 +107,9 @@ function chatStore(
     saveDraftAfterPause,
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
+    synced: () => undefined,
+    serverHits: { query: '', hits: [] },
+    searchServer: () => undefined,
   }));
   const wrap = (element: React.ReactElement) => (
     <ChatStoreContext.Provider value={store}>

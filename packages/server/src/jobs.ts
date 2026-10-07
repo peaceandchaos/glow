@@ -17,6 +17,7 @@ import {
   type JobEvent,
   type Submission,
 } from '../../../shared/contracts';
+import { purgeChat, storeReply } from './chats';
 import type { Database, SqlConnection } from './database';
 import { AttemptCancelled, RequestError } from './errors';
 import type { RegistryKey } from './models';
@@ -171,6 +172,8 @@ async function appendEvents(
     );
   }
   await writeJob(db, owner, job);
+  if (isTerminal(job.snapshot.status) && job.snapshot.status !== 'deleted')
+    await storeReply(db, owner, job.snapshot);
   return events;
 }
 
@@ -492,6 +495,7 @@ export class JobRepository {
            (SELECT attempt_id FROM chat_jobs WHERE owner = $1 AND chat_id = $2)`,
         [owner, chatId],
       );
+      await purgeChat(db, owner, chatId);
     });
   }
 

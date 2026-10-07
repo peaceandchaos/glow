@@ -1,13 +1,10 @@
 import { createMMKV } from 'react-native-mmkv';
 import { secureId } from '../device';
-import { ChatArchive, type ArchiveStorage } from './archive';
+import { ChatArchive, ownerStorage, type ArchiveStorage } from './archive';
 
-export function openArchive(now: () => number = Date.now): ChatArchive {
-  const mmkv = createMMKV({
-    id: 'personal-chat.archive.v1',
-    recoveryStrategy: 'recover-on-error',
-  });
-  const storage: ArchiveStorage = {
+function mmkvStorage(id: string): ArchiveStorage {
+  const mmkv = createMMKV({ id, recoveryStrategy: 'recover-on-error' });
+  return {
     getString: key => mmkv.getString(key),
     getAllKeys: () => mmkv.getAllKeys(),
     set: (key, value) => mmkv.set(key, value),
@@ -15,7 +12,19 @@ export function openArchive(now: () => number = Date.now): ChatArchive {
       mmkv.remove(key);
     },
   };
-  const archive = new ChatArchive(storage, secureId, now);
+}
+
+export function openArchive(
+  appleUserId: string,
+  onDirty: () => void,
+  now: () => number = Date.now,
+): ChatArchive {
+  const archive = new ChatArchive(
+    ownerStorage(appleUserId, mmkvStorage),
+    secureId,
+    now,
+    onDirty,
+  );
   archive.recover();
   return archive;
 }

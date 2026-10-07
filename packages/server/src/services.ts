@@ -4,7 +4,7 @@ import { replyWorkflow } from '../workflows/reply';
 import type { ApiServices } from './api';
 import {
   runtimeCatalog,
-  runtimeJev,
+  runtimeChats,
   runtimeJobs,
   runtimeSessions,
 } from './runtime';
@@ -19,10 +19,10 @@ export function services(): ApiServices {
     appleKeys,
     sessions: runtimeSessions,
     jobs: runtimeJobs,
+    chats: runtimeChats,
     async dispatch(owner, attemptId) {
       return (await start(replyWorkflow, [owner, attemptId])).runId;
     },
-    rank: (input, signal) => runtimeJev().rank(input, signal),
     catalog: runtimeCatalog(),
   };
 }

@@ -15,6 +15,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { parseArgs } from 'node:util';
 import { handleRequest, socketRoute } from '../../packages/server/src/api.ts';
 import { SessionStore } from '../../packages/server/src/auth.ts';
+import { ChatRows } from '../../packages/server/src/chats.ts';
 import { JobRepository } from '../../packages/server/src/jobs.ts';
 import { catalogFrom, defaultMenu } from '../../packages/server/src/models.ts';
 import { runAttempt } from '../../packages/server/src/worker.ts';
@@ -102,7 +103,7 @@ const services = {
     Promise.reject(new Error('The harness never signs in with Apple.')),
   sessions: () => Promise.resolve(sessions),
   jobs: () => Promise.resolve(jobs),
-  rank: () => Promise.resolve([]),
+  chats: () => Promise.resolve(new ChatRows(database)),
   async dispatch(owner, attemptId) {
     dispatches.set(attemptId, (dispatches.get(attemptId) ?? 0) + 1);
     owners.set(attemptId, owner);

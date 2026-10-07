@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { textItem } from '../src/compaction/context';
 import { runtimeJev, runtimeProviders } from '../src/runtime';
 import { submission } from './fixtures';
@@ -48,16 +47,12 @@ function sendToGateway() {
   );
 }
 
-function rankWithJev() {
-  return runtimeJev().rank(
-    {
-      query: 'hello',
-      candidates: [
-        { id: randomUUID(), title: 'First' },
-        { id: randomUUID(), title: 'Second' },
-      ],
-    },
+function selectWithJev() {
+  return runtimeJev().select(
+    submission(),
     new AbortController().signal,
+    () => Promise.resolve(),
+    ['deepseek', 'kimi'],
   );
 }
 
@@ -69,7 +64,7 @@ test('without a Gateway key, the chat client sends the Vercel OIDC token', async
 });
 
 test('without a Gateway key, Jev authenticates through @ai-sdk/gateway in OIDC mode', async () => {
-  await expect(rankWithJev()).rejects.toThrow();
+  await expect(selectWithJev()).rejects.toThrow();
   expect(
     requests.map(headers => [
       headers.get('Authorization'),
@@ -81,7 +76,7 @@ test('without a Gateway key, Jev authenticates through @ai-sdk/gateway in OIDC m
 test('an empty Gateway key counts as no key for both clients', async () => {
   process.env.AI_GATEWAY_API_KEY = '';
   await expect(sendToGateway()).rejects.toThrow('HTTP 500');
-  await expect(rankWithJev()).rejects.toThrow();
+  await expect(selectWithJev()).rejects.toThrow();
   expect(
     requests.map(headers => [
       headers.get('Authorization'),
@@ -96,7 +91,7 @@ test('an empty Gateway key counts as no key for both clients', async () => {
 test('a Gateway key, when set, is used instead of the OIDC token', async () => {
   process.env.AI_GATEWAY_API_KEY = 'example-gateway-key';
   await expect(sendToGateway()).rejects.toThrow('HTTP 500');
-  await expect(rankWithJev()).rejects.toThrow();
+  await expect(selectWithJev()).rejects.toThrow();
   expect(
     requests.map(headers => [
       headers.get('Authorization'),

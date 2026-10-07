@@ -1,6 +1,8 @@
 import { bakedCatalog } from '../../../shared/catalog';
+import type { SyncPage, SyncPush } from '../../../shared/contracts';
 import {
   ChatArchive,
+  ownerStorage,
   type ArchiveStorage,
   type SavedMessage,
 } from '../src/state/archive';
@@ -12,8 +14,11 @@ function randomUUID(): string {
 }
 
 class MemoryStorage implements ArchiveStorage {
-  readonly values = new Map<string, string>();
+  readonly values: Map<string, string>;
   failAfter: number | null = null;
+  constructor(values = new Map<string, string>()) {
+    this.values = new Map(values);
+  }
   getString(key: string) {
     return this.values.get(key);
   }
@@ -317,4 +322,316 @@ test('a catalog cached before the first chat keeps the archive readable, and a m
   expect(new ChatArchive(storage, randomUUID).catalog()).toEqual(cached);
   archive.saveCatalog('{"auto":');
   expect(archive.catalog()).toEqual(bakedCatalog);
+});
+
+function opened(storage: ArchiveStorage = new MemoryStorage()): ChatArchive {
+  const archive = new ChatArchive(storage, randomUUID);
+  archive.recover();
+  return archive;
+}
+
+// Another phone's chat as the server would return it.
+function remoteChat(turns: string[]) {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  for (const text of turns)
+    complete(archive, archive.createTurn(chat.id, text, []));
+  const batch = archive.outboxBatch();
+  if (!batch) throw new Error('The remote chat queued nothing.');
+  return {
+    chatId: chat.id,
+    rows: {
+      chats: batch.chats.map(({ dirty: _dirty, ...row }) => row),
+      messages: batch.messages,
+    },
+  };
+}
+
+function page(cursor: number, rows: Partial<SyncPage> = {}): SyncPage {
+  return {
+    chats: [],
+    messages: [],
+    deletedChatIds: [],
+    more: false,
+    cursor,
+    ...rows,
+  };
+}
+
+function pushAll(archive: ChatArchive): SyncPush {
+  const batch = archive.outboxBatch();
+  if (!batch) throw new Error('Nothing was queued.');
+  archive.clearPushed(batch);
+  return batch;
+}
+
+// Runs act once per write it makes, crashing at that write, then reopens.
+function atEveryCrash(
+  base: MemoryStorage,
+  act: (archive: ChatArchive) => void,
+  check: (restored: ChatArchive) => void,
+): void {
+  for (let writes = 0; ; writes += 1) {
+    const storage = new MemoryStorage(base.values);
+    const archive = new ChatArchive(storage, randomUUID);
+    storage.failAfter = writes;
+    let finished = true;
+    try {
+      act(archive);
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        error.message !== 'Simulated termination'
+      )
+        throw error;
+      finished = false;
+    }
+    storage.failAfter = null;
+    check(opened(storage));
+    if (finished) return;
+  }
+}
+
+test('a crash while a pulled page is saved never leaves the cursor ahead of its rows', () => {
+  const remote = remoteChat(['First', 'Second']);
+  const pulled = page(9, remote.rows);
+  const base = new MemoryStorage();
+  opened(base);
+  const outcomes = new Set<string>();
+  atEveryCrash(
+    base,
+    archive => archive.applyRemote(pulled),
+    restored => {
+      const leaf = restored.hasChat(remote.chatId)
+        ? restored.chat(remote.chatId).leafId
+        : null;
+      outcomes.add(
+        JSON.stringify([
+          restored.cursor(),
+          restored.ancestry(leaf).map(message => message.text),
+        ]),
+      );
+    },
+  );
+  expect([...outcomes].sort()).toEqual([
+    JSON.stringify([0, []]),
+    JSON.stringify([9, ['First', 'A reply', 'Second', 'A reply']]),
+  ]);
+});
+
+test('a send, a rename and a settled reply are queued in the same write as the change', () => {
+  const base = new MemoryStorage();
+  const archive = opened(base);
+  const chat = archive.createChat('auto');
+  complete(archive, archive.createTurn(chat.id, 'Before', []));
+  const pending = archive.createTurn(chat.id, 'Waiting', []);
+  pushAll(archive);
+  const queued = (restored: ChatArchive) => {
+    const batch = restored.outboxBatch();
+    return {
+      messages: batch?.messages.map(row => row.id) ?? [],
+      fields: batch?.chats.find(row => row.id === chat.id)?.dirty ?? [],
+    };
+  };
+
+  atEveryCrash(
+    base,
+    current => {
+      current.saveMessages([
+        { ...pending, status: 'completed', accepted: true, text: 'Done' },
+      ]);
+      current.acknowledge(pending.id);
+    },
+    restored => {
+      const left = restored.metadata().jobIds.includes(pending.id);
+      expect(queued(restored).messages.includes(pending.id)).toBe(!left);
+    },
+  );
+
+  complete(archive, pending);
+  pushAll(archive);
+  atEveryCrash(
+    base,
+    current => current.rename(chat.id, 'Renamed'),
+    restored => {
+      const renamed = restored.chat(chat.id).title === 'Renamed';
+      expect(queued(restored).fields).toEqual(renamed ? ['title'] : []);
+    },
+  );
+
+  const leaf = archive.chat(chat.id).leafId;
+  atEveryCrash(
+    base,
+    current => current.createTurn(chat.id, 'Next', []),
+    restored => {
+      const sent = restored.chat(chat.id).leafId !== leaf;
+      const { messages, fields } = queued(restored);
+      expect(fields).toEqual(sent ? ['leaf'] : []);
+      expect(messages).toHaveLength(sent ? 1 : 0);
+    },
+  );
+});
+
+test('an archive from before sync queues its settled messages and sent chats once, and a new store gets an index', () => {
+  const storage = new MemoryStorage();
+  const legacy = new ChatArchive(storage, randomUUID);
+  const sent = legacy.createChat('auto');
+  const settledReply = legacy.createTurn(sent.id, 'Answered', []);
+  complete(legacy, settledReply);
+  // Finished, but its receipt is not confirmed, so acknowledge queues it later.
+  const pending = legacy.createTurn(sent.id, 'Finished, not acknowledged', []);
+  legacy.saveMessages([
+    { ...pending, status: 'completed', accepted: true, text: 'Done' },
+  ]);
+  const unsent = legacy.createChat('kimi');
+  for (const key of ['archive/outbox', 'archive/sync/cursor'])
+    storage.values.delete(key);
+
+  const seeded = opened(storage);
+  const first = storage.values.get('archive/outbox');
+  const batch = seeded.outboxBatch();
+  expect(batch?.chats.map(row => [row.id, row.dirty])).toEqual([
+    [sent.id, ['title', 'model', 'leaf']],
+  ]);
+  expect(batch?.messages.map(row => row.id).sort()).toEqual(
+    [settledReply.parentId, settledReply.id, pending.parentId].sort(),
+  );
+  expect(batch?.messages.map(row => row.id)).not.toContain(pending.id);
+  expect(batch?.chats.map(row => row.id)).not.toContain(unsent.id);
+
+  storage.values.delete('archive/sync/cursor');
+  opened(storage);
+  expect(storage.values.get('archive/outbox')).toBe(first);
+
+  const fresh = new MemoryStorage();
+  opened(fresh);
+  expect(opened(fresh).metadata().chatIds).toEqual([]);
+});
+
+test('a reply the pull returned is not uploaded again', () => {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  const reply = archive.createTurn(chat.id, 'Question', []);
+  complete(archive, reply, 'Local copy');
+  const stored = archive
+    .outboxBatch()
+    ?.messages.find(row => row.id === reply.id);
+  if (!stored) throw new Error('The reply was not queued.');
+  archive.applyRemote(
+    page(3, { messages: [{ ...stored, text: 'Server copy' }] }),
+  );
+  expect(archive.outboxBatch()?.messages.map(row => row.id)).not.toContain(
+    reply.id,
+  );
+  expect(archive.message(reply.id).text).toBe('Server copy');
+});
+
+test('a pulled chat row takes the server title but keeps a model chosen here and not yet sent', () => {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  complete(archive, archive.createTurn(chat.id, 'Question', []));
+  const [row] = pushAll(archive).chats;
+  archive.setPicker(chat.id, 'kimi');
+  const { dirty: _dirty, ...sent } = row;
+  archive.applyRemote(
+    page(5, {
+      chats: [{ ...sent, title: 'From the other phone', picker: 'deepseek' }],
+    }),
+  );
+  expect(archive.chat(chat.id)).toMatchObject({
+    title: 'From the other phone',
+    picker: 'kimi',
+  });
+});
+
+test('a pulled chat waits until its messages arrive in a later page', () => {
+  const remote = remoteChat(['Hello']);
+  const archive = opened();
+  archive.applyRemote(page(1, { chats: remote.rows.chats, more: true }));
+  expect(archive.recents()).toEqual([]);
+  expect(archive.hasChat(remote.chatId)).toBe(false);
+  const change = archive.applyRemote(
+    page(3, { messages: remote.rows.messages }),
+  );
+  expect([...change.chats]).toEqual([remote.chatId]);
+  const [restored] = archive.recents();
+  expect(restored.id).toBe(remote.chatId);
+  expect(
+    archive.ancestry(restored.leafId).map(message => message.text),
+  ).toEqual(['Hello', 'A reply']);
+});
+
+test('a pulled delete removes a chat whose record never arrived', () => {
+  const remote = remoteChat(['Gone soon']);
+  const storage = new MemoryStorage();
+  const archive = opened(storage);
+  archive.applyRemote(page(2, { messages: remote.rows.messages }));
+  expect(archive.children(remote.chatId, null)).toHaveLength(1);
+  const change = archive.applyRemote(
+    page(4, { deletedChatIds: [remote.chatId] }),
+  );
+  expect(change.deleted).toEqual([remote.chatId]);
+  const left = [...storage.values.keys()].filter(
+    key =>
+      key.includes(remote.chatId) ||
+      remote.rows.messages.some(row => key.includes(row.id)),
+  );
+  expect(left).toEqual([]);
+  expect(archive.metadata().deletions).toEqual([]);
+});
+
+test('a title edited while its push is in flight stays queued', () => {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  complete(archive, archive.createTurn(chat.id, 'Question', []));
+  const batch = archive.outboxBatch();
+  if (!batch) throw new Error('Nothing was queued.');
+  archive.rename(chat.id, 'Edited during the push');
+  archive.clearPushed(batch);
+  expect(archive.outboxBatch()).toEqual({
+    messages: [],
+    chats: [
+      expect.objectContaining({
+        id: chat.id,
+        title: 'Edited during the push',
+        dirty: ['title'],
+      }),
+    ],
+  });
+});
+
+test("a second Apple user gets an empty store and leaves the first user's chats and queue alone", () => {
+  const stores = new Map<string, MemoryStorage>();
+  const open = (id: string) => {
+    const storage = stores.get(id) ?? new MemoryStorage();
+    stores.set(id, storage);
+    return storage;
+  };
+  const first = opened(ownerStorage('001.aaa.1', open));
+  const chat = first.createChat('auto');
+  complete(first, first.createTurn(chat.id, 'Mine', []));
+  const before = new Map(stores.get('personal-chat.archive.v1')?.values);
+
+  const second = opened(ownerStorage('002.bbb.2', open));
+  expect(second.recents()).toEqual([]);
+  expect(second.outboxBatch()).toBeNull();
+  second.createTurn(second.createChat('auto').id, 'Theirs', []);
+  expect(stores.get('personal-chat.archive.v1')?.values).toEqual(before);
+
+  const again = opened(ownerStorage('001.aaa.1', open));
+  expect(again.recents().map(saved => saved.id)).toEqual([chat.id]);
+});
+
+test('a chat row waits while its messages fill a batch', () => {
+  const archive = opened();
+  const chat = archive.createChat('auto');
+  for (let turn = 0; turn < 251; turn += 1)
+    complete(archive, archive.createTurn(chat.id, `Turn ${turn}`, []));
+  const first = pushAll(archive);
+  expect([first.messages.length, first.chats.length]).toEqual([500, 0]);
+  const second = pushAll(archive);
+  expect(second.messages.map(row => row.id)).toContain(
+    archive.chat(chat.id).leafId,
+  );
+  expect(second.chats.map(row => row.id)).toEqual([chat.id]);
 });

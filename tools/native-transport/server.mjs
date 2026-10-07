@@ -57,7 +57,6 @@ const services = {
     dispatches.set(attemptId, (dispatches.get(attemptId) ?? 0) + 1);
     return Promise.resolve('fixture-run');
   },
-  rank: () => Promise.resolve([]),
 };
 let dropNextChat = null;
 let go = false;

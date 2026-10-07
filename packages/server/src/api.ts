@@ -6,9 +6,10 @@ import {
   decodeJson,
   idSchema,
   searchRequestSchema,
+  seqSchema,
   sessionRequestSchema,
   socketCommandSchema,
-  type SearchRequest,
+  syncPushSchema,
   type ServerMessage,
   type SessionResponse,
   type SocketCommand,
@@ -21,6 +22,7 @@ import {
   sessionOwner,
   type SessionStore,
 } from './auth';
+import type { ChatRows } from './chats';
 import { deliverJob, jobStream } from './delivery';
 import { RequestError } from './errors';
 import { InputParts } from './input-parts';
@@ -31,8 +33,8 @@ export type ApiServices = {
   appleKeys: JWTVerifyGetKey;
   sessions: () => Promise<SessionStore>;
   jobs: () => Promise<JobRepository>;
+  chats: () => Promise<ChatRows>;
   dispatch: Dispatcher;
-  rank: (input: SearchRequest, signal: AbortSignal) => Promise<string[]>;
   catalog: Catalog;
 };
 
@@ -296,6 +298,35 @@ async function handleJobRoute(
   throw new RequestError(404, 'Route not found.');
 }
 
+async function handleChatRowsRoute(
+  request: Request,
+  owner: string,
+  route: string,
+  services: ApiServices,
+): Promise<Response> {
+  const chats = await services.chats();
+  if (route === 'sync' && request.method === 'GET') {
+    const after = seqSchema.parse(
+      Number(new URL(request.url).searchParams.get('after') ?? Number.NaN),
+    );
+    return Response.json(await chats.pull(owner, after), {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+  if (route === 'sync' && request.method === 'POST') {
+    await chats.push(
+      owner,
+      decodeJson(syncPushSchema, await readBody(request)),
+    );
+    return new Response(null, { status: 204 });
+  }
+  if (route === 'search' && request.method === 'POST') {
+    const { query } = decodeJson(searchRequestSchema, await readBody(request));
+    return Response.json(await chats.search(owner, query));
+  }
+  throw new RequestError(404, 'Route not found.');
+}
+
 async function signIn(
   request: Request,
   services: ApiServices,
@@ -356,10 +387,8 @@ async function handleSignedInRoute(
     await (await services.jobs()).deleteChat(owner, idSchema.parse(path[2]));
     return new Response(null, { status: 204 });
   }
-  if (path[1] === 'search' && path.length === 2 && request.method === 'POST') {
-    const body = decodeJson(searchRequestSchema, await readBody(request));
-    return Response.json({ ids: await services.rank(body, request.signal) });
-  }
+  if (path.length === 2 && (path[1] === 'sync' || path[1] === 'search'))
+    return handleChatRowsRoute(request, owner, path[1], services);
   throw new RequestError(404, 'Route not found.');
 }
 

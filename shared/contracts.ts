@@ -239,13 +239,81 @@ export const serverMessageSchema = z.discriminatedUnion('kind', [
 ]);
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
 
-export const searchRequestSchema = z.strictObject({
-  query: z.string().min(1).max(500),
-  candidates: z
-    .array(z.strictObject({ id: idSchema, title: z.string().min(1).max(200) }))
-    .max(20),
+export const seqSchema = z.number().int().nonnegative().safe();
+// model is {picker, level}; leaf is {leafId, updatedAt}.
+export const chatFieldSchema = z.enum(['title', 'model', 'leaf']);
+export type ChatField = z.infer<typeof chatFieldSchema>;
+export const chatRowSchema = z.strictObject({
+  id: idSchema,
+  title: z.string().min(1).max(120),
+  picker: pickerSchema,
+  level: levelKeySchema.optional(),
+  basePathId: idSchema,
+  leafId: idSchema,
+  createdAt: z.number().int(),
+  updatedAt: z.number().int(),
 });
-export type SearchRequest = z.infer<typeof searchRequestSchema>;
+export type ChatRow = z.infer<typeof chatRowSchema>;
+export const chatPushSchema = z.strictObject({
+  ...chatRowSchema.shape,
+  dirty: z.array(chatFieldSchema).min(1),
+});
+// A newer phone may send attachment metadata, which this build does not
+// store. Unknown attachment keys and an unreadable list are dropped, so those
+// rows still sync.
+const attachmentMetaSchema = z.object({
+  id: idSchema,
+  kind: z.string().max(32),
+  mediaType: z.string().max(127),
+  name: z.string().max(255),
+  bytes: z.number().int().positive(),
+});
+export const messageRowSchema = z.strictObject({
+  id: idSchema,
+  chatId: idSchema,
+  parentId: idSchema.nullable(),
+  pathId: idSchema,
+  role: z.enum(['user', 'assistant']),
+  status: z.enum(['completed', 'stopped', 'interrupted', 'failed']),
+  text: z.string().max(1_000_000),
+  reasoning: z.string().max(1_000_000),
+  imageCount: z.number().int().min(0).max(4),
+  picker: pickerSchema,
+  level: levelKeySchema.optional(),
+  retryModel: modelKeySchema.nullable(),
+  actualModel: modelKeySchema.nullable(),
+  error: z.string().nullable(),
+  createdAt: z.number().int(),
+  attachments: z.array(attachmentMetaSchema).max(4).optional().catch(undefined),
+});
+export type MessageRow = z.infer<typeof messageRowSchema>;
+export const syncPushSchema = z.strictObject({
+  chats: z.array(chatPushSchema).max(200),
+  messages: z.array(messageRowSchema).max(500),
+});
+export type SyncPush = z.infer<typeof syncPushSchema>;
+export const syncPageSchema = z.strictObject({
+  chats: z.array(chatRowSchema),
+  messages: z.array(messageRowSchema),
+  deletedChatIds: z.array(idSchema),
+  cursor: seqSchema,
+  more: z.boolean(),
+});
+export type SyncPage = z.infer<typeof syncPageSchema>;
+export const searchRequestSchema = z.strictObject({
+  query: z.string().trim().min(1).max(200),
+});
+const searchHitSchema = z.strictObject({
+  chatId: idSchema,
+  messageId: idSchema.nullable(),
+  title: z.string(),
+  snippet: z.string(),
+});
+export type SearchHit = z.infer<typeof searchHitSchema>;
+export const searchResponseSchema = z.strictObject({
+  hits: z.array(searchHitSchema).max(20),
+});
+export type SearchResponse = z.infer<typeof searchResponseSchema>;
 
 export const sessionTokenBytes = 32;
 export const sessionTokenSchema = z

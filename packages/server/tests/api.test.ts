@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   bakedCatalog,
   parseCatalog,
@@ -11,6 +12,7 @@ import {
 } from '../../../shared/contracts';
 import { SseDecoder } from '../../../shared/provider-events';
 import { handleRequest, type ApiServices } from '../src/api';
+import { ChatRows } from '../src/chats';
 import { deliverJob } from '../src/delivery';
 import { newSessionToken } from '../src/auth';
 import { InputParts } from '../src/input-parts';
@@ -47,31 +49,29 @@ async function fixture() {
   const { database, postgres } = await testDatabase();
   const jobs = new JobRepository(database);
   const dispatch = jest.fn(() => Promise.resolve('fixture-workflow'));
-  const rank = jest.fn(() => Promise.resolve([]));
   const services: ApiServices = {
     ...(await signedIn(database, [
       [token, owner],
       [anotherToken, anotherOwner],
     ])),
     jobs: () => Promise.resolve(jobs),
+    chats: () => Promise.resolve(new ChatRows(database)),
     dispatch,
-    rank,
     catalog: bakedCatalog,
   };
-  return { jobs, postgres, services, dispatch, rank };
+  return { jobs, postgres, services, dispatch };
 }
 
-test('unauthorized requests are rejected before body decoding, database access, or evaluation', async () => {
+test('unauthorized requests are rejected before body decoding or database access', async () => {
   const jobs = jest.fn(() =>
     Promise.reject(new Error('Must not load database')),
   );
   const dispatch = jest.fn(() => Promise.resolve('never'));
-  const rank = jest.fn(() => Promise.resolve([]));
   const services: ApiServices = {
     ...withoutDatabase(owner),
     jobs,
+    chats: jobs,
     dispatch,
-    rank,
     catalog: bakedCatalog,
   };
   const response = await handleRequest(
@@ -81,7 +81,6 @@ test('unauthorized requests are rejected before body decoding, database access, 
   expect(response.status).toBe(401);
   expect(jobs).not.toHaveBeenCalled();
   expect(dispatch).not.toHaveBeenCalled();
-  expect(rank).not.toHaveBeenCalled();
 });
 
 test('a body that is not UTF-8 is a client error, not a server failure', async () => {
@@ -99,8 +98,8 @@ test('a body that is not UTF-8 is a client error, not a server failure', async (
       {
         ...(await signedIn(database, [[token, owner]])),
         jobs,
+        chats: jobs,
         dispatch: jest.fn(),
-        rank: jest.fn(),
         catalog: bakedCatalog,
       },
     );
@@ -141,6 +140,29 @@ test('the model catalog is served only to a signed-in phone, uncached', async ()
       ],
     });
   } finally {
+    await f.postgres.close();
+  }
+});
+
+test('a title-ranking request from an older app is refused without a paid call', async () => {
+  const f = await fixture();
+  const paid = jest.spyOn(globalThis, 'fetch');
+  try {
+    const response = await handleRequest(
+      request(
+        'search',
+        'POST',
+        JSON.stringify({
+          query: 'hello',
+          candidates: [{ id: randomUUID(), title: 'Hello' }],
+        }),
+      ),
+      f.services,
+    );
+    expect(response.status).toBe(400);
+    expect(paid).not.toHaveBeenCalled();
+  } finally {
+    paid.mockRestore();
     await f.postgres.close();
   }
 });

@@ -17,6 +17,7 @@ import {
   type ClientSocket,
 } from '../../app/src/network/client';
 import { ChatSession } from '../../app/src/state/session';
+import { ChatSync } from '../../app/src/state/sync';
 import {
   handleRequest,
   socketRoute,
@@ -25,6 +26,7 @@ import {
 } from '../src/api';
 import { newSessionToken } from '../src/auth';
 import { ProviderFailure } from '../src/errors';
+import { ChatRows } from '../src/chats';
 import { JobRepository } from '../src/jobs';
 import type {
   PreparedContext,
@@ -312,7 +314,7 @@ export async function startServer(): Promise<Server> {
   const services: ApiServices = {
     ...auth,
     jobs: () => Promise.resolve(jobs),
-    rank: () => Promise.resolve([]),
+    chats: () => Promise.resolve(new ChatRows(database)),
     catalog: bakedCatalog,
     // Durable dispatch starts the real worker asynchronously, as Workflow does.
     async dispatch(dispatchOwner, attemptId) {
@@ -484,6 +486,8 @@ export type Phone = {
   archive: ChatArchive;
   transport: ServerTransport;
   session: ChatSession;
+  // Tests run it themselves; the app runs it on its triggers.
+  sync: ChatSync;
   network: Network;
 };
 
@@ -520,7 +524,10 @@ export function openPhone(
     retryBaseMs: 10,
     retryMaxMs: 60,
   });
-  const phone = { storage, archive, transport, session, network };
+  const sync = new ChatSync(archive, transport, change =>
+    session.forget(change.deleted),
+  );
+  const phone = { storage, archive, transport, session, sync, network };
   server.phones.push(phone);
   session.setLifecycle('active');
   return phone;
