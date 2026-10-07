@@ -4,6 +4,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createStore } from 'zustand/vanilla';
 import { bakedCatalog } from '../../../shared/catalog';
+import type { LevelKey, Picker } from '../../../shared/contracts';
 import { Composer, type SendResult } from '../src/components/Composer';
 import { ChatStoreContext } from '../src/state/chatStore';
 import type { ChatViewState } from '../src/state/chatView';
@@ -12,6 +13,8 @@ jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   default: { View: require('react-native').View },
   Easing: { inOut: () => undefined, ease: undefined },
+  cubicBezier: () => undefined,
+  useReducedMotion: () => false,
   useAnimatedStyle: () => ({}),
   withTiming: () => 0,
 }));
@@ -26,19 +29,49 @@ let mockPickPhotos: () => Promise<void>;
 jest.mock('../src/components/AttachmentMenu', () => ({
   AttachmentMenu: ({ onPickPhotos }: { onPickPhotos: () => Promise<void> }) => {
     mockPickPhotos = onPickPhotos;
-    return null;
+    const { View: MenuButton } = require('react-native');
+    return <MenuButton accessibilityLabel="Attach" />;
   },
 }));
 jest.mock('../src/components/Glass', () => ({
   Glass: ({ children }: { children: React.ReactNode }) => children,
 }));
 jest.mock('../src/components/Icon', () => ({ Icon: () => null }));
+jest.mock('../src/components/GaugeDial', () => ({ GaugeDial: () => null }));
+jest.mock('zeego/context-menu', () => {
+  const { View: MenuItem } = require('react-native');
+  const passThrough = ({ children }: { children: React.ReactNode }) => children;
+  const hidden = () => null;
+  return {
+    Root: passThrough,
+    Trigger: passThrough,
+    Content: passThrough,
+    Label: hidden,
+    CheckboxItem: ({
+      value,
+      onValueChange,
+    }: {
+      value: string;
+      onValueChange: () => void;
+    }) => (
+      <MenuItem testID="level" value={value} onValueChange={onValueChange} />
+    ),
+    ItemIndicator: hidden,
+    ItemTitle: hidden,
+  };
+});
 
-function chatStore(draftsOnDisk: Record<string, string> = {}) {
+function chatStore(
+  draftsOnDisk: Record<string, string> = {},
+  picker: Picker = 'kimi',
+) {
   const saveDraftAfterPause = jest.fn<void, [string, string]>();
+  const setLevel = jest.fn<void, [LevelKey]>(level =>
+    store.setState({ level }),
+  );
   const store = createStore<ChatViewState>()(() => ({
     chatId: 'chat',
-    picker: 'kimi',
+    picker,
     level: undefined,
     catalog: bakedCatalog,
     messages: [],
@@ -47,7 +80,7 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
     send: () => null,
     stop: () => undefined,
     setPicker: () => undefined,
-    setLevel: () => undefined,
+    setLevel,
     newChat: () => undefined,
     openChat: () => undefined,
     loadOlder: () => undefined,
@@ -61,7 +94,19 @@ function chatStore(draftsOnDisk: Record<string, string> = {}) {
       {element}
     </ChatStoreContext.Provider>
   );
-  return { saveDraftAfterPause, wrap };
+  return { saveDraftAfterPause, setLevel, store, wrap };
+}
+
+const buttons = (renderer: ReactTestRenderer, label: string) =>
+  renderer.root.findAll(
+    node =>
+      node.props.accessibilityLabel === label &&
+      typeof node.props.onPress === 'function',
+  );
+function button(renderer: ReactTestRenderer, label: string) {
+  const [found] = buttons(renderer, label);
+  if (!found) throw new Error(`No ${label} button.`);
+  return found;
 }
 
 function renderComposer(result: SendResult) {
@@ -88,11 +133,8 @@ function renderComposer(result: SendResult) {
   act(() => {
     input().props.onChangeText('Draft');
   });
-  const send = renderer.root.find(
-    node => node.props.hitSlop === 6 && node.props.disabled === false,
-  );
   act(() => {
-    send.props.onPress();
+    button(renderer, 'Send').props.onPress();
   });
   return { onSubmit, text: input().props.value };
 }
@@ -131,9 +173,7 @@ test('each chat keeps its own draft text and photos, and switching back restores
   const open = (chatId: string) => act(() => renderer.update(composer(chatId)));
   const send = () =>
     act(() => {
-      renderer.root
-        .find(node => node.props.hitSlop === 6 && node.props.disabled === false)
-        .props.onPress();
+      button(renderer, 'Send').props.onPress();
     });
   const photo = {
     uri: 'file:///tmp/a.jpg',
@@ -198,4 +238,107 @@ test('each chat opens with the draft text saved before the relaunch, and every t
     input().props.onChangeText('');
   });
   expect(saveDraftAfterPause).toHaveBeenLastCalledWith('b', '');
+});
+
+function mountComposer(picker: Picker = 'gpt-6.1-sol') {
+  const chat = chatStore({}, picker);
+  const rendered = React.createRef<ReactTestRenderer>();
+  act(() => {
+    rendered.current = create(
+      chat.wrap(
+        <Composer
+          chatId="chat"
+          onSubmit={() => 'saved'}
+          onStop={() => undefined}
+          streaming={false}
+          composerRef={React.createRef<View>()}
+          onLayout={() => undefined}
+        />,
+      ),
+    );
+  });
+  const renderer = rendered.current;
+  if (!renderer) throw new Error('The test renderer was not created.');
+  return {
+    ...chat,
+    renderer,
+    shows: (label: string) => buttons(renderer, label).length > 0,
+    input: () => renderer.root.findByType(TextInput),
+  };
+}
+
+test('the bar holds the plus, the text field, the effort gauge and the send button, in that order', () => {
+  const { renderer } = mountComposer();
+  const order = renderer.root
+    .findAll(
+      node =>
+        typeof node.type === 'string' &&
+        (node.props.accessibilityLabel || node.props.placeholder),
+    )
+    .map(node => node.props.accessibilityLabel ?? node.props.placeholder);
+  expect(order).toEqual(['Attach', 'Ask anything', 'Reasoning effort', 'Send']);
+});
+
+test('a tap on the gauge steps the chat’s level up one, wraps to the lowest after the highest, and saves each pick', () => {
+  const { renderer, setLevel } = mountComposer('gpt-6.1-sol');
+  const gauge = () => button(renderer, 'Reasoning effort');
+  expect(gauge().props.accessibilityHint).toBe('Double-tap to increase');
+  const shown = [gauge().props.accessibilityValue.text];
+  for (let tap = 0; tap < 5; tap++) {
+    act(() => {
+      gauge().props.onPress();
+    });
+    shown.push(gauge().props.accessibilityValue.text);
+  }
+  expect(shown).toEqual(['Low', 'Medium', 'High', 'Extra high', 'Max', 'Low']);
+  expect(setLevel.mock.calls).toEqual([
+    ['medium'],
+    ['high'],
+    ['xhigh'],
+    ['max'],
+    ['low'],
+  ]);
+});
+
+test('the gauge is hidden under Auto and for a model with no levels', () => {
+  expect(mountComposer('auto').shows('Reasoning effort')).toBe(false);
+
+  const kimi = mountComposer('kimi');
+  expect(kimi.shows('Reasoning effort')).toBe(true);
+  const [deepseek, kimiModel, ...rest] = bakedCatalog.models;
+  act(() =>
+    kimi.store.setState({
+      catalog: {
+        auto: true,
+        models: [deepseek, { ...kimiModel, levels: [] }, ...rest],
+      },
+    }),
+  );
+  expect(kimi.shows('Reasoning effort')).toBe(false);
+});
+
+test('a long press lists the levels with the chat’s level checked, and a pick saves it', () => {
+  const { renderer, setLevel } = mountComposer('gpt-6.1-sol');
+  const items = () =>
+    renderer.root.findAll(
+      node => typeof node.type === 'string' && node.props.testID === 'level',
+    );
+  expect(items().map(item => item.props.value)).toEqual([
+    'on',
+    'off',
+    'off',
+    'off',
+    'off',
+  ]);
+  act(() => {
+    items()[2].props.onValueChange();
+  });
+  expect(setLevel.mock.calls).toEqual([['high']]);
+  expect(items().map(item => item.props.value)).toEqual([
+    'off',
+    'off',
+    'on',
+    'off',
+    'off',
+  ]);
 });
