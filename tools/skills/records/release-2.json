@@ -1208,5 +1208,794 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "explicitSslMode rewrites sslmode prefer, require and verify-ca to verify-full. The safety fact is that the pinned pg-connection-string already treats those modes as verify-full.",
+            "cites": "How sure are you 4",
+            "none": "Proven by running the pinned pg-connection-string 2.14.0: parse() of a require URL and of a verify-full URL gives the same ssl object. index.js lines 139-151 show the same branch. TLS behavior does not change; only the warning goes away."
+          },
+          {
+            "finding": "An old app build parses actualModel with a four-key enum inside strict schemas. If MODEL_MENU lists gpt-6-luna, Auto can pick it, and the old build cannot read that reply's snapshots and status events.",
+            "cites": "Steps 4",
+            "none": "No code change: the default menu has no Luna, so this cannot happen without a deployment setting. Follow-up: keep MODEL_MENU free of gpt-6-luna until no old build is installed."
+          },
+          {
+            "finding": "A new app sends level and the new server stores it. The previous server's strict submission schema has no level, so a server rollback would refuse those sends and stored jobs.",
+            "cites": "Steps 4",
+            "none": "No code change: the release rolls forward. Follow-up: roll back the server and the app together, or not at all."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01TFWdub4q3Rw1Aywi85b2V7",
+            "time": "2026-10-07T02:17:12.406Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "NCSfved5EPVfve6tqlzOIMEvWpvB4HjHgfgOT5Yawhebi6AqTJ0htkqNxwfjCMhfXbNbbd0SnOhOgsZ2MmgCDQ=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "Checked the diff for extra comments, defensive guards on trusted paths, casts and deep nesting.",
+            "cites": "Focus Areas",
+            "none": "None found. The empty catch in receiveCatalog keeps the current catalog when storage fails, and the guards in useDictation and parseCatalog sit at native and network boundaries."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Fhi2NL8Cs1XS1YR62vwAMk",
+            "time": "2026-10-07T02:17:12.734Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "t4qPe11JSgl//TK2KvYzVbQ9IlMQCeRDKirk+Pj/fvgnuMu7a5NqbrrjaaLSvqoBRYp5PkpiVkUR5AQLFqp/DQ=="
+          }
+        ]
+      },
+      {
+        "skill": "expo-animation",
+        "findings": [
+          {
+            "finding": "GaugeDial animates the needle with a 240 ms withTiming on Easing.bezier(0.23, 1, 0.32, 1) and sets the value directly under Reduce Motion. The composer buttons use a 150 ms backgroundColor transition.",
+            "cites": "5. Timing or spring",
+            "none": "Within the duration and easing tables, on the UI thread, with a Reduce Motion fallback. The attachment strip height animation already existed on main."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "expo-animation",
+            "source": "Skill",
+            "sha256": "cad39a1208a5b65e496fb14588e28b684cf94c263b9a2a97bd9da994058db057",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01L3MdHauDfy3FttYUq5jX83",
+            "time": "2026-10-07T02:17:13.037Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "RJFUONmaJLl1tRB7VBpDHM1fminMW47a+EbBz8dku2FbLuA8/9jexEMsl9Cr2Zg7xypQ1o6tb94iCExd9psSCA=="
+          }
+        ]
+      },
+      {
+        "skill": "expo-ios-hig",
+        "findings": [
+          {
+            "finding": "The gauge has a VoiceOver label, value and hint, the level menu is the native context menu, and the dictation prompts are system prompts with usage strings.",
+            "cites": "7. Accessibility (MEDIUM-HIGH)",
+            "none": "Meets the rules; the sign-in failure is also announced for VoiceOver."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "expo-ios-hig",
+            "source": "Skill",
+            "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Bcn1BoNfVwSsm7By6ciD68",
+            "time": "2026-10-07T02:17:13.396Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "6Z2JuMhBb84I/RCQiqDqyW0qDZa/WonxdGEBS3oKfj53mXhlBoaoVGAXO0SR71w6DZBTeOVaqkHZ1GCBdJGuCA=="
+          }
+        ]
+      },
+      {
+        "skill": "ios-debugger-agent",
+        "findings": [
+          {
+            "finding": "Dictation has no device evidence for a real transcript, a denied permission or a missing microphone; the simulator audio input never delivered buffers.",
+            "cites": "Troubleshooting",
+            "none": "A code read of Dictation.m found no crash path: both usage strings are in Info.plist, a denied permission rejects once with code denied, a nil recognizer returns the unavailable error, channelCount 0 is checked before installTapOnBus, and late callbacks are dropped after teardown. This review had no simulator. Follow-up for the first TestFlight build: deny the microphone and tap the mic, allow it and dictate a sentence, then stop by tap and by silence."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "ios-debugger-agent",
+            "source": "Skill",
+            "sha256": "bb8ad932ec473cee097c9c8d106051134e9ab6cf9dc85d6a8e62ce80ad24c385",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01R6Ge5y8CkM2VsuE5k2TfuL",
+            "time": "2026-10-07T02:17:13.787Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "m/lGtoWVoXcY9oIM6Ktiu25JnXtQdVvTqcjCGntGw4CWRmz4NGwo7M7P1125+CF+Gjnvh78fmIxYLlXojYoYBQ=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "Checked the added comments in the server, shared and app files.",
+            "cites": "Scope",
+            "none": "Each kept comment states a non-obvious reason, such as the lenient catalog parse, the open model keys or the zero-channel tap. The reviewer did not spawn the comment agent because a review does not edit code."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01VSme4RkJLxwEj6o8FdKiFQ",
+            "time": "2026-10-07T02:17:14.035Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "OvzJVomIy/fnYDpryzIAkkgIOJqftXu1Y/IMAUCA4EryP+nyx4uEDeQ3vzJZoAobHf87JEifsPSqcVxAroSrCg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-boundary-discipline",
+        "findings": [
+          {
+            "finding": "Network, storage, environment and native data are parsed at the edge: parseCatalog for GET /v1/models and the cache, menuFrom for MODEL_MENU, zod for the native dictation rejection, and the strict submission schema on the server.",
+            "cites": "Boundary Discipline",
+            "none": "Correct placement; internal code trusts Catalog and RegistryKey."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-boundary-discipline",
+            "source": "Skill",
+            "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01NyB2mfw3sKmN7kgC3mBoXr",
+            "time": "2026-10-07T02:17:15.586Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "VJMhf32HQQE5SrdMGP9drGeXV+mS79zhM9pyPr/arcolR6hXCxHYYhWH8gJuHOv9a5LIRT6HBo7yhWkpJaTzBw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-fix-root-causes",
+        "findings": [
+          {
+            "finding": "The summary-effort fix sets the effort where the summary call is built in providers.ts, not in the Gateway client.",
+            "cites": "Fix Root Causes",
+            "none": "Root cause fixed at its source. Replies take the menu's first level and summaries take the registry's first level; they agree for the default menu, and the doc now names the registry."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-fix-root-causes",
+            "source": "Skill",
+            "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01FCTqnCSos4ZkeRs34T3eqk",
+            "time": "2026-10-07T02:17:16.033Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "pADpfNO6TL0OYCV+LJ3hdC0JKtU91zDNA/33D6g8jJojnSEzw5pT76Id2GG0Ch5bSzKn3bZHymBq/QrtDDGoDA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-make-operations-idempotent",
+        "findings": [
+          {
+            "finding": "The sign-in nonce claim, the session insert and the expired-nonce cleanup run in one transaction; the schema adds the nonce table with CREATE TABLE IF NOT EXISTS; the worker keeps the claim lock and maxRetries 0.",
+            "cites": "Make Operations Idempotent 2",
+            "none": "A crash at any point leaves either no session or one session per nonce, and a rerun of the schema is a no-op."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-make-operations-idempotent",
+            "source": "Skill",
+            "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_018CpBmvHJ4oYNWWDj95pYvn",
+            "time": "2026-10-07T02:17:16.326Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "H427iN1Gkk9eiSyjL7EhFDQKr7JAEdpu+shC5G3BgDwrZK8ZOzwxVm1M8le8a1DnDwx4Sz68oH9rnALJbJKSCA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-migrate-callers-then-delete-legacy-apis",
+        "findings": [
+          {
+            "finding": "modelSchema, modelLabels and appleUser are removed and every caller moved to modelKeySchema, the catalog labels and appleSignIn.",
+            "cites": "Migrate Callers Then Delete Legacy APIs",
+            "none": "No compatibility layer is left; the unused publish option is gone from the transport harness."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-migrate-callers-then-delete-legacy-apis",
+            "source": "Skill",
+            "sha256": "8014f4eb04fe50474f7e3f9286bce2de276116b8b669cd2fe7b2100972efb68a",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01JCiU3BfpSELRRmDc7VNu5J",
+            "time": "2026-10-07T02:17:16.855Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "isJVLOGAMC2cIfxYxxseS7uLSz3t+YKBWbMuGBjRIwDQEoVy/TXjnQ6vEFwJyar+tHL0dH/1MjqkAxFFPJZqBw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-minimize-reader-load",
+        "findings": [
+          {
+            "finding": "The new files are shared/catalog.ts, the gauge components, BarButton and the dictation module and hook.",
+            "cites": "Minimize Reader Load 1",
+            "none": "Each has more than one caller or hides a real decision; resolveChoice is the one place that maps a stored choice to a model and level for both the app and the server."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-minimize-reader-load",
+            "source": "Skill",
+            "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01XAzceJpiBNHV9oPEYdTGD9",
+            "time": "2026-10-07T02:17:17.165Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "Rz9BhDvRyrGa2/YjrRcbrv3/BgEsglmMyQbutxKu8zvkTIY+gOv0iBZUzFbDndjRb4MWWydgmDFrEq+qmN9FDQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "The release JS bundle must contain no harness code.",
+            "cites": "Prove It Works",
+            "none": "Rebuilt with npm run build:ios-js and searched it. No harness module string is present. The only hit is the App prop name harnessAccount, which is always undefined in production because index.js registers App with no props."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01EX3xMgB2SXrWoH2XYjMPZM",
+            "time": "2026-10-07T02:17:17.421Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "M6WY7thRt6QJngHDw/fshXK1a/djMzSRkjuDJRchwOYoT1ziUwF/q270H1kgRQZr3GNP6c0JUK/WiE5Zf7X/CQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-sequence-verifiable-units",
+        "findings": [
+          {
+            "finding": "The fix commits after the record commit each change one thing: the export cleanup, the fixed dictation sentence, the summary effort, the harness option and the doc sentence.",
+            "cites": "Sequence work into verifiable units",
+            "none": "Each is small and checkable on its own; verify:commit passes at the head."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-sequence-verifiable-units",
+            "source": "Skill",
+            "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01E6hUS28yN17E1GkrZVGHUk",
+            "time": "2026-10-07T02:17:19.036Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "iwscGjb4vAMMrJdaj2SUusgS3giWzVmPuvz3dtN5lh3UW9RunF6gHt7fr1zUv+ky4OLADQrKO/Rmk0n/y8oFCg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-subtract-before-you-add",
+        "findings": [
+          {
+            "finding": "The hard-coded none effort and its test were removed before the per-chat effort path replaced them.",
+            "cites": "Subtract Before You Add",
+            "none": "No second effort path remains."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-subtract-before-you-add",
+            "source": "Skill",
+            "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01EPtsUWbZ2Wk7sqw91JCpFy",
+            "time": "2026-10-07T02:17:19.494Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "t8xvJ4CudtVCqKlsnm01wW2mDBDqOZxiT5AcZKCnnpHzdiotNtsum1SE3cV7Y45AtYVqODpOWYM0Zpad74fGCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-test-behavior-not-implementation",
+        "findings": [
+          {
+            "finding": "The removed gateway-routing case pinned the old hard-coded none effort.",
+            "cites": "Test behavior, not implementation",
+            "none": "The behavior is still pinned with exact values: worker.test expects deepseek none and kimi none for no stored level, and adapters.test expects effort none in the Kimi and DeepSeek summary bodies."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-test-behavior-not-implementation",
+            "source": "Skill",
+            "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_019gFKNVEJm3FJSMJub4nPWx",
+            "time": "2026-10-07T02:17:19.749Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "1tnF7h2xMo9m9BvNeThTlSY6pDTWE//4t8s6l5gF+Z2ahEE2CN0y02gnYtmoOebUTh2RMUkFCtgwofkfvZX4Cw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-type-system-discipline",
+        "findings": [
+          {
+            "finding": "Catalog.models is a non-empty tuple, Choice is a discriminated union, and RegistryKey narrows open model keys with isRegistryKey before a provider call.",
+            "cites": "Type System Discipline",
+            "none": "No casts were added; the one runtime check, the non-registry ProviderFailure in the worker, cannot fire for a catalog built from the registry."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-type-system-discipline",
+            "source": "Skill",
+            "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Y5ysioTuqiwiJAVWR6XzXn",
+            "time": "2026-10-07T02:17:20.162Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "+uhYMwO5MRPhtBDdEsJ63ZTHMU0vuryE/wOX8mth/Yeq3efmDFVn6b8P1HyUuIouI/tv5qvK6wV7Vo62SYv+BQ=="
+          }
+        ]
+      },
+      {
+        "skill": "react-native-best-practices",
+        "findings": [
+          {
+            "finding": "The catalog refresh runs on launch and on each return to the foreground, and only one request runs at a time.",
+            "cites": "Review Guardrails",
+            "none": "No render or startup cost. The request has no app-side timeout, so a hung request skips later refreshes until the session stops; sending does not depend on it."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "react-native-best-practices",
+            "source": "Skill",
+            "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01SZkwCPK9X8TokCx3LzfzVn",
+            "time": "2026-10-07T02:17:20.497Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "0NvV2w+svYh8QRyF0sWyQsYhaUWO1eyMkbBrX1ry+0TNHooQk8W6fS9KiNKBvkx+TcQqnmFmH+/czlNwyyk9AA=="
+          }
+        ]
+      },
+      {
+        "skill": "react-native-best-practices-sm",
+        "findings": [
+          {
+            "finding": "GaugeDial drives a Skia path end and a needle transform from one shared value set in an effect.",
+            "cites": "Sub-skills",
+            "none": "The shared value is never read or written during render, and the animation runs on the UI thread."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "react-native-best-practices-sm",
+            "source": "Skill",
+            "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Wczq8ymNz4uzjVGiTV2KSH",
+            "time": "2026-10-07T02:17:20.732Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "BhCfnRW5wawNhe+hiTuT25/G7/KFLy0NHKnSywSEcNBfB36Zt30+Hv7nrR/4Oa4Es0q16IqHsG+bY1A2lcUcBA=="
+          }
+        ]
+      },
+      {
+        "skill": "review-animations",
+        "findings": [
+          {
+            "finding": "The gauge needle moves on a deliberate tap, at 240 ms with a strong ease-out, and Reduce Motion sets it directly.",
+            "cites": "The Ten Non-Negotiable Standards 4",
+            "none": "Under 300 ms, ease-out, interruptible because withTiming retargets from the current value, and transform-only."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "review-animations",
+            "source": "Read",
+            "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01L8gd6PPsjeWZ2QHXWZDEGm",
+            "time": "2026-10-07T02:33:31.767Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "520ebdee02848d63846eff5af88f3730ebcda381",
+            "headPatch": "95f1283798d8ac30499537e190685bb4ee5cf630",
+            "sig": "b5EGJMv9yJLYb4IqB88Os6d+QqJJ7pja5tyH5HC1B7pWi93C9v2qyXsbQbeEFL8sqRrWLDBjk7B6vuxe9gVfAA=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "docs/providers.md said that context summaries never send a reasoning effort, but the Kimi and DeepSeek summaries send none since the summary-effort fix.",
+            "cites": "Voice and repo specifics",
+            "commit": "520ebdee02848d63846eff5af88f3730ebcda381"
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01FBCyacnfCunHV3h5VoF6Lk",
+            "time": "2026-10-07T02:17:22.165Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "2bMTqFJ5kgUjwYz0uTnlSsEYm/QpAipS/UJdfyHBmqitb8kVo/acRmAilELrSYtZxENv+WcTae+YG09Uww3XAw=="
+          }
+        ]
+      },
+      {
+        "skill": "test-prune",
+        "findings": [
+          {
+            "finding": "Reviewed the removed gateway-routing case, the changed worker tests and the new adapters, catalog, sign-in and dictation tests.",
+            "cites": "Review questions",
+            "none": "The removal keeps the protection at the worker and adapter boundaries; the new tests assert exact values and run the real code with fakes only at the provider and native boundaries."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "test-prune",
+            "source": "Read",
+            "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_013gzM4GQ7nv8vk4yyKDBfKV",
+            "time": "2026-10-07T02:33:31.768Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "520ebdee02848d63846eff5af88f3730ebcda381",
+            "headPatch": "95f1283798d8ac30499537e190685bb4ee5cf630",
+            "sig": "7yYQE6uEWntGaWO7NJJcKOn0lfMHAecWtbcB39AMABxNqaejTBssTrjqvM+qXY8QUmT+CWJcbjDD52vpUKOVAA=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "No changed file is near 1,000 lines, and the model choice lives in one resolveChoice used by the app and the server.",
+            "cites": "Approval Bar",
+            "none": "No structural regression. setPicker also clears the level when the same model is picked again; that is a small UX choice, not a defect."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01NQLg6z2es4rnZGFuHbdHPB",
+            "time": "2026-10-07T02:17:22.612Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "r3wYwV1T24F5wV6lN30kRYI8qHipf7p1GMvgCtPfQCSWHwYtRBCPDjOpDHKI4kfuTp0wGyYQ/TfGfDNRIcsPBw=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "External JSON is parsed with zod schemas and the types are inferred from them.",
+            "cites": "TypeScript best practices",
+            "none": "No as casts were added on untrusted data."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_013Wk7di4oFQfsD3BAwxG6NE",
+            "time": "2026-10-07T02:17:22.837Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "nwl5dJiMuTdtJs0KBkbRzVOnTPrrrnmg/ZKTBTwkIMkS8x/4Bu3hqnBmY77nbYYK8MeDkhKmiWVhW8nnf8B6CA=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "Read the new doc sentence and the commit messages.",
+            "cites": "Plain speech 28",
+            "none": "Plain, one idea per sentence, no filler."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01U4fsZhdMNyHVwoLiqUkyH1",
+            "time": "2026-10-07T02:17:23.154Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "fkiWH/Wdpu5shzxJMzpj678Agw6kNnk2W9OnrKVRCDMwB5eZFR2TQPMb46p6nIelw3mxY9pcflfj3EDDGCqoBw=="
+          }
+        ]
+      },
+      {
+        "skill": "workflow",
+        "findings": [
+          {
+            "finding": "The reply workflow keeps one step with maxRetries 0, no getWritable stream, and passes only serializable owner and attempt ids.",
+            "cites": "Prefer Step Functions to Avoid Sandbox Errors",
+            "none": "runtimeCatalog cannot throw before the claim because menuFrom falls back to the default menu."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "workflow",
+            "source": "Skill",
+            "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a3b07d877a71579c1",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_017FZptZZfuRomhV9ehsJmDC",
+            "time": "2026-10-07T02:17:23.392Z",
+            "cwd": "e28d810e535d88d93f4352674781c0ebf5954a27b8b98d67694eae00f7ebc39f",
+            "commonDir": "72a0693b05726106646f61202e2a109b7a2d65af6f8237d50942966d9dec3075",
+            "branch": "submission/release-2",
+            "head": "2924c0197681382abfe5c1ce15b0ea43d9909cf9",
+            "headPatch": "cc426e829b8d4a9375f75544d4c60fda1dee41c9",
+            "sig": "IKEIcVGEkQ2gywk3eiWqeTYLbzgX8h+RQq3kJ0VnzpYOBvs4igMrcRhMIfPjrdeVV9icHfBPTYR13rt3cnxLCw=="
+          }
+        ]
+      }
+    ]
+  }
 }
