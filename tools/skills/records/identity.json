@@ -321,5 +321,272 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "The change is safe because the identity line never enters context.items or the Responses input. providers.ts:140 puts the line only in the Gateway request array, and providers.ts:147-151 builds the Gateway checkpoint from context.items plus the assistant text. responses.ts:167 sends the line as the top-level instructions field, and responses.ts:204 builds the returned items from trimCompacted([...input, ...output]), which never sees it. The reviewer reran identity.test.ts inside verify:commit at 56345b1, and the two checkpoint tests passed with a non-empty checkpoint that does not contain the line. The author's mutation red ('Expected substring: not \"running in the Glow app\"') shows the absence assertion catches a leak. The reviewer made no source edit, so its own proof stops at level 3 plus the passing tests.",
+            "cites": "How sure are you 3",
+            "none": "The fact holds at 56345b1."
+          },
+          {
+            "finding": "Auto uses the routed model's label. worker.ts resolves Jev's pick with resolveChoice and passes choice.model.key to providers.generate (worker.ts:139), the only caller, and identityInstruction reads that key's registry label. The phone shows the same label (models.ts:182, shared/catalog.ts:56). Summaries, standalone compaction, and Jev do not send the line: prepare() calls gateway.generate and responses.compact directly, and jev.select is a separate client. context.items holds no system item, because the only other system textItem is the Kimi summary request (compaction/context.ts:141-144) and the summary returns as a user item (compaction/context.ts:163). A Gateway reply therefore sends exactly one system message.",
+            "cites": "Steps 3",
+            "none": "Checked in the source. No defect."
+          },
+          {
+            "finding": "Live acceptance is unverified. No live call has sent instructions on the WebSocket response.create, an array-content system message to the DeepSeek Gateway upstreams, or confirmed that Gateway chunks carry a top-level model. A missing model only makes the log show answered=-. The answered value is logged as the provider sends it, so a newline in it would split the log line, with a log-only cost.",
+            "cites": "Steps 4",
+            "none": "Documented limit. A live check needs a paid call that this review may not make, so the next approved live check covers it."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01R1DeUhQWnaeGMtk1MJ917z",
+            "time": "2026-10-07T07:42:18.782Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "TL8C0xGsy010QO0oWPYISXc6dVQWGLnrrJYDTksYx1703SzGvxqUUTDZYnC7yQOBCvFHxpXpJrZeMADWKVg/Bg=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "The one new try/catch, around JSON.parse in reportedModel (providers.ts:26-37), is needed because the Gateway stream ends with the non-JSON [DONE] record. The diff adds no casts, no any, and no defensive guards on trusted paths.",
+            "cites": "Focus Areas",
+            "none": "Nothing to remove."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01GN3sWzxxsPBPS6BkyWoLWY",
+            "time": "2026-10-07T07:42:19.156Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "h9b6W6WUyeZumnk5ELCkJVbHlVepC9bxis4ldSAp+LcAVNpKCK/6OEXYTBazzPq+gjym+a8hAF1RRf0d6AQSBg=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "A grep of the added lines in packages/server finds no comments and no lint or TypeScript suppressions. comment-sicko was not spawned, because the lane rules allow only one subagent type, so the reviewer applied the check directly.",
+            "cites": "Steps 2",
+            "none": "No comment to judge."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_0195zjeoqc15h7b14NmSvsJU",
+            "time": "2026-10-07T07:42:19.360Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "+Qo8qOnPQ09Oo4Bb8QrnTLuO6vpv7naFjDtGqOcgRaUNMve11u5EOJvowFBCiZIYx/nJ9sDOj+oS/eaXn+OyCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "The reviewer reran the decisive checks on the real artifact instead of the author's report. npm run verify:commit -- HEAD at 56345b1 passed all 16 checks, and tests.log shows PASS tests/identity.test.ts with 215 of 215 server tests passing. The log tests assert console.info was called exactly once with the full expected line, so an extra field such as message text would fail them. The three docs claims that the tests do not pin were read in the source: the phone label, the Auto label, and the excluded summary paths.",
+            "cites": "Prove It Works",
+            "none": "Verified at 56345b1."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01HNthgjGBwVdyDHH43T2LRM",
+            "time": "2026-10-07T07:42:19.604Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "A+9qza+KGSW4p4lVavxaAR1+p1GjGsHoQLDNsP1kzVCwQTjB4lTESKcGjL5kW4wlJryc93afvuQg4VeuNfpGDg=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "The new docs/providers.md section is reference mode and each claim matches the code. The line format matches models.ts:92-94, the 8-character attempt prefix and the answered=- fallback match providers.ts:98-100, and the success-only log matches the await before console.info. The 2026-10-01 live-call paragraph above it lists the payload fields of that day and does not name instructions. The new section does not say that the instructions field and the Gateway system message are unverified live.",
+            "cites": "Pick the mode first (Diátaxis)",
+            "none": "No claim is wrong. The missing unverified-live note is a documented limit that the blast-radius finding records."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01DJF4e4W3RRsMPHfjCZQWeF",
+            "time": "2026-10-07T07:42:21.185Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "A6BdK+/Ho7cJHv1ltKRFS9skSlgP/F2Dg2TBZxBnREOs1pROhYE8HtHt/wo795QDnjKe7QEL4t09+zbP5wzQCQ=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "No structural regression. providers.ts grows to 155 lines. The private reply method repeats the seven positional parameters of generate so that the log line sits in one place for both wires. A model field on ProviderChunk would remove the second JSON.parse, but it changes a shared type and both clients for a small gain. The ??= stops parsing after the first chunk that carries a model, which is the first chunk on both wires in the fixtures.",
+            "cites": "Approval Bar",
+            "none": "Accepted as the smallest change. The extra parse per chunk when a provider reports no model is a documented limit."
+          },
+          {
+            "finding": "In identity.test.ts the two kimi log cases share one test.each title, so a failure names the model but not which case failed. Jest runs both.",
+            "cites": "Primary Review Questions",
+            "none": "Cosmetic. Recorded as a documented limit."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01YcK2NU74yGbeKezybV6v1T",
+            "time": "2026-10-07T07:42:21.610Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "Sw6TXCyoniYa/z9111owMJYIV3iElGKWXcNshff96p/wKCSWfsCqv7SCxSUBJpSTxH7rDqbWoKI6uyA2jpjHBA=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "reportedModel parses provider chunks from unknown with a zod safeParse (providers.ts:21-37), and the tests parse request bodies with zod. The diff adds no as casts. console.info is not a structured logger, but it matches the server's existing console.warn and console.error use (api.ts:310, models.ts:172). The positional parameters are the existing Providers.generate interface.",
+            "cites": "TypeScript best practices",
+            "none": "Matches the existing server logging. A structured logger is out of scope."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_018GiXAL8T3AWuBB6zrYVceP",
+            "time": "2026-10-07T07:42:21.863Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "vU7TbkWH279N4V2zbtuVGZlJFlK5u/LAOr31+NsHHm10F5yT5rEIrAFDWL/Q5tGbSd2eikSC+0Bb3wWk67gdCA=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "The docs section uses active voice and has no dashes. Its two colons introduce an example (the quoted line and the log format), which rule 14 allows.",
+            "cites": "Style 14",
+            "none": "Nothing to change."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "af48146c8601ccf4c",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01WARzoNurDiUpsUWX4u1L3r",
+            "time": "2026-10-07T07:42:22.103Z",
+            "cwd": "d48484a986f519c0e63d74efa1a1fe9e71c7098fc2bd95e65640589e8e3d014a",
+            "commonDir": "5d17c00298fbd7ecf86d856fd114e0aceaef07d9a17ad50b49ba6cb3a6ee2ff0",
+            "branch": "submission/identity",
+            "head": "56345b14c35827146faf761103333974d071a907",
+            "headPatch": "56e7bfc3fc188358ece176507f9162bdd4c6711f",
+            "sig": "dsVpt/bKJd500VJT+bntM2HAQJSjCnrdQqrwjY8ICElrvzPLBRzNJlPaCzX3cqiAHZ97EsG7PsLFFuYlLVdmDA=="
+          }
+        ]
+      }
+    ]
+  }
 }
