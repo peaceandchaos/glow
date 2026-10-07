@@ -1,0 +1,1174 @@
+{
+  "change": "release-2",
+  "base": {
+    "commit": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+    "patch": "0ae535b53301b208631863bcf46416d2bcda0db0"
+  },
+  "skills": [
+    {
+      "skill": "blast-radius",
+      "files": [
+        "packages/server/src/auth.ts",
+        "shared/contracts.ts",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "After the merge DeepSeek and Kimi still send reasoning effort none by default: resolveChoice falls back to each model's first level, both models list none first, the worker passes effortFor(model, level) to GatewayClient.generate, and the server default menu must equal the baked catalog.",
+          "cites": "How sure are you 4",
+          "none": "Proven: worker.test expects deepseek none and kimi none for no stored level; moving none after low in openLevels fails 'the server default menu is the catalog the app bakes in'; the simulator harness logged model deepseek effort none for a real send. The app fixes come from the U03 lane report, the server hardening from U04, the registry, effort, open keys, catalog route, Luna and docs from U08a, the harness, transport and per-chat level from U08b, the catalog cache, picker and default level from U08b-2, and the lowest-level rule, divider, composer, gauge and dictation from U21."
+        },
+        {
+          "finding": "Compaction summaries for DeepSeek and Kimi no longer send reasoning effort none, because the reasoning-level change passes no effort on the summary path and the hard-coded Gateway line is gone.",
+          "cites": "Steps 3",
+          "none": "The conflict resolution follows the stated rule that the per-chat effort mapping replaces the hard-coded line; summaries carried no effort in the reasoning-level change (U08a). Raised for a decision in the lane report."
+        },
+        {
+          "finding": "tools/native-transport/app-server.mjs still passes a publish option that runAttempt no longer reads.",
+          "cites": "Steps 3",
+          "none": "Present on main before this change and harmless in untyped JavaScript; left out of a conflict-only rebuild and listed as a follow-up."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "blast-radius",
+          "source": "Skill",
+          "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01DynG6AEiWkTBhguA3JgxVJ",
+          "time": "2026-10-07T01:09:14.718Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "1pDg8aKuYuXlhr1PBuSaZDckDYHnpkMRmpvwifhhGmywdU/FqaP0jG0lTsJtOFffEuOAmyf4CRMBmlN9kPEoAg=="
+        }
+      ]
+    },
+    {
+      "skill": "deslop",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The conflict resolutions in gateway.ts, worker.ts, reply.ts, worker.test.ts and reply-speed.bench.ts add no casts, guards, try/catch or comments.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "deslop",
+          "source": "Skill",
+          "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01X3o1WeLTYHW3LMu7bnGXmB",
+          "time": "2026-10-07T01:09:15.041Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "Eck/cXiorO8tfZOQxIUMME1nQ0KZBI6cL3p/NBFpRgElWjQoB1pOJD1nYHWZanlU2QmQ95ed+o0ibCtfZnPTBw=="
+        }
+      ]
+    },
+    {
+      "skill": "expo-animation",
+      "files": [
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/GaugeDial.tsx"
+      ],
+      "findings": [
+        {
+          "finding": "Composer, BarButton and GaugeDial motion arrived unchanged from the chat UI work (U21): 120 ms press scale and opacity, transform and opacity only, Reduce Motion handled.",
+          "cites": "The Build Sequence",
+          "none": "git diff e24cf7b HEAD shows no app file change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "expo-animation",
+          "source": "Skill",
+          "sha256": "cad39a1208a5b65e496fb14588e28b684cf94c263b9a2a97bd9da994058db057",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01UhgEgUaaTbspJaRTecogw8",
+          "time": "2026-10-07T01:09:21.219Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "qEX/lUY9MCKaPLcVMck5NMYeSLmzOVWL/gGAO5Z+0kirLT7cNAl0kfNiRyCntgHsXNojrDkn4hJ229JxHeB7CA=="
+        }
+      ]
+    },
+    {
+      "skill": "expo-ios-hig",
+      "files": [
+        "packages/app/src/components/AttachmentMenu.tsx",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/components/MessageBubble.tsx",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx"
+      ],
+      "findings": [
+        {
+          "finding": "The model menu, gauge context menu, divider and composer arrived unchanged from U21 and U08b-2; the simulator shows the native level menu with the current level checked.",
+          "cites": "Quick Reference",
+          "none": "Checked on the iPhone 15 Pro simulator, screenshots 04 and 07."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "expo-ios-hig",
+          "source": "Skill",
+          "sha256": "83b2e6a0fc8b2351738ab819284a81fbacda5b2a339b9947088250c2f13ca6d5",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01CAUmV3wgbYeM1CfYQWJ9iE",
+          "time": "2026-10-07T01:09:21.497Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "9akqDSQPiT1HP6jw/yGec6zqTcy35etHUtphhN+GBF4m8hjgDRLIiPfPea892wWRCVIp5AaxF7qGWkwV4db/DQ=="
+        }
+      ]
+    },
+    {
+      "skill": "ios-debugger-agent",
+      "files": [
+        "packages/app/ios/MargeloChat.xcodeproj/project.pbxproj",
+        "packages/app/ios/MargeloChat/Dictation.m",
+        "packages/app/ios/MargeloChat/Info.plist",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "Built the Debug simulator app with xcodebuild, launched it on the iPhone 15 Pro simulator with the harness Metro entry and app server, and drove the sends.",
+          "cites": "3) Build + run (when requested)",
+          "none": "BUILD SUCCEEDED; the app server logged deepseek none and gpt-6.1-sol high."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "ios-debugger-agent",
+          "source": "Skill",
+          "sha256": "bb8ad932ec473cee097c9c8d106051134e9ab6cf9dc85d6a8e62ce80ad24c385",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Te68Ki4oTFdb474LdBYNii",
+          "time": "2026-10-07T01:09:21.795Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "tITLQDlSoAg6eOcTuhjBBP4HKtlFFaqv9k8Yx2vQIhjhy/8RtsPr7xVNU/HWCNuadz4MEXkAjzy8/MJ+hwZmDw=="
+        }
+      ]
+    },
+    {
+      "skill": "no-comments",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The resolutions add no comment; the comments that remain were reviewed in their source lanes (U20 for the speed fix, U08a and U21 for the reasoning-level change).",
+          "cites": "Steps 2",
+          "none": "No new comment to judge."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "no-comments",
+          "source": "Skill",
+          "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Qtdq4ycwmVkNd8FGURUibE",
+          "time": "2026-10-07T01:09:15.387Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "tSg88Ynrq3mO7GvVgJYy3kcvO2VHno88wNs6mJzlx8+iMMz+QvyK+I3pQrgCW145Be5/RrFSFRKgvCywpUMFAQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-boundary-discipline",
+      "files": [
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/ios/MargeloChat/Dictation.m",
+        "packages/app/src/account.ts",
+        "packages/app/src/network/client.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/schema.ts",
+        "shared/catalog.ts",
+        "shared/contracts.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The worker trusts the parsed catalog from runtimeCatalog and the parsed submission; the merge adds no validation inside the worker.",
+          "cites": "Boundary Discipline",
+          "none": "Parsing stays at the catalog and request boundaries."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-boundary-discipline",
+          "source": "Skill",
+          "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01DTaFQasDSL2VXHmKghaDK1",
+          "time": "2026-10-07T01:09:15.678Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "ox6qeqmdZAwN2/9Nn1OxSBbXNdAvQ9gjQr7PgXCobbKCaxAK22YgG7I46HBjyrv0UF/UzyPxkdCWAj5edVpSCQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-fix-root-causes",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "npm run typecheck failed on scripts/reply-speed.bench.ts after the open-keys pick, because WorkerOptions now requires a catalog; the bench now passes bakedCatalog.",
+          "cites": "Fix Root Causes",
+          "commit": "7c7fed7b287c3a9a6e78f047bebaaa86a77dd7e9",
+          "patch": "432edc626197c88c43345f13f4476a4040f03ff7"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-fix-root-causes",
+          "source": "Skill",
+          "sha256": "4c5fd0fb9eb4754dff9a6dd4d1de7a87dc927f5154ab3afd643bedb9b7f8b6b9",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01AHHUbdHGH9Pdy9t6CszTHy",
+          "time": "2026-10-07T01:09:15.989Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "J6CqR2NSZzVsGs9q7yZz/G4YuFzpuYWsLkMcB2PwEDEdKczizgTuAheF9K6XXqFLyfTeRgQpVRwSYjAyOTjCDA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-make-operations-idempotent",
+      "files": [
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/server/src/database.ts",
+        "packages/server/src/jobs.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/services.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "A lost worker and a retry still converge on one interrupted reply with the catalog in WorkerOptions.",
+          "cites": "Make Operations Idempotent 2",
+          "none": "worker.test 'a worker lost mid-stream and a retry converge on one interrupted reply' passes."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-make-operations-idempotent",
+          "source": "Skill",
+          "sha256": "576260695df90ac979f01c03321d5a8cb7bd824bdbc5d3fbe6790ee1caa19ab4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_018r64bbiRwc9GewhEC6L55U",
+          "time": "2026-10-07T01:04:13.498Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+          "headPatch": "0ae535b53301b208631863bcf46416d2bcda0db0",
+          "sig": "0+B4aDTBLZ/TNwdMk+H5NT4RsHxrnvXRVdHv/F2oQ6kvXIIUeMtC2Q61i6YCX7egFLhCJ9IEiBLqs8z7KyGfBA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-migrate-callers-then-delete-legacy-apis",
+      "files": ["packages/server/src/auth.ts", "shared/contracts.ts"],
+      "findings": [
+        {
+          "finding": "The publish option and the workflow stream are gone from every typed caller: reply.ts, the worker tests, the session harness, images.test and the bench.",
+          "cites": "Migrate Callers Then Delete Legacy APIs",
+          "none": "Only the untyped harness app-server.mjs still passes publish, as on main; listed as a follow-up."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-migrate-callers-then-delete-legacy-apis",
+          "source": "Skill",
+          "sha256": "8014f4eb04fe50474f7e3f9286bce2de276116b8b669cd2fe7b2100972efb68a",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01VXokNKtn2nKFmh9NFjCaD9",
+          "time": "2026-10-07T01:09:17.807Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "IYMId56jwZLoZb0woTHwEDGHvRo4Br7Skxg7HivuPMULMHnCRBYN61RjyE2uBk0Ox5anzEtproOZ82bAWxiUCQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-minimize-reader-load",
+      "files": [
+        "packages/app/ios/MargeloChat/Dictation.m",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "shared/catalog.ts"
+      ],
+      "findings": [
+        {
+          "finding": "worker.ts after the merge has one choice resolution and one chunk writer, 190 lines, with no extra branch from the merge.",
+          "cites": "Minimize Reader Load 1",
+          "none": "No layer added."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-minimize-reader-load",
+          "source": "Skill",
+          "sha256": "772bd55686c20d49e1220d0728de4587cd5608ae2968b7896c5477b3f8813dfc",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01TroDsNcKtdwsL2LPe7qoac",
+          "time": "2026-10-07T01:09:18.050Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "GE7rJXQEEqGnKFGxmFRAMsg0NIkVSAaxgSocR8qgfNYklhes05wyC9Z/XHxDz2A5gCdSi74XvDWhPFU/Sge2CQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-prove-it-works",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Checked the head: lint, format, typecheck, tests (288, 147, 206), server build, iOS bundle, Release-bundle harness grep 0, bench 119, 119, 124 statements per reply, simulator sends, and verify:commit.",
+          "cites": "Prove It Works",
+          "none": "Evidence is in the lane report."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-prove-it-works",
+          "source": "Skill",
+          "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_013mff9xqujRjehoN9TJGZDU",
+          "time": "2026-10-07T01:09:18.412Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "rs1zJcCIQvnTdvMOwWScq9NJgNKR63V9/s19vckee+55+QrSQmm90bK13XENy6iuYzgwzkMIf7/qHe830GbcCA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-sequence-verifiable-units",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "Each conflicted pick was typechecked and its server tests run before cherry-pick --continue, and every pick passed the staged hook. Commits 668032e to 7724119 do not send none for DeepSeek and Kimi; f816dd9 restores it.",
+          "cites": "Sequence work into verifiable units",
+          "none": "Intermediate commits are not deployed; the head carries both behaviors."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-sequence-verifiable-units",
+          "source": "Skill",
+          "sha256": "5bee6caf5abdf7b05b3e7c8d3e66549d108c2f798d8155c352a1764d030816d7",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Lp858xdS5X4nCHqwumYKoB",
+          "time": "2026-10-07T01:09:18.900Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "YjDM79NS7okOcntq9dHqQV445n+pSLJthellgre79RlnH3CYevwOtWNNe1TFvMIYCIfFGsJH+2M4yQELO3tDCg=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-subtract-before-you-add",
+      "files": [
+        "packages/app/ios/MargeloChat/Dictation.m",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "shared/catalog.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The hard-coded Gateway effort line and its test were removed instead of kept next to the per-chat mapping.",
+          "cites": "Subtract Before You Add",
+          "commit": "668032e0cab4bf61528aad6f67967c64a1d7f2b9",
+          "patch": "d811a247a0b0d7660a5d67d4b5919ebc2fcd7a7b"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-subtract-before-you-add",
+          "source": "Skill",
+          "sha256": "84bfde4d3dc16360264e0cb944b2dfbd8d92a70624322e83b93432f8e35dc60e",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_019ozxJjA9MMGHK94p6yJNZL",
+          "time": "2026-10-07T01:09:19.210Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "ho2JTBieS8RMe2+NM9Scg4zMRO0BA8hYm403pT+QubvjrnynPveC86z2zz01Ub500E9yuHCmL2mOkibb+hruBA=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-test-behavior-not-implementation",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/compaction.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/jobs.test.ts",
+        "packages/server/tests/models.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-picker.test.ts",
+        "packages/server/tests/session-recents.test.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "packages/server/tests/worker.test.ts",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "Removed gateway-routing.test '%s asks for no reasoning effort', which pinned the hard-coded line. The default-none contract is pinned by worker.test and the baked-catalog equality test, and a mutation of openLevels fails it.",
+          "cites": "Test behavior, not implementation",
+          "commit": "668032e0cab4bf61528aad6f67967c64a1d7f2b9",
+          "patch": "d811a247a0b0d7660a5d67d4b5919ebc2fcd7a7b"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-test-behavior-not-implementation",
+          "source": "Skill",
+          "sha256": "9f6a2e492337348bcedb02c42c1b7046b8b1b9f48fbffde98e101f0168faa9ba",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01Ux9L8mzr7ibVww6B3xAhAs",
+          "time": "2026-10-07T01:04:13.880Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+          "headPatch": "0ae535b53301b208631863bcf46416d2bcda0db0",
+          "sig": "mDBcoNUCavCxUTjFPcuskgDroceK+bXJk5aiSo3zNbWgeoilQtw0YQz31cvlYYiPB6ewXIV9hvepvXYviQZ3BQ=="
+        }
+      ]
+    },
+    {
+      "skill": "principle-type-system-discipline",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/harness/seed.ts",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/AttachmentMenu.tsx",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/components/MessageBubble.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts",
+        "packages/server/scripts/reply-speed.bench.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/compaction/context.ts",
+        "packages/server/src/database.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/jev.ts",
+        "packages/server/src/jobs.ts",
+        "packages/server/src/models.ts",
+        "packages/server/src/provider.ts",
+        "packages/server/src/providers.ts",
+        "packages/server/src/responses.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/schema.ts",
+        "packages/server/src/services.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/compaction.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/jobs.test.ts",
+        "packages/server/tests/models.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-picker.test.ts",
+        "packages/server/tests/session-recents.test.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "packages/server/tests/worker.test.ts",
+        "packages/server/workflows/reply.ts",
+        "shared/catalog.ts",
+        "shared/contracts.ts"
+      ],
+      "findings": [
+        {
+          "finding": "WorkerOptions requires catalog, so the bench and every runAttempt caller had to pass one; no cast or optional field was added.",
+          "cites": "Type System Discipline",
+          "none": "The compiler found the bench caller."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "principle-type-system-discipline",
+          "source": "Skill",
+          "sha256": "adaa7a27c8794b24112fdaf73d11d7c59f0926c496fd5c9b0b5cb1c0ebbd3536",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01G3phV76PA6uicU7Yb5ssBT",
+          "time": "2026-10-07T01:09:19.440Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "w4cGuxH/Qx4FnjPdeasz/JKByv6kEpu6CzHGoYUKwuq6Yc6N+N2hrgfyEta5AD/nu/Rj3uBqM4hOpM231d3lDQ=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/harness/seed.ts",
+        "packages/app/ios/MargeloChat.xcodeproj/project.pbxproj",
+        "packages/app/ios/MargeloChat/Dictation.m",
+        "packages/app/ios/MargeloChat/Info.plist",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/AttachmentMenu.tsx",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/components/MessageBubble.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts",
+        "tools/native-transport/app-server.mjs",
+        "tools/native-transport/server.mjs"
+      ],
+      "findings": [
+        {
+          "finding": "App code arrived unchanged from U03, U08b, U08b-2 and U21, whose reports carry the measurements.",
+          "cites": "Review Guardrails",
+          "none": "No app change in this rebuild."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices",
+          "source": "Skill",
+          "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01GRxymKyLLdgY2E8XVyr9jq",
+          "time": "2026-10-07T01:09:23.650Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "daFC0NMkJuJC4+x/jQilMV2Z3NI1jgD2zrYvQqiMEUgJYs1Mfsi/12EQfRdDxgLJf6eKwfRXS3k4zxZU8R9OBA=="
+        }
+      ]
+    },
+    {
+      "skill": "react-native-best-practices-sm",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/harness/seed.ts",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/AttachmentMenu.tsx",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/components/MessageBubble.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts"
+      ],
+      "findings": [
+        {
+          "finding": "Reanimated and Gesture Handler use in the composer and gauge arrived unchanged from U21.",
+          "cites": "Sub-skills",
+          "none": "No app change in this rebuild."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "react-native-best-practices-sm",
+          "source": "Skill",
+          "sha256": "29dd5507d4a278f549fdbb4c40ce426d9aebd9102c76ba38e76e1455efeba256",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_018fJjeXxB5CoeFEip9dvi1t",
+          "time": "2026-10-07T01:09:23.852Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "wIknkDYhH/4OQXzy8Bs6aQ8oK9+RICuo/kSX8D+j+9C2znt4t8tZqgm0ofBE0iw8xuiTOftslxFbYn6MKs+SAA=="
+        }
+      ]
+    },
+    {
+      "skill": "review-animations",
+      "files": [
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/GaugeDial.tsx"
+      ],
+      "findings": [
+        {
+          "finding": "Gauge and bar press motion arrived unchanged from U21, which reviewed it against these standards.",
+          "cites": "The Ten Non-Negotiable Standards 7",
+          "none": "No motion change in this rebuild."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "review-animations",
+          "source": "Read",
+          "sha256": "61cf8ac0c4c8e1f63385298c546b16c65ca9aec34abddcd04e821c16712d671d",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_015Gxgz4sQQkDcHAshgDzGJF",
+          "time": "2026-10-07T01:09:22.220Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "kWETP+8KYWv9ea9Eag1e2Ugr7Rg/W//w9fTjuMt62MPsOJDQ8QEIaLIyy13qX4VSDtEqC5qIltjABp9SiSkOAA=="
+        }
+      ]
+    },
+    {
+      "skill": "technical-writing",
+      "files": ["<change>", "docs/providers.md"],
+      "findings": [
+        {
+          "finding": "Commit messages are the source commits' messages, and docs/providers.md is unchanged from U08a and U21.",
+          "cites": "Voice and repo specifics",
+          "none": "No new prose besides this record."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "technical-writing",
+          "source": "Skill",
+          "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_016byrd8XLMh552d9YNQ4mrT",
+          "time": "2026-10-07T01:09:24.289Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "lcfVir2u+PhjyEqInsCqp2D2nQaIxXqiWgviMgUbY77g01phYJoF63lA1INwK/pOWZDfob9x5DG4JD+Ti2weCA=="
+        }
+      ]
+    },
+    {
+      "skill": "test-prune",
+      "files": [
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/compaction.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/jobs.test.ts",
+        "packages/server/tests/models.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-picker.test.ts",
+        "packages/server/tests/session-recents.test.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "packages/server/tests/worker.test.ts"
+      ],
+      "findings": [
+        {
+          "finding": "One test removed (gateway-routing '%s asks for no reasoning effort', two cases) because the behavior it pinned was replaced; the replacement contract keeps two checks at different boundaries. Server tests 206 = 202 + 6 speed-fix tests - 2.",
+          "cites": "Decisions and repairs",
+          "commit": "668032e0cab4bf61528aad6f67967c64a1d7f2b9",
+          "patch": "d811a247a0b0d7660a5d67d4b5919ebc2fcd7a7b"
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "test-prune",
+          "source": "Read",
+          "sha256": "807f913944dce0e0e87abe8559da20b9f9162988d4234dab0ecbe20f430e1364",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_018qRduk1t3bSCQNuYb4hWRa",
+          "time": "2026-10-07T01:04:14.384Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+          "headPatch": "0ae535b53301b208631863bcf46416d2bcda0db0",
+          "sig": "r6i+U300N87oCy6uJRxLscTCwsheqMUMMhDQ1/15oZjUu2osi9vyoum1wDIyvG0Vx4U15+kekyPiiZNGbcnJCA=="
+        }
+      ]
+    },
+    {
+      "skill": "thermo-nuclear-code-quality-review",
+      "files": ["<change>"],
+      "findings": [
+        {
+          "finding": "The merge composes the speed fix and the reasoning-level change without new branches; no changed file passes 1000 lines (largest is client.test.ts at 662).",
+          "cites": "Non-Negotiable Additional Standards 1",
+          "none": "No structural finding."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "thermo-nuclear-code-quality-review",
+          "source": "Skill",
+          "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_01S3KgvUP7yhkVsRmdEa2v2x",
+          "time": "2026-10-07T01:09:24.598Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "wrvUgJ4k6MBkImzqh07yc7Koom+rFArslOPb455IItQikk/X53Cg3LkIEfONvegchWlVFd6waxRpHNy8aPIUCQ=="
+        }
+      ]
+    },
+    {
+      "skill": "typescript-best-practices",
+      "files": [
+        "packages/app/App.tsx",
+        "packages/app/__tests__/ChatScreen.test.tsx",
+        "packages/app/__tests__/Composer.test.tsx",
+        "packages/app/__tests__/MessageBubble.test.tsx",
+        "packages/app/__tests__/RecentsScreen.test.tsx",
+        "packages/app/__tests__/account.test.ts",
+        "packages/app/__tests__/archive.test.ts",
+        "packages/app/__tests__/bearer.test.ts",
+        "packages/app/__tests__/client.test.ts",
+        "packages/app/__tests__/modelMenu.test.tsx",
+        "packages/app/__tests__/signIn.test.tsx",
+        "packages/app/harness/appProbe.tsx",
+        "packages/app/harness/nativeTransport.tsx",
+        "packages/app/harness/seed.ts",
+        "packages/app/src/account.ts",
+        "packages/app/src/components/AttachmentMenu.tsx",
+        "packages/app/src/components/BarButton.tsx",
+        "packages/app/src/components/Composer.tsx",
+        "packages/app/src/components/EffortGauge.tsx",
+        "packages/app/src/components/GaugeDial.tsx",
+        "packages/app/src/components/Header.tsx",
+        "packages/app/src/components/Icon.tsx",
+        "packages/app/src/components/MessageBubble.tsx",
+        "packages/app/src/dictation.ts",
+        "packages/app/src/hooks/useDictation.ts",
+        "packages/app/src/network/client.ts",
+        "packages/app/src/screens/ChatScreen.tsx",
+        "packages/app/src/screens/SignInScreen.tsx",
+        "packages/app/src/state/appSession.ts",
+        "packages/app/src/state/archive.ts",
+        "packages/app/src/state/chatView.ts",
+        "packages/app/src/theme.ts",
+        "packages/server/scripts/reply-speed.bench.ts",
+        "packages/server/src/api.ts",
+        "packages/server/src/auth.ts",
+        "packages/server/src/compaction/context.ts",
+        "packages/server/src/database.ts",
+        "packages/server/src/gateway.ts",
+        "packages/server/src/jev.ts",
+        "packages/server/src/jobs.ts",
+        "packages/server/src/models.ts",
+        "packages/server/src/provider.ts",
+        "packages/server/src/providers.ts",
+        "packages/server/src/responses.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/schema.ts",
+        "packages/server/src/services.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/tests/adapters.test.ts",
+        "packages/server/tests/api.test.ts",
+        "packages/server/tests/catalog.test.ts",
+        "packages/server/tests/compaction.test.ts",
+        "packages/server/tests/contracts.test.ts",
+        "packages/server/tests/gateway-auth.test.ts",
+        "packages/server/tests/gateway-routing.test.ts",
+        "packages/server/tests/images.test.ts",
+        "packages/server/tests/jobs.test.ts",
+        "packages/server/tests/models.test.ts",
+        "packages/server/tests/postgres-ssl.test.ts",
+        "packages/server/tests/session-commands.test.ts",
+        "packages/server/tests/session-harness.ts",
+        "packages/server/tests/session-picker.test.ts",
+        "packages/server/tests/session-recents.test.ts",
+        "packages/server/tests/session-recovery.test.ts",
+        "packages/server/tests/sessions.ts",
+        "packages/server/tests/sign-in.test.ts",
+        "packages/server/tests/worker.test.ts",
+        "packages/server/workflows/reply.ts",
+        "shared/catalog.ts",
+        "shared/contracts.ts"
+      ],
+      "findings": [
+        {
+          "finding": "The resolutions add no as cast; EventPayload and ProviderChunk types replace the dropped JobEvent import.",
+          "cites": "TypeScript best practices",
+          "none": "Nothing to change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "typescript-best-practices",
+          "source": "Skill",
+          "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_015V8HBSsuqxBAbSgDyA1FVv",
+          "time": "2026-10-07T01:04:12.821Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+          "headPatch": "0ae535b53301b208631863bcf46416d2bcda0db0",
+          "sig": "vF6pCOdsXXhyx6S2JPl5QFJq99JrBKNTFkw+Wv5AfGCxVwxbGHFgIdEdDUtzAbsvV5tzrIrgbhf8smMrdRwjCw=="
+        }
+      ]
+    },
+    {
+      "skill": "unslop",
+      "files": ["<change>", "docs/providers.md"],
+      "findings": [
+        {
+          "finding": "This record and the commit message use plain sentences.",
+          "cites": "Process 2",
+          "none": "Checked."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "unslop",
+          "source": "Skill",
+          "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_013fBWdZxNm6P5AXWL9gj6SM",
+          "time": "2026-10-07T01:09:24.842Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "cabf4cf73a59d445b792cfda907c869c5cef65c1",
+          "headPatch": "a96fa3ec810fd02e4c7d790061029f2faa56419a",
+          "sig": "TYOkEpA0JsRZIMm89GtyhX76Jc19ZGLxDF0Hyy9TfEN322y07+MxLlzSU2g8SLh0Q4yZ/vj5wKhqHTvm+bhIDA=="
+        }
+      ]
+    },
+    {
+      "skill": "workflow",
+      "files": [
+        "packages/server/src/jobs.ts",
+        "packages/server/src/runtime.ts",
+        "packages/server/src/services.ts",
+        "packages/server/src/worker.ts",
+        "packages/server/workflows/reply.ts"
+      ],
+      "findings": [
+        {
+          "finding": "reply.ts stays one step with maxRetries 0, no getWritable and no publish; it now passes runtimeCatalog().",
+          "cites": "Streaming",
+          "none": "Matches the merged speed fix and the reasoning-level change."
+        }
+      ],
+      "receipts": [
+        {
+          "v": 1,
+          "client": "claude-code",
+          "skill": "workflow",
+          "source": "Skill",
+          "sha256": "e4f3981d54efc3de50c898eba48ba71ccf45dfd25ce8806c1e100f9826a9885b",
+          "partial": false,
+          "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+          "agent": "a9006b0b2dd7eccc4",
+          "agentType": "pstack:poteto-agent-high",
+          "toolUseId": "toolu_016La2ukr98ABtnY55XP55Nw",
+          "time": "2026-10-07T01:04:13.100Z",
+          "cwd": "34529c142e946869ad042d15866c63462de570058bce88555a8dd4c7be3282ee",
+          "commonDir": "53181673c175dd58b6a6fc48c5432229c7510b84196d29477074d0084b7d9fca",
+          "branch": "submission/release-2",
+          "head": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+          "headPatch": "0ae535b53301b208631863bcf46416d2bcda0db0",
+          "sig": "bfnV/WOo7fMsUa2vZQ76cEuVp6PeM+RjCTCoKEGdbeSBRUVBSn4MaSFjGpc2Ox8YRdg+jUHUmDEY89x5KOu1Bg=="
+        }
+      ]
+    }
+  ]
+}
