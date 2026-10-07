@@ -518,5 +518,288 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "How sure are you 4",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_015MyrSooV4imV5hKjPmuYoc",
+            "time": "2026-10-07T03:42:03.354Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "wP48h/QMmhn48xUgYiN0p8T2xAMIuxWH3FtkhCnDCJ249jwt7svla+7Nf75ezylN4JplHwAI9cM4VFqnTPnpDA=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Focus Areas",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01GiahBJ4L2vMTFxwRWHv8uJ",
+            "time": "2026-10-07T03:42:04.122Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "7xggd0bmW20uFjiKHtfLmtb5XIqc4teFvX4ZOYsnZbBM58wPeZgPvJEJaqu+J6BmEx+acyd1JT7vAX0oAaHgBA=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Steps",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_016GLBgtDzMYiqxwzefSb17h",
+            "time": "2026-10-07T03:42:04.199Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "k5pX8JJhTOaYNWKtuaUr6E1Y9OCOL/r6ScyzbzblXbFYoAZARQf7zwlk050g2YyDOoBhOB8G/umztR+HKGEiBA=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-boundary-discipline",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Boundary Discipline",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-boundary-discipline",
+            "source": "Skill",
+            "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01G1JnLcSWH65JErtti3qSgk",
+            "time": "2026-10-07T03:42:04.943Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "q7gMMjRRDT772YnHGNhz6JQCqB16oagVCN6Sn3S1KTFyPHKClZHYkri6cLeUhwtl16pJfFasxD47cH06fRCcDw=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Prove It Works",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01UPTbJBATaPoohur2YJpAyF",
+            "time": "2026-10-07T03:42:05.021Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "Mhnnv5x1sMQdlZwkAKflUFtgZLzVP7z/YBLyh+5+KbC5Q0veFhsCbBUdZugQEfBZvR+7glCaYi4xJztSx1PgAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "technical-writing",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Leave no sentence open to two readings (Global English)",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "technical-writing",
+            "source": "Skill",
+            "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01PTGenG2qfkpVbhS9axojU6",
+            "time": "2026-10-07T03:42:05.680Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "omjHEwMh7NzT7IcaHXN8CjAk6kUy/Ym9QiCZfCCgkxNlSwia2mkbCUgkr7p/hPZAIJFd8/x7W0yCoE+gnEjiDw=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Approval Bar",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_012GNM4SpuLGhiTDX3wGC2wp",
+            "time": "2026-10-07T03:42:06.445Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "SGTdJrW0KHdPLfetn51NTYtyvaQm2Uz6ip/zfskQXPvfAAnw9zJOarcLp7GIUXl0yIecCpWyp4LoDiPlRv4VAw=="
+          }
+        ]
+      },
+      {
+        "skill": "unslop",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Style",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "unslop",
+            "source": "Skill",
+            "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_012pNUkf9npaLGgSzmoS9Pbe",
+            "time": "2026-10-07T03:42:06.638Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "AjmtCQXdtJjVbN7KE/VBrpn95W4miteVzwI2XHshID1QSf74V5sOZtCtR9wCM4VZl29Gcm/DEobmL7wyrImrDw=="
+          }
+        ]
+      },
+      {
+        "skill": "writing-for-agents",
+        "findings": [
+          {
+            "finding": "This sign-off review follows four earlier reviews of the change. Their last blocking findings are fixed in 9db03cf, which stops lint from ignoring packages/app/ios and limits the format ignore to its JSON files, and in 96f5622, which makes tools/security-check.cjs scan shared as well as packages/app. The review confirmed both fixes at the head and looked for nothing new.",
+            "cites": "Pruning",
+            "none": "The earlier reviews raised no open finding for this skill after 9db03cf and 96f5622."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "writing-for-agents",
+            "source": "Skill",
+            "sha256": "a842323e664e5af104eac5c97ad22fda929ebeb62d81c501161ac1f6f482db58",
+            "partial": false,
+            "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
+            "agent": "a734c2a52fa6a98ec",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01AwaoCxWXuHzDrTkpDD3VxB",
+            "time": "2026-10-07T03:42:06.735Z",
+            "cwd": "907b6e60ba28b4a0c8fb6f6cc2b452422f935a54e2a18ea67599b617cbccfdf7",
+            "commonDir": "72c437ee87ecf281ebc0db56df1ebecaa5b58d981f333aab79c4b1e1c0a05cbd",
+            "branch": "submission/control-paths-5",
+            "head": "3db54a284e4ae62306bf6d130ed403057e2de5d2",
+            "headPatch": "f220f3168be2daa4b12e99a4fcb2b39c064a1069",
+            "sig": "IkFyaxysCa5avE5NtGRO1qQjVAMW4FNFnI6xqXzPyySug+lcbSSzV2LLpUhwKMRj2uBNAFN4Gn+RbC7lSF+IDA=="
+          }
+        ]
+      }
+    ]
+  }
 }
