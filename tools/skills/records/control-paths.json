@@ -29,6 +29,12 @@
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
+          "finding": "packages/app/App.tsx and packages/app/index.js are app source, so .github/CODEOWNERS now lists them in the unowned block, before the owned config lines. The controls rule lists both in excludePaths, because its packages/*/* glob would route them otherwise. codeowners.test.js expects no owner for both files and checks that they are not routed to controls. packages/app/app.json and packages/app/android/** keep the owner.",
+          "cites": "How sure are you 4",
+          "commit": "3c90a4c",
+          "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
+        },
+        {
           "finding": "A project .npmrc could send the dependency audit to another registry. tools/verify.cjs now sets npm_config_registry for every check it runs, and npm ranks the environment above a project .npmrc. With a stub-registry .npmrc and the old environment, audit:check sent its bulk advisory request to the stub and failed. With the new variable, the stub got no request and audit:check passed against the public registry. verify:commit on a commit that adds the stub .npmrc on top of this range made no request to the stub.",
           "cites": "How sure are you 4",
           "commit": "b9aa1c3",
@@ -47,7 +53,7 @@
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
-          "finding": "Docs, root files, package-root files such as packages/app/App.tsx and app.json, and packages/app/android now have the owner. The controls rule mirrors that set, so a change to them routes blast-radius, and a small edit to them no longer qualifies for the tiny tier. routing-committed.test.js now expects controls for docs edits, a readme plan, and skill edits, and a 2-line skill edit is no longer tiny.",
+          "finding": "Docs, root files, package-root files such as packages/app/app.json, and packages/app/android now have the owner. The controls rule mirrors that set, so a change to them routes blast-radius, and a small edit to them no longer qualifies for the tiny tier. routing-committed.test.js now expects controls for docs edits, a readme plan, and skill edits, and a 2-line skill edit is no longer tiny.",
           "cites": "Steps 4",
           "none": "Intended by the owner-by-default rule, and the routing test pins it."
         },
@@ -155,6 +161,12 @@
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
+          "finding": "With the /packages/app/index.js line removed from CODEOWNERS, two cases failed with the predicted diff. The no-owner case for index.js received true, and the controls case listed packages/app/index.js as routed but not owned. Restoring the line made all 26 cases pass.",
+          "cites": "Script the check when you can",
+          "commit": "3c90a4c",
+          "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
+        },
+        {
           "finding": "The registry and nested-config guards were proven on real runs of audit:check and npm run lint, before and after, not by reading npm or oxlint docs.",
           "cites": "Prove It Works",
           "commit": "061e4cd",
@@ -238,7 +250,7 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 11, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. No file passes 1000 lines.",
+          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 11, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. The two app entry files are named once in CODEOWNERS and once in the controls rule's excludePaths, and the test fails if the two lists differ. No file passes 1000 lines.",
           "cites": "Approval Bar",
           "none": "No structural regression."
         }
