@@ -118,7 +118,6 @@ const services = {
       claimId: randomUUID(),
       heartbeatMs: 200,
       timeoutMs: 600_000,
-      publish: () => Promise.resolve(),
     }).catch(error =>
       record({ event: 'worker-error', attemptId, message: error.message }),
     );
