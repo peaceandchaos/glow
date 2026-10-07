@@ -31,6 +31,8 @@ const scannerSkips = [
   '**/*.e2e.js',
   '**/*.e2e.ts',
 ];
+// The app bundle imports source from these folders.
+const scanRoots = ['packages/app', 'shared'];
 const testFolders = [
   'packages/app/__tests__/',
   'packages/server/tests/',
@@ -62,6 +64,20 @@ function scan(path) {
   if (result.status === 1 && !high)
     throw new Error(`rnsec failed without a HIGH finding.\n${result.stderr}`);
   return report;
+}
+
+function scanAll(base = root) {
+  const reports = scanRoots.map(folder => {
+    const report = scan(join(base, folder));
+    if (!(report.scannedFiles > 0))
+      throw new Error(`rnsec scanned no files in ${folder}.`);
+    return report;
+  });
+  return {
+    findings: reports.flatMap(report => report.findings),
+    ignoredRules: reports.flatMap(report => report.ignoredRules),
+    scannedFiles: reports.reduce((sum, report) => sum + report.scannedFiles, 0),
+  };
 }
 
 function evaluate(report, dispositions, today, base = root) {
@@ -117,7 +133,7 @@ function scannerGaps(files) {
 
 function main() {
   const gaps = scannerGaps(git(root, ['ls-files']).split('\n'));
-  const report = scan(join(root, 'packages/app'));
+  const report = scanAll();
   const dispositions = JSON.parse(
     readFileSync(
       join(__dirname, 'verification/security-dispositions.json'),
@@ -140,5 +156,5 @@ function main() {
   if (failures.length) process.exitCode = 1;
 }
 
-module.exports = { scan, evaluate, scannerSkips, scannerGaps };
+module.exports = { scan, scanAll, evaluate, scannerSkips, scannerGaps };
 if (require.main === module) main();
