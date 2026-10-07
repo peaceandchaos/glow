@@ -102,6 +102,8 @@ test.each([
     'no-abusive-eslint-disable',
     '// eslint-disable -- No named rule\nexport const value = 1;',
   ],
+  ['ban-ts-comment', "// @ts-nocheck\nexport const value: number = 'text';"],
+  ['ban-ts-comment', "// @ts-ignore\nexport const value: number = 'text';"],
 ])('rejects %s', (rule, source) => {
   const result = lint(source);
   expect(result.status).toBe(1);
@@ -139,6 +141,35 @@ test.each([
   expect(result.stdout).toContain(
     "List a reviewed boundary file in project/no-type-assertion's allow option",
   );
+});
+
+test.each([
+  [
+    'a next-line',
+    "// oxlint-disable-next-line typescript/ban-ts-comment -- Trusted file.\n// @ts-ignore\nexport const value: number = 'text';",
+  ],
+  [
+    'a file-wide eslint',
+    "/* eslint-disable @typescript-eslint/ban-ts-comment -- Trusted file. */\n// @ts-nocheck\nexport const value: number = 'text';",
+  ],
+  [
+    'a combined',
+    "/* oxlint-disable eqeqeq,ban-ts-comment -- Trusted file. */\n// @ts-nocheck\nexport const value: number = 'text';",
+  ],
+])('rejects %s disable of typescript/ban-ts-comment', (_kind, source) => {
+  const result = lint(source);
+  expect(result.status).toBe(1);
+  expect(result.stdout).toContain(
+    'Fix the type error instead of disabling typescript/ban-ts-comment',
+  );
+});
+
+test('allows a described @ts-expect-error', () => {
+  expect(
+    lint(
+      "// @ts-expect-error -- The fixture assigns text to a number.\nexport const value: number = 'text';",
+    ).status,
+  ).toBe(0);
 });
 
 test('allows const assertions, and assertions in a listed boundary file', () => {

@@ -1,6 +1,12 @@
 import { relative, sep } from 'node:path';
 import { eslintCompatPlugin } from '@oxlint/plugins';
 
+// oxlint applies a disable of a built-in rule under any plugin prefix, or none.
+const lockedRules = [
+  [/\bproject\/no-type-assertion\b/u, 'assertion'],
+  [/(?:^|[\s,/])ban-ts-comment(?![\w-])/u, 'tsComment'],
+];
+
 function isConstAssertion(node) {
   const type = node.typeAnnotation;
   return (
@@ -22,6 +28,8 @@ export default eslintCompatPlugin({
             'Name the disabled rules and explain the exception after --.',
           assertion:
             "List a reviewed boundary file in project/no-type-assertion's allow option instead of disabling the rule inline.",
+          tsComment:
+            'Fix the type error instead of disabling typescript/ban-ts-comment. Give each @ts-expect-error a description.',
         },
       },
       create(context) {
@@ -42,9 +50,11 @@ export default eslintCompatPlugin({
                 );
               if (!match || !match[1].trim() || !match[2].trim()) {
                 context.report({ loc: comment.loc, messageId: 'missing' });
-              } else if (/\bproject\/no-type-assertion\b/u.test(match[1])) {
-                context.report({ loc: comment.loc, messageId: 'assertion' });
+                continue;
               }
+              const locked = lockedRules.find(([rule]) => rule.test(match[1]));
+              if (locked)
+                context.report({ loc: comment.loc, messageId: locked[1] });
             }
           },
         };
