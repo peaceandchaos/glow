@@ -98,13 +98,13 @@ describe('the committed routing', () => {
       'a docs edit',
       [{ path: 'docs/providers.md', lines: 3 }],
       'docs-only',
-      [docsOnly],
+      [docsOnly, controls],
     ],
     [
       'a 500-line docs edit',
       [{ path: 'docs/providers.md', lines: 500 }],
       'docs-only',
-      [docsOnly],
+      [docsOnly, controls],
     ],
     [
       'a normal screen change',
@@ -168,7 +168,7 @@ describe('the committed routing', () => {
       'a new doc',
       [{ status: 'added', path: 'docs/new.md', lines: 5 }],
       'docs-only',
-      [docsOnly],
+      [docsOnly, controls],
     ],
     [
       'a renamed doc',
@@ -181,7 +181,7 @@ describe('the committed routing', () => {
         },
       ],
       'docs-only',
-      [docsOnly],
+      [docsOnly, controls],
     ],
     [
       'an upstream note under tools',
@@ -193,13 +193,13 @@ describe('the committed routing', () => {
       'a 30-line skill edit',
       [{ path: '.agents/skills/test-prune/SKILL.md', lines: 30 }],
       null,
-      [everyChange, quality, agentInstructions],
+      [everyChange, quality, agentInstructions, controls],
     ],
     [
       'a 2-line skill edit',
       [{ path: '.agents/skills/test-prune/SKILL.md', lines: 2 }],
-      'tiny',
-      [tiny, agentInstructions],
+      null,
+      [everyChange, quality, agentInstructions, controls],
     ],
     [
       'a 2-line AGENTS.md edit',
@@ -294,7 +294,7 @@ describe('the committed routing', () => {
       ['packages/server/src/api.ts'],
       [everyChange, quality, server, boundary],
     ],
-    ['a readme', ['README.md'], [docsOnly]],
+    ['a readme', ['README.md'], [docsOnly, controls]],
   ])('a plan for %s lists the slim skill set', (_, paths, groups) => {
     expect(routed(plan(paths)).skills).toEqual(skillsOf(...groups));
   });
@@ -302,7 +302,7 @@ describe('the committed routing', () => {
   test('a plan evaluates every rule and docs-only, and leaves tiny unevaluated', () => {
     expect(routed(plan(['docs/providers.md', 'README.md']))).toEqual({
       tier: 'docs-only',
-      skills: docsOnly,
+      skills: skillsOf(docsOnly, controls),
     });
     for (const paths of [
       ['AGENTS.md', 'docs/providers.md'],
