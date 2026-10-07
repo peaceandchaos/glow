@@ -378,21 +378,48 @@ test('dictation adds its transcript after the draft as it arrives, shows the rec
   });
 });
 
-test('a refused dictation explains why and leaves the microphone ready', async () => {
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-  mockDictation.start.mockRejectedValueOnce(
-    new Error('Microphone access is off for Glow.'),
-  );
-  const { renderer, input } = mountComposer();
-  await act(async () => button(renderer, 'Dictate').props.onPress());
-  expect(alert).toHaveBeenCalledWith(
-    'Dictation is unavailable',
-    'Microphone access is off for Glow.',
-  );
-  expect(mockRecognizer).toBeNull();
-  expect(input().props.placeholder).toBe('Ask anything');
-  alert.mockRestore();
-});
+function nativeRejection(code: string, message: string) {
+  return Object.assign(new Error(message), { code });
+}
+
+test.each([
+  [
+    'a permission refusal',
+    nativeRejection('denied', 'NATIVE DETAIL'),
+    'Allow microphone and speech access in Settings.',
+  ],
+  [
+    'a missing microphone',
+    nativeRejection('unavailable', 'No microphone is available right now.'),
+    'No microphone is available right now.',
+  ],
+  [
+    'any other native failure',
+    nativeRejection('unavailable', 'NATIVE DETAIL'),
+    'Dictation stopped. Try again.',
+  ],
+  [
+    'a rejection that is not an Error',
+    'NATIVE DETAIL',
+    'Dictation stopped. Try again.',
+  ],
+])(
+  '%s shows a fixed sentence, never the native text, and leaves the microphone ready',
+  async (_case, rejection, sentence) => {
+    const alert = jest
+      .spyOn(Alert, 'alert')
+      .mockImplementation(() => undefined);
+    mockDictation.start.mockRejectedValueOnce(rejection);
+    const { renderer, input } = mountComposer();
+    await act(async () => button(renderer, 'Dictate').props.onPress());
+    expect(alert).toHaveBeenCalledTimes(1);
+    expect(alert).toHaveBeenCalledWith('Dictation is unavailable', sentence);
+    expect(JSON.stringify(alert.mock.calls)).not.toContain('NATIVE DETAIL');
+    expect(mockRecognizer).toBeNull();
+    expect(input().props.placeholder).toBe('Ask anything');
+    alert.mockRestore();
+  },
+);
 
 test('a long press lists the levels with the chat’s level checked, and a pick saves it', () => {
   const { renderer, setLevel } = mountComposer('gpt-6.1-sol');

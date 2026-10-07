@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
+import { z } from 'zod';
 import { dictation } from '../dictation';
 
 type DictationControl = {
   listening: boolean;
   toggle: (onText: (text: string) => void) => Promise<void>;
 };
+
+// Dictation.m rejects a missing audio input with this exact sentence.
+const noMicrophone = 'No microphone is available right now.';
+const nativeRejection = z.object({ code: z.string(), message: z.string() });
+
+function failureMessage(
+  rejection: z.infer<typeof nativeRejection> | undefined,
+): string {
+  if (rejection?.code === 'denied')
+    return 'Allow microphone and speech access in Settings.';
+  if (rejection?.message === noMicrophone) return noMicrophone;
+  return 'Dictation stopped. Try again.';
+}
 
 export function useDictation(): DictationControl | null {
   const [listening, setListening] = useState(false);
@@ -42,7 +56,7 @@ export function useDictation(): DictationControl | null {
       end();
       Alert.alert(
         'Dictation is unavailable',
-        error instanceof Error ? error.message : undefined,
+        failureMessage(nativeRejection.safeParse(error).data),
       );
     }
   };
