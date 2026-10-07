@@ -8,6 +8,8 @@ const repo = resolve(__dirname, '../..');
 const owner = '@peaceandchaos';
 const records = 'tools/skills/records/';
 const sourceDirs = [
+  'packages/app/App.tsx',
+  'packages/app/index.js',
   'packages/app/src/',
   'packages/app/__tests__/',
   'packages/app/harness/',
@@ -79,6 +81,8 @@ const configs = [
 ];
 const added = ['docs/new.md', 'packages/app/android/build.gradle.kts'];
 const sources = [
+  'packages/app/App.tsx',
+  'packages/app/index.js',
   'packages/app/src/screens/ChatScreen.tsx',
   'packages/server/src/api.ts',
   'packages/app/ios/MargeloChat.xcodeproj/project.pbxproj',

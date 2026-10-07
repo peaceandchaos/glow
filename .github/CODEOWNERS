@@ -1,5 +1,7 @@
 * @peaceandchaos
 
+/packages/app/App.tsx
+/packages/app/index.js
 /packages/app/src/
 /packages/app/__tests__/
 /packages/app/harness/

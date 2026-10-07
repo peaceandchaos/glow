@@ -195,7 +195,11 @@
         "**/Gemfile",
         "**/Gemfile.lock"
       ],
-      "excludePaths": ["tools/skills/records/**"],
+      "excludePaths": [
+        "packages/app/App.tsx",
+        "packages/app/index.js",
+        "tools/skills/records/**"
+      ],
       "skills": ["blast-radius"]
     }
   ]
