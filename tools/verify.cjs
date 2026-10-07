@@ -46,6 +46,8 @@ function run(directory, name, args) {
         CI: '1',
         npm_config_userconfig: userConfig,
         npm_config_globalconfig: globalConfig,
+        // Overrides a candidate's own .npmrc, so it cannot move the audit.
+        npm_config_registry: 'https://registry.npmjs.org/',
       },
       stdio: ['ignore', log, log],
       timeout: 10 * 60 * 1000,
