@@ -1,8 +1,8 @@
 {
   "change": "control-paths",
   "base": {
-    "commit": "9200e5f6a8a8626498dfcb9499ac7bd6b549dc3e",
-    "patch": "39c64d5178adfc1f25995bdbaf981352dfe7d541"
+    "commit": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
+    "patch": "0ae535b53301b208631863bcf46416d2bcda0db0"
   },
   "skills": [
     {
@@ -23,33 +23,33 @@
       ],
       "findings": [
         {
-          "finding": "The change is safe because the owner owns every file by default. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, and Gemfile at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, packages/app/src/.eslintignore, packages/server/.prettierignore, and packages/server/nitro.config.ts. It fails when the default owner line, the dotfile line, or the config line is removed, when tools/ loses its owner, or when packages/app/ios/ gains one. git ls-files with the same patterns as an exclude file gives the same 164 owned files out of 301 as the test's matcher.",
+          "finding": "The change is safe because the owner owns every file by default. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, and Gemfile at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, packages/app/src/.eslintignore, packages/server/.prettierignore, and packages/server/nitro.config.ts. It fails when the default owner line, the dotfile line, or the config line is removed, when tools/ loses its owner, or when packages/app/ios/ gains one. git ls-files with the same patterns as an exclude file gives the same 162 owned files out of 303 as the test's matcher.",
           "cites": "How sure are you 4",
-          "commit": "a2328e8",
+          "commit": "135fe0ebd492",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
           "finding": "packages/app/App.tsx and packages/app/index.js are app source, so .github/CODEOWNERS now lists them in the unowned block, before the owned config lines. The controls rule lists both in excludePaths, because its packages/*/* glob would route them otherwise. codeowners.test.js expects no owner for both files and checks that they are not routed to controls. packages/app/app.json and packages/app/android/** keep the owner.",
           "cites": "How sure are you 4",
-          "commit": "3c90a4c",
+          "commit": "860a50270033",
           "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
         },
         {
           "finding": "A project .npmrc could send the dependency audit to another registry. tools/verify.cjs now sets npm_config_registry for every check it runs, and npm ranks the environment above a project .npmrc. With a stub-registry .npmrc and the old environment, audit:check sent its bulk advisory request to the stub and failed. With the new variable, the stub got no request and audit:check passed against the public registry. verify:commit on a commit that adds the stub .npmrc on top of this range made no request to the stub.",
           "cites": "How sure are you 4",
-          "commit": "b9aa1c3",
+          "commit": "c12bc17200d8",
           "patch": "bb192d0161e83e7c47a7d013fcbbc1b5ae412492"
         },
         {
           "finding": "A nested .oxlintrc.json replaced the root lint rules for its folder. With {} in packages/server/src/.oxlintrc.json and a line that breaks eqeqeq and the type-assertion rules in api.ts, oxlint without the flag exited 0. npm run lint now passes --disable-nested-config and exits 1 with those rules named. The only tracked .oxlintrc.json is the root one, so the flag changes nothing today.",
           "cites": "How sure are you 4",
-          "commit": "061e4cd",
+          "commit": "55c822b42b72",
           "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
           "finding": "No oxlint or oxfmt flag stops a nested .gitignore from hiding source. With src/ appended to packages/server/.gitignore, npm run lint still exits 0 on the probe line. Ownership is the control, so packages/server/.gitignore and any new nested .gitignore, .eslintignore, or .prettierignore now need owner review.",
           "cites": "Steps 4",
-          "commit": "a2328e8",
+          "commit": "135fe0ebd492",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
@@ -60,7 +60,7 @@
         {
           "finding": "tools/github/integration-rules.json now equals the live ruleset, rule by rule, after adding the rebase-only merge method, the extra approval for unattributed changes, and the empty reviewer list. ruleset.cjs passes the parameters through unchanged, and ruleset.test.js still passes.",
           "cites": "Steps 3",
-          "commit": "1d0b488",
+          "commit": "4285d26694a9",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
         }
       ],
@@ -73,16 +73,16 @@
           "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01SRyN5bgaXMivEmcfzjt6wT",
-          "time": "2026-10-06T23:28:21.057Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "z129lysTbBWQulpc356BJQ25spUD+Vu7cFCjOiqPu3CTx/hCOC1O/oSKbmEjNdxyoD74m7VZfGbOH5EmHuhrBA=="
+          "toolUseId": "toolu_01K2Qxox3eE8AyCT6JvRm9sc",
+          "time": "2026-10-07T00:55:32.300Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "fbWtVLkeqayaCp6VuDui+xUbChlzWn+/sgze5g0xV8liPWQPOKH7ndvnOYDatWmiMlXUnI2fLqi3R3ndpkQnBA=="
         }
       ]
     },
@@ -105,16 +105,16 @@
           "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_015TdPjKYmJtXEJSEpfZGw24",
-          "time": "2026-10-06T23:28:21.506Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "2MTzVrnAh44YW/1MqSQgCQZNoNw8DiOksNLffIFF1crFqbpkvcIf4dX/WsbiyjWECxWzIPgu2Lp+uGmKJ/sWDg=="
+          "toolUseId": "toolu_019g9MQWMdUo11hXKH4WJwyx",
+          "time": "2026-10-07T00:55:32.496Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "505TaTI9jwRSiJvCwmEvlBqtXkiT3Xv1ahCyUR12E/TCNvYvUUqpZwsrXogpDX8DlmzGkmbFlq6+pVxSo0GICg=="
         }
       ]
     },
@@ -137,16 +137,16 @@
           "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01DrwCedesQpmVijsRz3yKHC",
-          "time": "2026-10-06T23:28:21.716Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "BlcO3FjQb86ynCIQ/LFUf0QrKEIMDNMwyRg6s/BLH33wtNInpOzxXSN+SzxIK+rKzexZ4eqRyCNlZjAjoYGKBw=="
+          "toolUseId": "toolu_01BFr5m6cFjqu1XdJbS558LJ",
+          "time": "2026-10-07T00:55:32.793Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "ammljgOWgI7bSV9ps4HRACBtVZjIgN1Ojwcx6VvTLRFcVzPjJ1BE4NVmc0iCRWImExGEabghTRwPaV+UE6psAQ=="
         }
       ]
     },
@@ -157,25 +157,25 @@
         {
           "finding": "The ownership proof is a jest test that runs on every verify. Each mutation failed with the predicted diff. Removing the default owner line or unowning tools/ listed the newly unowned files, such as tools/__tests__/app-config.test.js. Owning packages/app/ios/ made project.pbxproj expect false and receive true. Dropping docs/** from controls listed the five docs files as owned but not routed. Restoring each file made all 24 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "a2328e8",
+          "commit": "135fe0ebd492",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
           "finding": "With the /packages/app/index.js line removed from CODEOWNERS, two cases failed with the predicted diff. The no-owner case for index.js received true, and the controls case listed packages/app/index.js as routed but not owned. Restoring the line made all 26 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "3c90a4c",
+          "commit": "860a50270033",
           "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
         },
         {
           "finding": "The registry and nested-config guards were proven on real runs of audit:check and npm run lint, before and after, not by reading npm or oxlint docs.",
           "cites": "Prove It Works",
-          "commit": "061e4cd",
+          "commit": "55c822b42b72",
           "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
           "finding": "The ruleset values came from a read-only fetch of the live ruleset, compared field by field, not from the review's summary.",
           "cites": "Prove It Works",
-          "commit": "1d0b488",
+          "commit": "4285d26694a9",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
         }
       ],
@@ -188,16 +188,16 @@
           "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01MrcuNWNcdcUZg6Nng9enzD",
-          "time": "2026-10-06T23:28:21.965Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "aQ7WWxYtfbocLQasZN8gom+L6J9g06ZHcez1SnoWZ2YN+wI78kzyfzmRgBMX1oCsrIps57cwy8Y6Lxc89LA6Ag=="
+          "toolUseId": "toolu_01DWLqAqy2p8HbRSMmeryYwT",
+          "time": "2026-10-07T00:55:33.142Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "ENBE94ogC+fnOxeaG1bWsA2pdidZ+BWdjdM9zuET2mRPRTrtjqL36Qle6Sx43VsmOzqUf54rS4xHKqavDRseDQ=="
         }
       ]
     },
@@ -213,13 +213,13 @@
         {
           "finding": "README.md now says acceptance requires protected GitHub checks, the owner reviews changes to the control paths in .github/CODEOWNERS, and other changes merge on green checks. AGENTS.md says acceptance requires the full suite and protected GitHub checks, changes to the control paths in .github/CODEOWNERS also require owner review, and other changes merge on green checks. docs/github-controls.md says CODEOWNERS assigns the checks and their configs, CI, hooks, dependencies, and agent rules to the owner, and that after a repair approval full candidate checks still apply and owner review applies when the PR changes a code-owned control path. docs/skills.md does not describe owner review.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "6aef0dc",
+          "commit": "c3d1873fd95b",
           "patch": "4ef376cacab0d65ab3973c0f213b0ab34c22a7ee"
         },
         {
           "finding": "README.md, AGENTS.md, and docs/github-controls.md now say that .github/CODEOWNERS gives the owner every file except app and server source, tests, harness, and native project files, that the owner still owns every dotfile and config inside them, and that a change that touches only unowned files merges on green checks. docs/github-controls.md names the registry pin and the lint flag in two sentences of one claim each. docs/skills.md does not describe ownership.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "1d25ae1",
+          "commit": "e737ca7f31d4",
           "patch": "af58f26f95e956c3f635d4e9f9655fa19c1a7d5e"
         }
       ],
@@ -232,16 +232,16 @@
           "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01ERzvaTF5Cct65sKELoDm6W",
-          "time": "2026-10-06T23:28:23.547Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "QPJ0SkFWz3Zf5s53csvFHDRPtde5qgdl3AmFG0LvOPuXOeE5J6yQ/ond4K76koMmpWp7cD0noecrrOyXnqRAAg=="
+          "toolUseId": "toolu_01S93QMzLKHqRLeCd1F47qy4",
+          "time": "2026-10-07T00:55:33.475Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "fiS5OOAiAV+mCnqux2HH64F79RZVIIiatIms585mLx4iHdf2rT646TOSQgGrLTfwlqrH5VjPEOqJUk+kwuzDDg=="
         }
       ]
     },
@@ -250,7 +250,7 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 11, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. The two app entry files are named once in CODEOWNERS and once in the controls rule's excludePaths, and the test fails if the two lists differ. No file passes 1000 lines.",
+          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 10, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. The two app entry files are named once in CODEOWNERS and once in the controls rule's excludePaths, and the test fails if the two lists differ. No file passes 1000 lines.",
           "cites": "Approval Bar",
           "none": "No structural regression."
         }
@@ -264,16 +264,16 @@
           "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01EvwaEnRbJgChxUGHmjniZd",
-          "time": "2026-10-06T23:28:24.073Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "O0mKPZ+DPF6jy2zQESSZyHXQkUbmUl3jkOKu8CLuAHW4ZXpapV8VK6SEOSqeLUj1Cv8PmpGP9GL69jiu6h2dDQ=="
+          "toolUseId": "toolu_01WP3mdahn8ur1dWyqurE8zF",
+          "time": "2026-10-07T00:55:33.831Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "GHwqjfOVn3BA6E3RTrxGorK4pvoMfYSM85EoNVFRuyqLu18Gk2R+Jbl+P3tnDUvT/SUZadR24bQT9+NSgdS5Dg=="
         }
       ]
     },
@@ -302,16 +302,16 @@
           "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_012EFWwNS8B1jRjA8ZTwU8XX",
-          "time": "2026-10-06T23:28:24.155Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "VafMTgIFPxgzJ42F+NRq75TYfTWfwOIFeMLud1QE8eMcpXAPU11kD3nSxBh4Sn3RZMP4uFvQ6VZfkARVTGegDw=="
+          "toolUseId": "toolu_01BUUBkPoz9Jkppo3DryC5HJ",
+          "time": "2026-10-07T00:55:34.198Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "yi/5u2OsFgGy/Y3f0gvHyVbVV+/WAELMlOp3Js4xLABqjEqfesESeBIRJEwZL8ZJxF4k6cQqT8KcleK/owRICA=="
         }
       ]
     },
@@ -334,16 +334,16 @@
           "sha256": "a842323e664e5af104eac5c97ad22fda929ebeb62d81c501161ac1f6f482db58",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "abaad3c3ea36063d0",
+          "agent": "af5fec0bdea8cd34d",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01HzNpDg59MFrmfPCnP9VpTx",
-          "time": "2026-10-06T23:28:24.415Z",
-          "cwd": "f83b0e61d8efd7907ffdb93870410cfde5c785cafc64bfc51527ebbc5681f2c8",
-          "commonDir": "4aeb6ca17cb4b2aa84a77cc13cad9983d772ed806d80deb1965e68c6a71ae299",
-          "branch": "submission/control-paths-3",
-          "head": "9ab8eaef79c6222c20cf56bb38b698ea0c50c4cd",
-          "headPatch": "ab014692e44796e9d636bce72870d310ca54b282",
-          "sig": "wDQWmiHYUnJk7R4B/QYrbBmUk3n8doWidUr+HNZXMkuUE5Rnh2NE1Yc36CtN44kQ6eV5pcYLsozkC7lmh8D2Aw=="
+          "toolUseId": "toolu_018LaESiLK8MjVvZ1v2Q4jTN",
+          "time": "2026-10-07T00:55:34.422Z",
+          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
+          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
+          "branch": "submission/control-paths-4",
+          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
+          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
+          "sig": "OgJyLmxRzmrDueqd02rmrPu4H7Oql+kMPWqW47+eecoUf/Hi7nQVZs4smli7IkO50YWqD8B4eUBIAXXnp47QBQ=="
         }
       ]
     }
