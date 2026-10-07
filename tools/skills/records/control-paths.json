@@ -31,7 +31,7 @@
       ],
       "findings": [
         {
-          "finding": "The change is safe because a change to unowned files alone cannot hide source from a check. Ownership is half of that fact. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, Gemfile, and packages/app/src/config.example.ts at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, and packages/server/nitro.config.ts. The guards are the other half, because a check's own ignore list can skip unowned paths: verify.cjs pins the npm registry, npm run lint passes --disable-nested-config, the ignored-files check fails on a tracked file under a .gitignore path, the security check fails on source in a path that rnsec skips, and lint bans @ts-nocheck, @ts-ignore, and inline disables of typescript/ban-ts-comment. Two exceptions remain and docs/github-controls.md names them. The unowned project.pbxproj can add a Swift package, and the suppression policy allows a named inline lint disable with a reason in unowned source for other rules.",
+          "finding": "The change is safe because a change to unowned files alone cannot hide source from lint, format, or the type check, and cannot hide app or shared source from the security check. Ownership is half of that fact. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, Gemfile, and packages/app/src/config.example.ts at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, and packages/server/nitro.config.ts. The guards are the other half, because a check's own ignore list can skip unowned paths. verify.cjs pins the npm registry, and npm run lint passes --disable-nested-config. Lint and format read packages/app/ios/, and format skips only its JSON files. The ignored-files check fails on a tracked file under a .gitignore path. The security check scans packages/app and shared, and it fails on source in a path that rnsec skips. Lint bans @ts-nocheck, @ts-ignore, and inline disables of typescript/ban-ts-comment. Two exceptions remain and docs/github-controls.md names them. The unowned project.pbxproj can add a Swift package, and the suppression policy allows a named inline lint disable with a reason in unowned source for other rules. The security check does not read unowned source in other folders, such as packages/server/src/, and the docs name that limit too.",
           "cites": "How sure are you 4",
           "commit": "135fe0ebd492",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
@@ -99,6 +99,23 @@
           "cites": "How sure are you 4",
           "commit": "663fc6cd6fcf",
           "patch": "41e4806a67b3a675a1ee363f2ba1bac25aedc16e"
+        },
+        {
+          "finding": "Lint and format ignored all of packages/app/ios/, which has no code owner, while Metro bundles any .ts file there that app code imports. .oxlintrc.json now lints the folder, and .oxfmtrc.json skips only packages/app/ios/**/*.json, because the Xcode Contents.json files are not in oxfmt style. On the clean head npm run lint and npm run format:check exit 0. With a probe line that uses == and a type assertion in packages/app/ios/probe/index.ts, lint exits 1 with 7 problems in that file and format exits 1 naming it. With the two config lines restored, both exit 0 on the same probe.",
+          "cites": "How sure are you 4",
+          "commit": "d7c01f9de287",
+          "patch": "d146fec5aa2882bdc70180585e01655429ec21e6"
+        },
+        {
+          "finding": "The app imports shared/contracts.ts and shared/provider-events.ts at run time, and shared/ has no code owner, but rnsec read only packages/app. scanAll in tools/security-check.cjs now scans packages/app and shared, merges findings and ignored rules into one report before evaluate checks dispositions, and throws when either folder yields no files. The clean head passes with 52 files, against 50 before. An eval probe appended to shared/provider-events.ts fails with EVAL_USAGE and INSECURE_DESERIALIZATION HIGH, and passes with the old check. packages/app/.rnsec.json still applies to the app scan.",
+          "cites": "How sure are you 4",
+          "commit": "adef9e9581c9",
+          "patch": "5001c83152dbdacf21e9f088fa8e841cf6792848"
+        },
+        {
+          "finding": "Metro's watchFolders is the repo root and no lint rule restricts imports, so app code could import unowned source from packages/server/src/, which rnsec never reads. An eval file in packages/server/src/ leaves node tools/security-check.cjs at PASS. Lint, format, and the type check still read that folder.",
+          "cites": "Steps 3",
+          "none": "docs/github-controls.md names the limit. Closing it needs a wider scan or an import rule, which is outside this change."
         }
       ],
       "receipts": [
@@ -134,6 +151,11 @@
         },
         {
           "finding": "The B6 to B9 commits add one 30-line check script, one guard function, one lint table, two data lines, and tests. The new code has no casts, no try/catch, and no defensive checks on internal values. ignored-check.cjs reuses the git helper from verification/snapshot.cjs, and security-check.cjs reuses globPattern from skills/routing.cjs instead of a new matcher.",
+          "cites": "Focus Areas",
+          "none": "Nothing to remove."
+        },
+        {
+          "finding": "The ios and shared-scan commits change two config lines, add scanAll and its test, and edit doc sentences. scanAll has no casts or try/catch.",
           "cites": "Focus Areas",
           "none": "Nothing to remove."
         }
@@ -173,6 +195,11 @@
           "finding": "The B6 to B9 commits add three comments. lint-policy.mjs says that oxlint applies a disable of a built-in rule under any plugin prefix, which a probe measured and the regex depends on. ignored-check.cjs says why lint and format need the check and why core.excludesFile is empty. security-check.cjs names the rnsec file that the copied list comes from. The comments were checked by hand, because the standing orders allow only poteto-agent-high subagents.",
           "cites": "Steps",
           "none": "Each comment explains a why the code cannot show."
+        },
+        {
+          "finding": "The ios and shared-scan commits add one comment. security-check.cjs says the app bundle imports source from the scan roots, which is why server source is not listed. It was checked by hand, because the standing orders allow only poteto-agent-high subagents.",
+          "cites": "Steps",
+          "none": "The comment gives a why the code cannot show."
         }
       ],
       "receipts": [
@@ -205,6 +232,11 @@
           "finding": "tools/security-check.cjs reads two inputs from outside the check, the tracked file list from git and rnsec's fixed skip list. It reads the file list once in main(), and scannerGaps is a pure function over that list, so the test calls it with plain paths. The copied skip list is checked against rnsec's own source at the boundary by hidden-source.test.js, not at run time.",
           "cites": "Boundary Discipline",
           "none": "The guard keeps its inputs at the edge and its logic pure."
+        },
+        {
+          "finding": "scanAll is the one place that knows the scan roots. It checks each rnsec report for files at the boundary, and evaluate keeps its shape check and disposition logic unchanged on the merged report, so a disposition is matched against findings from both folders.",
+          "cites": "Boundary Discipline",
+          "none": "Validation stays where rnsec output enters the check."
         }
       ],
       "receipts": [
@@ -262,6 +294,12 @@
           "cites": "Script the check when you can",
           "commit": "7e9c7b5f3af6",
           "patch": "f5f85d233f147d5843726c1d032f6190a570af53"
+        },
+        {
+          "finding": "Both new guards were proven on the real commands and mutation-checked once. Without the ios config edits, the ios probe passes lint and format. With scanRoots cut to packages/app, the new hidden-source.test.js case fails on scannedFiles, expected 2 and received 1. With the zero-file throw removed, it fails because scanAll did not throw. Restoring each made all 4 cases pass.",
+          "cites": "Script the check when you can",
+          "commit": "adef9e9581c9",
+          "patch": "5001c83152dbdacf21e9f088fa8e841cf6792848"
         }
       ],
       "receipts": [
@@ -312,6 +350,18 @@
           "cites": "Leave no sentence open to two readings (Global English)",
           "commit": "aa3b067225b3",
           "patch": "f72d52d30c065e56925590805b01dccd1dbff0b5"
+        },
+        {
+          "finding": "docs/github-controls.md now says lint and format read packages/app/ios/, the security check runs rnsec on packages/app/ and shared/, the two exceptions still hold, and the security check does not read other unowned folders.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "98676921c42b",
+          "patch": "032ba2c2512727826e0c893850a24f9c2cad0442"
+        },
+        {
+          "finding": "README.md said the scanner scans the remaining app. It now says the scanner reads shared/ and the app, except Android-specific files.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "0af3b2981bc5",
+          "patch": "d6f6b7fea7d4538b6a1f0039dcb6385ca75ed60d"
         }
       ],
       "receipts": [
@@ -347,6 +397,11 @@
         },
         {
           "finding": "The B6 to B9 commits add one small check script and keep each guard in the check it protects. The ban-ts-comment lock replaces an else-if with a two-entry table, so a third locked rule is one line. The scanner guard is one pure filter in security-check.cjs. No file passes 1000 lines; verification.test.js stays at 799 lines because the new tests live in hidden-source.test.js.",
+          "cites": "Approval Bar",
+          "none": "No structural regression."
+        },
+        {
+          "finding": "The shared scan adds one root list and one 12-line function. scan and evaluate keep their signatures and tests, and main swaps one call. The new test lives in hidden-source.test.js, so verification.test.js does not grow.",
           "cites": "Approval Bar",
           "none": "No structural regression."
         }
@@ -392,6 +447,11 @@
           "finding": "The new doc sentences and check messages use plain words, one fact per sentence, and no colon connectors or dashes.",
           "cites": "Style",
           "none": "Nothing left to rewrite."
+        },
+        {
+          "finding": "The new doc sentences, record findings, and error message use plain words, one fact per sentence, and no colon connectors or dashes.",
+          "cites": "Style",
+          "none": "Nothing left to rewrite."
         }
       ],
       "receipts": [
@@ -429,6 +489,11 @@
           "finding": "routing.json gains one controls path and AGENTS.md is unchanged. AGENTS.md already says the owner owns every config inside the source folders, which now includes config.example.ts.",
           "cites": "Pruning",
           "none": "No new agent-facing text to prune."
+        },
+        {
+          "finding": "AGENTS.md is unchanged. It points at .github/CODEOWNERS and does not describe the scan roots, so nothing in it went stale.",
+          "cites": "Pruning",
+          "none": "No new agent-facing text."
         }
       ],
       "receipts": [
