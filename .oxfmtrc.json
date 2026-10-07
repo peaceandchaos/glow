@@ -9,7 +9,7 @@
   "ignorePatterns": [
     ".quality-results/**",
     "packages/app/android/**",
-    "packages/app/ios/**",
+    "packages/app/ios/**/*.json",
     "packages/app/patches/**",
     "packages/app/vendor/**",
     "tools/vendor/**",
