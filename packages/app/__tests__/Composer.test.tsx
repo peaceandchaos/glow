@@ -152,8 +152,10 @@ function renderComposer(result: SendResult) {
   act(() => {
     input().props.onChangeText('Draft');
   });
+  const send = button(renderer, 'Send');
+  expect(send.props.disabled).toBe(false);
   act(() => {
-    button(renderer, 'Send').props.onPress();
+    send.props.onPress();
   });
   return { onSubmit, text: input().props.value };
 }
@@ -192,7 +194,9 @@ test('each chat keeps its own draft text and photos, and switching back restores
   const open = (chatId: string) => act(() => renderer.update(composer(chatId)));
   const send = () =>
     act(() => {
-      button(renderer, 'Send').props.onPress();
+      const sendButton = button(renderer, 'Send');
+      expect(sendButton.props.disabled).toBe(false);
+      sendButton.props.onPress();
     });
   const photo = {
     uri: 'file:///tmp/a.jpg',

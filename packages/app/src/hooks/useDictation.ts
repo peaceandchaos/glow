@@ -4,7 +4,6 @@ import { dictation } from '../dictation';
 
 export type DictationControl = {
   listening: boolean;
-  // Starts with `onText` for this session's transcript, or stops a running one.
   toggle: (onText: (text: string) => void) => Promise<void>;
 };
 

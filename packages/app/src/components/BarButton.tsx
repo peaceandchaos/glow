@@ -5,11 +5,11 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-export const BAR_BUTTON = 40;
+const BAR_BUTTON = 40;
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
 
-// A composer control. A press dims and shrinks the icon in place; the button's
-// frame never moves, so the row does not shift.
+// Only the inner view dims and shrinks, so a press never moves the button's
+// frame or shifts the row.
 export function BarButton({
   children,
   ...props

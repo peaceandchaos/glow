@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import * as DropdownMenu from 'zeego/dropdown-menu';
-import { BAR_BUTTON } from './BarButton';
 import { Icon } from './Icon';
 import { showNotImplemented } from '../notImplemented';
 import { theme } from '../theme';
@@ -42,9 +41,11 @@ export function AttachmentMenu({ onPickPhotos }: AttachmentMenuProps) {
 }
 
 const styles = StyleSheet.create({
+  // 44 pt touch target in the 40 pt slot the other bar buttons use.
   button: {
-    width: BAR_BUTTON,
-    height: BAR_BUTTON,
+    width: 44,
+    height: 44,
+    margin: -2,
     alignItems: 'center',
     justifyContent: 'center',
   },

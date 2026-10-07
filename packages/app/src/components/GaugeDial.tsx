@@ -30,7 +30,7 @@ arc.addArc(
 );
 const easeOut = Easing.bezier(0.23, 1, 0.32, 1);
 
-// A 270° arc filled up to `fraction` (0 to 1), with a needle at the fill's end.
+// `fraction` runs from 0 (lowest level) to 1 (highest).
 export function GaugeDial({ fraction }: { fraction: number }) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(fraction);
