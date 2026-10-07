@@ -10,23 +10,46 @@
       "files": [
         ".github/CODEOWNERS",
         "AGENTS.md",
+        "README.md",
+        "docs/github-controls.md",
+        "docs/skills.md",
+        "package.json",
         "tools/__tests__/codeowners.test.js",
         "tools/__tests__/motion-lines.cjs",
         "tools/__tests__/routing-committed.test.js",
         "tools/github/integration-rules.json",
-        "tools/skills/routing.json"
+        "tools/skills/routing.json",
+        "tools/verify.cjs"
       ],
       "findings": [
         {
-          "finding": "The change is safe because every tracked file that can weaken a check or add a dependency now has the code owner. CODEOWNERS owns nested lint and format configs, the security scanner config, Metro configs, and the CocoaPods and Bundler files, and the controls rule routes the same globs. tools/__tests__/codeowners.test.js reads the real CODEOWNERS and routing.json and fails when a tracked controls file or one of ten listed paths, tracked or new, lacks the owner. With the CODEOWNERS from before the fix it fails 11 of 14 cases. git ls-files with the owned patterns as an exclude file gives the same 118 owned files as the test's matcher.",
+          "finding": "The change is safe because the owner owns every file by default. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, and Gemfile at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, packages/app/src/.eslintignore, packages/server/.prettierignore, and packages/server/nitro.config.ts. It fails when the default owner line, the dotfile line, or the config line is removed, when tools/ loses its owner, or when packages/app/ios/ gains one. git ls-files with the same patterns as an exclude file gives the same 164 owned files out of 301 as the test's matcher.",
           "cites": "How sure are you 4",
-          "commit": "efa7d33",
-          "patch": "9b73e3f2492fb34ecc58efad55431c5d7a2b844d"
+          "commit": "a2328e8",
+          "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
-          "finding": "A change to a Podfile, Gemfile, Metro config, or nested lint, format, or scanner config now routes blast-radius and no longer qualifies for the tiny tier. The routing test now expects controls for a Podfile change. project.pbxproj, .xcode.env, the xcconfig and plist files, packages/server/.gitignore, and the Android Gradle files stay without a code owner.",
+          "finding": "A project .npmrc could send the dependency audit to another registry. tools/verify.cjs now sets npm_config_registry for every check it runs, and npm ranks the environment above a project .npmrc. With a stub-registry .npmrc and the old environment, audit:check sent its bulk advisory request to the stub and failed. With the new variable, the stub got no request and audit:check passed against the public registry. verify:commit on a commit that adds the stub .npmrc on top of this range made no request to the stub.",
+          "cites": "How sure are you 4",
+          "commit": "b9aa1c3",
+          "patch": "bb192d0161e83e7c47a7d013fcbbc1b5ae412492"
+        },
+        {
+          "finding": "A nested .oxlintrc.json replaced the root lint rules for its folder. With {} in packages/server/src/.oxlintrc.json and a line that breaks eqeqeq and the type-assertion rules in api.ts, oxlint without the flag exited 0. npm run lint now passes --disable-nested-config and exits 1 with those rules named. The only tracked .oxlintrc.json is the root one, so the flag changes nothing today.",
+          "cites": "How sure are you 4",
+          "commit": "061e4cd",
+          "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
+        },
+        {
+          "finding": "No oxlint or oxfmt flag stops a nested .gitignore from hiding source. With src/ appended to packages/server/.gitignore, npm run lint still exits 0 on the probe line. Ownership is the control, so packages/server/.gitignore and any new nested .gitignore, .eslintignore, or .prettierignore now need the owner's review.",
           "cites": "Steps 4",
-          "none": "The routing change is intended and the routing test pins it. Native project files stay with normal review by design."
+          "commit": "a2328e8",
+          "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
+        },
+        {
+          "finding": "Docs, root files, package-root files such as packages/app/App.tsx and app.json, and packages/app/android now have the owner. The controls rule mirrors that set, so a change to them routes blast-radius, and a small edit to them no longer qualifies for the tiny tier. routing-committed.test.js now expects controls for docs edits, a readme plan, and skill edits, and a 2-line skill edit is no longer tiny.",
+          "cites": "Steps 4",
+          "none": "Intended by the owner-by-default rule, and the routing test pins it."
         },
         {
           "finding": "tools/github/integration-rules.json now equals the live ruleset, rule by rule, after adding the rebase-only merge method, the extra approval for unattributed changes, and the empty reviewer list. ruleset.cjs passes the parameters through unchanged, and ruleset.test.js still passes.",
@@ -62,7 +85,7 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The range adds one test, data lines in CODEOWNERS, routing.json, and the ruleset, and doc sentences. The test has no casts, guards, or try/catch.",
+          "finding": "The range adds one test, data lines in CODEOWNERS, routing.json, and the ruleset, one environment variable in verify.cjs, one lint flag, and doc sentences. The test has no casts, guards, or try/catch.",
           "cites": "Focus Areas",
           "none": "Nothing to remove."
         }
@@ -94,9 +117,9 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The range adds one comment, in tools/__tests__/codeowners.test.js. It states that GitHub applies the last matching CODEOWNERS line, which is why ownersOf reads every line instead of stopping at the first match. The repo cannot change that GitHub rule.",
+          "finding": "The range adds two comments. tools/__tests__/codeowners.test.js states that GitHub applies the last matching CODEOWNERS line, which the repo cannot change. tools/verify.cjs states that the registry variable overrides a candidate's own .npmrc, which the code cannot show. The comments were checked by hand instead of with the comment-sicko subagent.",
           "cites": "Steps",
-          "none": "The comment explains a rule outside the repo's control."
+          "none": "Both comments explain a why the code cannot show."
         }
       ],
       "receipts": [
@@ -126,10 +149,16 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The ownership proof is a jest test that runs on every verify, not a one-off script. Mutation check: with the .rnsec line removed from CODEOWNERS, the tracked-file case received [\"packages/app/.rnsec.json\"] where it expected [], and the two .rnsec path cases received no owners. Restoring the line made all 14 cases pass.",
+          "finding": "The ownership proof is a jest test that runs on every verify. Each mutation failed with the predicted diff. Removing the default owner line or unowning tools/ listed the newly unowned files, such as tools/__tests__/app-config.test.js. Owning packages/app/ios/ made project.pbxproj expect false and receive true. Dropping docs/** from controls listed the five docs files as owned but not routed. Restoring each file made all 24 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "efa7d33",
-          "patch": "9b73e3f2492fb34ecc58efad55431c5d7a2b844d"
+          "commit": "a2328e8",
+          "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
+        },
+        {
+          "finding": "The registry and nested-config guards were proven on real runs of audit:check and npm run lint, before and after, not by reading npm or oxlint docs.",
+          "cites": "Prove It Works",
+          "commit": "061e4cd",
+          "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
           "finding": "The ruleset values came from a read-only fetch of the live ruleset, compared field by field, not from the review's summary.",
@@ -174,6 +203,12 @@
           "cites": "Leave no sentence open to two readings (Global English)",
           "commit": "6aef0dc",
           "patch": "4ef376cacab0d65ab3973c0f213b0ab34c22a7ee"
+        },
+        {
+          "finding": "README.md, AGENTS.md, and docs/github-controls.md now say that .github/CODEOWNERS gives the owner every file except app and server source, tests, harness, and native project files, that the owner still owns every dotfile and config inside them, and that a change that touches only unowned files merges on green checks. docs/github-controls.md names the registry pin and the lint flag in two sentences of one claim each. docs/skills.md does not describe ownership.",
+          "cites": "Leave no sentence open to two readings (Global English)",
+          "commit": "1d25ae1",
+          "patch": "af58f26f95e956c3f635d4e9f9655fa19c1a7d5e"
         }
       ],
       "receipts": [
@@ -203,7 +238,7 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 11, and motion-lines.cjs is deleted. The new test is 82 lines and reuses globPattern from routing.cjs. CODEOWNERS and the controls rule stay two lists, and the test fails when they drift. No file passes 1000 lines.",
+          "finding": "The range removes more than it adds. routing.json goes from 22 rules to 11, and motion-lines.cjs is deleted. CODEOWNERS is now a default owner line, an unowned source list, and an owned config list. The controls rule is a positive list because routing globs cannot negate, and the test fails when it and CODEOWNERS drift in either direction. Generating one list from the other would need a generator, and the test is smaller. No file passes 1000 lines.",
           "cites": "Approval Bar",
           "none": "No structural regression."
         }
@@ -241,9 +276,9 @@
       ],
       "findings": [
         {
-          "finding": "The changed doc sentences use plain words and state one rule each, with no dashes and no colon connectors.",
+          "finding": "The changed doc sentences and the controls rule's why use plain words and state one rule each, with no dashes and no colon connectors. One long guard sentence was split in two before the docs commit.",
           "cites": "Style",
-          "none": "Nothing to rewrite."
+          "none": "Nothing left to rewrite."
         }
       ],
       "receipts": [
@@ -273,9 +308,9 @@
       "files": ["AGENTS.md", "tools/skills/routing.json"],
       "findings": [
         {
-          "finding": "The AGENTS.md completion line states the rule as a positive (owner review for the control paths, green checks for the rest) and points at .github/CODEOWNERS instead of copying the path list.",
+          "finding": "AGENTS.md states the ownership rule once in Checks and repairs and the merge rule once in Completion evidence, as positives, and points at .github/CODEOWNERS for the full list. The controls rule's why says it mirrors CODEOWNERS instead of naming a stale subset.",
           "cites": "Pruning",
-          "none": "The file keeps one source of truth for the control paths."
+          "none": "One source of truth for the owned paths."
         }
       ],
       "receipts": [
