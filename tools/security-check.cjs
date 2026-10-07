@@ -1,8 +1,41 @@
 const { spawnSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const { dirname, join, relative, resolve } = require('node:path');
+const { globPattern } = require('./skills/routing.cjs');
+const { git } = require('./verification/snapshot.cjs');
 
 const root = resolve(__dirname, '..');
+// rnsec 1.3.0 always skips these paths (dist/core/fileWalker.js defaultIgnore).
+const scannerSkips = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/.expo/**',
+  '**/android/build/**',
+  '**/ios/build/**',
+  '**/.git/**',
+  '**/coverage/**',
+  '**/*.test.js',
+  '**/*.test.ts',
+  '**/*.test.jsx',
+  '**/*.test.tsx',
+  '**/*.spec.js',
+  '**/*.spec.ts',
+  '**/*.spec.jsx',
+  '**/*.spec.tsx',
+  '**/__tests__/**',
+  '**/__mocks__/**',
+  '**/e2e/**',
+  '**/tests/**',
+  '**/test/**',
+  '**/*.e2e.js',
+  '**/*.e2e.ts',
+];
+const testFolders = [
+  'packages/app/__tests__/',
+  'packages/server/tests/',
+  'tools/__tests__/',
+];
 // npm audit advisories are judged by audit:check with dated dispositions.
 const dependencyRule = 'NPM_VULNERABLE_DEPENDENCY';
 const severities = ['LOW', 'MEDIUM', 'HIGH'];
@@ -72,7 +105,18 @@ function evaluate(report, dispositions, today, base = root) {
   return failures;
 }
 
+function scannerGaps(files) {
+  const skipped = scannerSkips.map(globPattern);
+  return files.filter(
+    file =>
+      /\.[jt]sx?$/u.test(file) &&
+      !testFolders.some(folder => file.startsWith(folder)) &&
+      skipped.some(pattern => pattern.test(file)),
+  );
+}
+
 function main() {
+  const gaps = scannerGaps(git(root, ['ls-files']).split('\n'));
   const report = scan(join(root, 'packages/app'));
   const dispositions = JSON.parse(
     readFileSync(
@@ -80,11 +124,12 @@ function main() {
       'utf8',
     ),
   );
-  const failures = evaluate(
-    report,
-    dispositions,
-    new Date().toISOString().slice(0, 10),
-  );
+  const failures = [
+    ...gaps.map(
+      file => `${file}: rnsec skips this path, so the scan cannot read it.`,
+    ),
+    ...evaluate(report, dispositions, new Date().toISOString().slice(0, 10)),
+  ];
   const deferred = report.findings.filter(
     finding => finding.ruleId === dependencyRule,
   ).length;
@@ -95,5 +140,5 @@ function main() {
   if (failures.length) process.exitCode = 1;
 }
 
-module.exports = { scan, evaluate };
+module.exports = { scan, evaluate, scannerSkips, scannerGaps };
 if (require.main === module) main();
