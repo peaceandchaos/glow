@@ -26,7 +26,7 @@ import { theme } from '../theme';
 
 const INPUT_MAX_HEIGHT = 120;
 
-// Shared duration for the attachment pill swell/shrink so the thumbnail fade
+// Shared duration for the attachment bar swell/shrink so the thumbnail fade
 // and the height collapse stay in lockstep.
 const THUMBS_ANIM_MS = 220;
 
@@ -73,7 +73,7 @@ export const Composer = React.memo(function ({
     changeDraft(() => ({ text: '', attachments: [] }));
   };
 
-  // The thumbnail strip lives in a height-clipped container so the pill can
+  // The thumbnail strip lives in a height-clipped container so the bar can
   // smoothly swell/shrink as images are added/removed.
   const hasAttachments = attachments.length > 0;
   const [thumbsContentHeight, setThumbsContentHeight] = useState(0);
@@ -89,7 +89,7 @@ export const Composer = React.memo(function ({
   }));
 
   // Keep the last non-empty attachment list so the thumbnails stay mounted
-  // while the pill collapses.
+  // while the bar collapses.
   const [displayedAttachments, setDisplayedAttachments] = useState(attachments);
   if (hasAttachments && displayedAttachments !== attachments) {
     setDisplayedAttachments(attachments);
@@ -182,7 +182,6 @@ export const Composer = React.memo(function ({
               </Animated.View>
             </BarButton>
           ) : null}
-          {/* While a reply streams, the send arrow becomes a stop button. */}
           <BarButton
             onPress={streaming ? onStop : onSend}
             disabled={!streaming && !canSend}

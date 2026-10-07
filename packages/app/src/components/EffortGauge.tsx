@@ -5,8 +5,6 @@ import { useChatStore } from '../state/chatStore';
 import { BarButton } from './BarButton';
 import { GaugeDial } from './GaugeDial';
 
-// Shows the chat's reasoning level. A tap steps up one level and wraps from the
-// highest to the lowest; a long press lists the levels by name.
 export function EffortGauge() {
   const catalog = useChatStore(state => state.catalog);
   const picker = useChatStore(state => state.picker);
@@ -14,10 +12,9 @@ export function EffortGauge() {
   const setLevel = useChatStore(state => state.setLevel);
 
   const choice = resolveChoice(catalog, picker, level);
-  if (choice.kind === 'auto') return null;
+  if (choice.kind === 'auto' || choice.level === null) return null;
   const { levels } = choice.model;
   const index = levels.findIndex(option => option.key === choice.level);
-  if (index < 0) return null;
   const next = levels[(index + 1) % levels.length];
 
   return (

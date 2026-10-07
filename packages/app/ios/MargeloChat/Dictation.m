@@ -97,9 +97,17 @@ RCT_EXPORT_METHOD(stop)
   request.addsPunctuation = YES;
   AVAudioEngine *engine = [AVAudioEngine new];
   AVAudioInputNode *input = engine.inputNode;
+  AVAudioFormat *format = [input outputFormatForBus:0];
+  // Installing a tap on a format with no channels raises an exception.
+  if (format.channelCount == 0) {
+    [audio setActive:NO withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:nil];
+    return [NSError errorWithDomain:@"Dictation"
+                               code:2
+                           userInfo:@{NSLocalizedDescriptionKey : @"No microphone is available right now."}];
+  }
   [input installTapOnBus:0
               bufferSize:1024
-                  format:[input outputFormatForBus:0]
+                  format:format
                    block:^(AVAudioPCMBuffer *buffer, AVAudioTime *when) {
                      [request appendAudioPCMBuffer:buffer];
                    }];
@@ -134,7 +142,7 @@ RCT_EXPORT_METHOD(stop)
   }
   if (result.isFinal || error) {
     [self finish];
-  } else if (_engine.isRunning) {
+  } else if (_request) {
     [self wrapUpAfter:GLWSilence];
   }
 }
@@ -149,15 +157,18 @@ RCT_EXPORT_METHOD(stop)
   });
 }
 
+// The request, not the engine, marks a running dictation: iOS stops the engine
+// itself on an interruption or a route change.
 - (void)wrapUp
 {
-  if (!_engine.isRunning) {
+  if (!_request) {
     return;
   }
   ++_silence;
   [_engine stop];
   [_engine.inputNode removeTapOnBus:0];
   [_request endAudio];
+  _request = nil;
   NSUInteger session = _session;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(GLWFinalResult * NSEC_PER_SEC)), self.methodQueue, ^{
     if (session == self->_session) {
@@ -168,13 +179,18 @@ RCT_EXPORT_METHOD(stop)
 
 - (void)finish
 {
+  if ([self tearDown]) {
+    [self sendEventWithName:@"dictationEnd" body:nil];
+  }
+}
+
+- (BOOL)tearDown
+{
   if (!_engine) {
-    return;
+    return NO;
   }
-  if (_engine.isRunning) {
-    [_engine stop];
-    [_engine.inputNode removeTapOnBus:0];
-  }
+  [_engine stop];
+  [_engine.inputNode removeTapOnBus:0];
   [_task cancel];
   _task = nil;
   _request = nil;
@@ -184,12 +200,12 @@ RCT_EXPORT_METHOD(stop)
   [AVAudioSession.sharedInstance setActive:NO
                                withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
                                      error:nil];
-  [self sendEventWithName:@"dictationEnd" body:nil];
+  return YES;
 }
 
 - (void)invalidate
 {
-  [self finish];
+  [self tearDown];
   [super invalidate];
 }
 
