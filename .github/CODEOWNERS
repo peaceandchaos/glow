@@ -24,3 +24,4 @@
 **/Podfile.lock @peaceandchaos
 **/Gemfile @peaceandchaos
 **/Gemfile.lock @peaceandchaos
+/packages/app/src/config.example.ts @peaceandchaos

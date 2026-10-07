@@ -78,6 +78,7 @@ const configs = [
   'packages/app/src/.cache/rules.json',
   'packages/app/.rnsec.jsonc',
   'packages/server/Gemfile.lock',
+  'packages/app/src/config.example.ts',
 ];
 const added = ['docs/new.md', 'packages/app/android/build.gradle.kts'];
 const sources = [
