@@ -175,7 +175,7 @@
     {
       "id": "controls",
       "scope": "file",
-      "why": "These paths mirror the owner's files in .github/CODEOWNERS, which are everything except app and server source, tests, and native project files, plus every dotfile and config. Checks, hooks, configs, and dependency files decide what each later change must pass.",
+      "why": "These paths mirror the files that .github/CODEOWNERS gives the owner, which are everything except app and server source, tests, and native project files, plus every dotfile and config. Checks, hooks, configs, and dependency files decide what each later change must pass.",
       "paths": [
         "*",
         "docs/**",
