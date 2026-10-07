@@ -241,8 +241,9 @@ export type ServerMessage = z.infer<typeof serverMessageSchema>;
 
 export const seqSchema = z.number().int().nonnegative().safe();
 // model is {picker, level}; leaf is {leafId, updatedAt}.
-const chatFieldSchema = z.enum(['title', 'model', 'leaf']);
-const chatRowSchema = z.strictObject({
+export const chatFieldSchema = z.enum(['title', 'model', 'leaf']);
+export type ChatField = z.infer<typeof chatFieldSchema>;
+export const chatRowSchema = z.strictObject({
   id: idSchema,
   title: z.string().min(1).max(120),
   picker: pickerSchema,
@@ -252,11 +253,22 @@ const chatRowSchema = z.strictObject({
   createdAt: z.number().int(),
   updatedAt: z.number().int(),
 });
-const chatPushSchema = z.strictObject({
+export type ChatRow = z.infer<typeof chatRowSchema>;
+export const chatPushSchema = z.strictObject({
   ...chatRowSchema.shape,
   dirty: z.array(chatFieldSchema).min(1),
 });
-const messageRowSchema = z.strictObject({
+// Attachments arrive with P1.6. Until then a row may carry their metadata,
+// and nothing stores it. Extra keys and an unreadable list are dropped, so a
+// newer phone's rows never stop this build's sync.
+const attachmentMetaSchema = z.object({
+  id: idSchema,
+  kind: z.string().max(32),
+  mediaType: z.string().max(127),
+  name: z.string().max(255),
+  bytes: z.number().int().positive(),
+});
+export const messageRowSchema = z.strictObject({
   id: idSchema,
   chatId: idSchema,
   parentId: idSchema.nullable(),
@@ -272,7 +284,9 @@ const messageRowSchema = z.strictObject({
   actualModel: modelKeySchema.nullable(),
   error: z.string().nullable(),
   createdAt: z.number().int(),
+  attachments: z.array(attachmentMetaSchema).max(4).optional().catch(undefined),
 });
+export type MessageRow = z.infer<typeof messageRowSchema>;
 export const syncPushSchema = z.strictObject({
   chats: z.array(chatPushSchema).max(200),
   messages: z.array(messageRowSchema).max(500),
