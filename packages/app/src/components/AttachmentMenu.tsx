@@ -1,12 +1,10 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as DropdownMenu from 'zeego/dropdown-menu';
-import { Glass } from './Glass';
+import { BAR_BUTTON } from './BarButton';
 import { Icon } from './Icon';
 import { showNotImplemented } from '../notImplemented';
 import { theme } from '../theme';
-
-const CIRCLE = 44;
 
 type AttachmentMenuProps = {
   onPickPhotos: () => void;
@@ -16,9 +14,14 @@ export function AttachmentMenu({ onPickPhotos }: AttachmentMenuProps) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Glass interactive style={styles.circle}>
+        <View
+          style={styles.button}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Attach"
+        >
           <Icon name="plus" size={22} color={theme.text} />
-        </Glass>
+        </View>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Item key="camera" onSelect={showNotImplemented}>
@@ -39,12 +42,10 @@ export function AttachmentMenu({ onPickPhotos }: AttachmentMenuProps) {
 }
 
 const styles = StyleSheet.create({
-  circle: {
-    width: CIRCLE,
-    height: CIRCLE,
-    borderRadius: CIRCLE / 2,
+  button: {
+    width: BAR_BUTTON,
+    height: BAR_BUTTON,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
 });

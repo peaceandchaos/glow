@@ -10,6 +10,7 @@ export const theme = {
   border: '#2C2C2E',
   sendActive: '#FFFFFF',
   sendInactive: '#48484A',
+  gaugeOff: 'rgba(255, 255, 255, 0.22)',
   menuBackground: '#1A1A1C',
   menuText: '#EAEAEA',
 } as const;
