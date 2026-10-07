@@ -89,6 +89,10 @@ export const models = {
 } satisfies Record<string, ModelConfig>;
 export type RegistryKey = keyof typeof models;
 
+export function identityInstruction(config: ModelConfig): string {
+  return `You are ${config.label}, running in the Glow app.`;
+}
+
 export function isRegistryKey(key: string): key is RegistryKey {
   return Object.hasOwn(models, key);
 }
