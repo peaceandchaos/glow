@@ -41,7 +41,7 @@
           "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
-          "finding": "No oxlint or oxfmt flag stops a nested .gitignore from hiding source. With src/ appended to packages/server/.gitignore, npm run lint still exits 0 on the probe line. Ownership is the control, so packages/server/.gitignore and any new nested .gitignore, .eslintignore, or .prettierignore now need the owner's review.",
+          "finding": "No oxlint or oxfmt flag stops a nested .gitignore from hiding source. With src/ appended to packages/server/.gitignore, npm run lint still exits 0 on the probe line. Ownership is the control, so packages/server/.gitignore and any new nested .gitignore, .eslintignore, or .prettierignore now need owner review.",
           "cites": "Steps 4",
           "commit": "a2328e8",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
