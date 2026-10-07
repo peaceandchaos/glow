@@ -1816,7 +1816,8 @@
           {
             "finding": "docs/providers.md said that context summaries never send a reasoning effort, but the Kimi and DeepSeek summaries send none since the summary-effort fix.",
             "cites": "Voice and repo specifics",
-            "commit": "520ebdee02848d63846eff5af88f3730ebcda381"
+            "commit": "520ebdee02848d63846eff5af88f3730ebcda381",
+            "patch": "95f1283798d8ac30499537e190685bb4ee5cf630"
           }
         ],
         "receipts": [
