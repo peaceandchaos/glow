@@ -28,7 +28,7 @@ function open(setGate: SetGate, signedIn?: Account): void {
         setGate({ kind: 'signedOut' });
         return;
       }
-      const store = await startAppSession(account.token);
+      const store = await startAppSession(account);
       setGate({ kind: 'signedIn', account, store });
     })
     .catch(() => {

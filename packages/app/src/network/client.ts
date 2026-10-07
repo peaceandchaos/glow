@@ -3,12 +3,17 @@ import {
   attemptSnapshotSchema,
   decodeJson,
   isTerminal,
+  searchResponseSchema,
   serverMessageSchema,
   submissionCommands,
+  syncPageSchema,
   type AttemptSnapshot,
+  type SearchHit,
   type ServerMessage,
   type SocketCommand,
   type Submission,
+  type SyncPage,
+  type SyncPush,
 } from '../../../../shared/contracts';
 import { resolveChoice, type Catalog } from '../../../../shared/catalog';
 import { SseDecoder } from '../../../../shared/provider-events';
@@ -17,6 +22,7 @@ import {
   TransportError,
   type ChatTransport,
   type Receive,
+  type SyncTransport,
 } from './transport';
 
 export interface ClientSocket {
@@ -102,7 +108,7 @@ function terminal(message: ServerMessage): boolean {
   );
 }
 
-export class ServerTransport implements ChatTransport {
+export class ServerTransport implements ChatTransport, SyncTransport {
   private readonly baseUrl: string;
   private socket: ClientSocket | null = null;
   private opening: Promise<ClientSocket> | null = null;
@@ -181,6 +187,25 @@ export class ServerTransport implements ChatTransport {
   async models(signal: AbortSignal): Promise<string> {
     const response = await this.request('/v1/models', signal);
     return response.text();
+  }
+
+  async pull(after: number, signal: AbortSignal): Promise<SyncPage> {
+    const response = await this.request(`/v1/sync?after=${after}`, signal);
+    return decodeJson(syncPageSchema, await response.text());
+  }
+
+  async push(batch: SyncPush, signal: AbortSignal): Promise<void> {
+    await this.request('/v1/sync', signal, 'POST', JSON.stringify(batch));
+  }
+
+  async search(query: string, signal: AbortSignal): Promise<SearchHit[]> {
+    const response = await this.request(
+      '/v1/search',
+      signal,
+      'POST',
+      JSON.stringify({ query }),
+    );
+    return decodeJson(searchResponseSchema, await response.text()).hits;
   }
 
   async submit(

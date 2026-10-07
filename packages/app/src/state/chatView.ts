@@ -3,7 +3,12 @@ import { createStore, type StoreApi } from 'zustand/vanilla';
 import { parseCatalog, type Catalog } from '../../../../shared/catalog';
 import type { LevelKey, Picker } from '../../../../shared/contracts';
 import type { ReplyLabel } from '../../../../shared/provider-events';
-import type { ChatArchive, ChatRecord, SavedMessage } from './archive';
+import type {
+  ChatArchive,
+  ChatRecord,
+  RemoteChange,
+  SavedMessage,
+} from './archive';
 import type { AttemptActivity, ChatSession } from './session';
 
 export type MessageRole = 'user' | 'assistant';
@@ -46,6 +51,8 @@ export type ChatViewState = {
   saveDraftsNow: () => void;
   // Takes a fetched catalog body; an unreadable one keeps the current catalog.
   receiveCatalog: (body: string) => void;
+  // Shows what a sync pull changed. A streaming chat repaints when it settles.
+  synced: (change: RemoteChange) => void;
 };
 
 export const historyPage = 50;
@@ -311,12 +318,28 @@ export function createChatView(
         store.setState({ catalog: next });
       } catch {}
     },
+    synced: change =>
+      attempt(() => {
+        session.forget(change.deleted);
+        const { chatId, isStreaming } = store.getState();
+        if (change.deleted.includes(chatId)) {
+          const opened = currentOrNew();
+          showPage(opened, newestPage(opened));
+        } else if (change.chats.has(chatId) && !isStreaming) {
+          const chat = archive.chat(chatId);
+          showPage(chat, newestPage(chat));
+        }
+        store.setState({ recents: archive.recents() });
+      }),
   }));
 
-  const currentId = archive.metadata().currentChatId;
-  const opened = currentId
-    ? archive.chat(currentId)
-    : archive.createChat(catalog.models[0].key);
+  function currentOrNew(): ChatRecord {
+    const currentId = archive.metadata().currentChatId;
+    return currentId
+      ? archive.chat(currentId)
+      : archive.createChat(store.getState().catalog.models[0].key);
+  }
+  const opened = currentOrNew();
   showPage(opened, newestPage(opened));
   store.setState({ recents: archive.recents() });
   session.subscribe(refresh);

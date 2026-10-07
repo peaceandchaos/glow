@@ -17,6 +17,7 @@ import {
   type ClientSocket,
 } from '../../app/src/network/client';
 import { ChatSession } from '../../app/src/state/session';
+import { ChatSync } from '../../app/src/state/sync';
 import {
   handleRequest,
   socketRoute,
@@ -485,6 +486,8 @@ export type Phone = {
   archive: ChatArchive;
   transport: ServerTransport;
   session: ChatSession;
+  // Tests run it themselves; the app runs it on its triggers.
+  sync: ChatSync;
   network: Network;
 };
 
@@ -521,7 +524,10 @@ export function openPhone(
     retryBaseMs: 10,
     retryMaxMs: 60,
   });
-  const phone = { storage, archive, transport, session, network };
+  const sync = new ChatSync(archive, transport, change =>
+    session.forget(change.deleted),
+  );
+  const phone = { storage, archive, transport, session, sync, network };
   server.phones.push(phone);
   session.setLifecycle('active');
   return phone;

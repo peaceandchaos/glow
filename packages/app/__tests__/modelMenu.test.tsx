@@ -103,6 +103,7 @@ function chatState(): ChatViewState {
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
+    synced: () => undefined,
   };
 }
 

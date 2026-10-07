@@ -67,7 +67,11 @@ function seedKind(): SeedKind | undefined {
 
 function seed(kind: SeedKind | undefined) {
   let clock = Date.now();
-  const archive = openArchive(() => clock);
+  const archive = openArchive(
+    harnessAccount.appleUserId,
+    () => undefined,
+    () => clock,
+  );
   if (archive.metadata().chatIds.length > 0) return;
   if (kind === 'long') seedChat(archive, longTurns(600));
   if (kind !== 'recents') return;
@@ -179,7 +183,7 @@ function frame(time: number) {
   if (!launchReported && !BootSplash.isVisible()) {
     launchReported = true;
     post({ kind: 'launch' });
-    startAppSession(harnessAccount.token).then(watchReplies, () => undefined);
+    startAppSession(harnessAccount).then(watchReplies, () => undefined);
   }
   if (last) intervals.push(time - last);
   last = time;

@@ -63,6 +63,7 @@ function renderRecents(): () => string[] {
     saveDraftAfterPause: () => undefined,
     saveDraftsNow: () => undefined,
     receiveCatalog: () => undefined,
+    synced: () => undefined,
   }));
   const rendered = React.createRef<ReactTestRenderer>();
   act(() => {

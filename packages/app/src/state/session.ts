@@ -167,14 +167,20 @@ export class ChatSession {
 
   deleteChat(chatId: string): void {
     this.archive.deleteChat(chatId);
+    this.forget([chatId]);
+    this.launchDeletions();
+    this.notify();
+  }
+
+  // Stops the readers of chats already removed from the archive.
+  forget(chatIds: string[]): void {
+    const gone = new Set(chatIds);
     for (const [id, message] of this.live) {
-      if (message.chatId !== chatId) continue;
+      if (!gone.has(message.chatId)) continue;
       this.live.delete(id);
       this.dirty.delete(id);
       this.dropRunner(id);
     }
-    this.launchDeletions();
-    this.notify();
   }
 
   setLifecycle(state: LifecycleState): void {

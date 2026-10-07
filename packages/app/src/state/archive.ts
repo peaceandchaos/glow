@@ -94,7 +94,7 @@ type ArchiveMetadata = z.infer<typeof metadataSchema>;
 type Outbox = z.infer<typeof outboxSchema>;
 type Write = z.infer<typeof journalSchema>[number];
 // What one pulled page changed, for the views that show it.
-type RemoteChange = { chats: Set<string>; deleted: string[] };
+export type RemoteChange = { chats: Set<string>; deleted: string[] };
 
 const metaKey = 'archive/index';
 const journalKey = 'archive/journal';

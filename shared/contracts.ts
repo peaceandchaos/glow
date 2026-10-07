@@ -309,6 +309,7 @@ const searchHitSchema = z.strictObject({
   title: z.string(),
   snippet: z.string(),
 });
+export type SearchHit = z.infer<typeof searchHitSchema>;
 export const searchResponseSchema = z.strictObject({
   hits: z.array(searchHitSchema).max(20),
 });

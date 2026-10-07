@@ -133,6 +133,7 @@ jest.mock('../src/screens/RootDrawer', () => {
 const service = 'personal-chat.session.v1';
 const sessionUrl = 'https://chat.example/v1/session';
 const modelsUrl = 'https://chat.example/v1/models';
+const syncUrl = 'https://chat.example/v1/sync?after=0';
 const signInLabel = 'Sign in with Apple';
 
 const fetch = jest.mocked(nativeDrivers.fetch);
@@ -350,6 +351,7 @@ test('the sign-in screen goes from request to failure, retries, and opens the ch
     [sessionUrl, 'POST'],
     [sessionUrl, 'POST'],
     [modelsUrl, 'GET'],
+    [syncUrl, 'GET'],
   ]);
 });
 
@@ -391,9 +393,13 @@ test('signing out from the Recents settings button asks first, deletes the sessi
   await app.press('Use GPT');
   await app.press('Send Hello');
   expect(sockets.map(opened => opened.readyState)).toEqual(['OPEN']);
+  // Sync runs at start, on the foreground and after the send.
   expect(fetch.mock.calls.map(([url, init]) => [url, init.method])).toEqual([
     [modelsUrl, 'GET'],
+    [syncUrl, 'GET'],
     [modelsUrl, 'GET'],
+    [syncUrl, 'GET'],
+    [syncUrl, 'GET'],
   ]);
   fetch.mockClear();
 
