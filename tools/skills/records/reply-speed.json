@@ -11,8 +11,8 @@
       "findings": [
         {
           "finding": "The merged reply step is safe because submit takes lockAttempt(owner, attemptId) before it calls dispatch and holds it until commit (jobs.ts submit), and claim now takes the same lock first, so claim cannot read before the row commits. Reached step 2 only: PGlite runs one transaction at a time, so a local test cannot tell the lock from PGlite's own mutex.",
-          "cites": "How sure are you 2",
-          "open": "Prove the claim wait on a real Postgres with two connections, or on a preview deployment."
+          "cites": "How sure are you 4",
+          "none": "Proven on Postgres 17 with two connections: claim waits on the attempt advisory lock until submit commits, reads the committed input after commit, and finds no row after a rollback; a copy with the lock removed from claim fails the run."
         },
         {
           "finding": "No lock cycle: claim and requestCancellation take the advisory lock and then the row lock; update, heartbeat and markProviderStarted take only the row lock, so none waits on the advisory lock while holding the row.",
