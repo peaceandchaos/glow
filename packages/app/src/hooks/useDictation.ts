@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import { dictation } from '../dictation';
 
-export type DictationControl = {
+type DictationControl = {
   listening: boolean;
   toggle: (onText: (text: string) => void) => Promise<void>;
 };
