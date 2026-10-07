@@ -39,7 +39,6 @@
     ".quality-results/**",
     "**/node_modules/**",
     "packages/app/android/**",
-    "packages/app/ios/**",
     "packages/app/patches/**",
     "tools/vendor/**",
     "tools/fixtures/**",
