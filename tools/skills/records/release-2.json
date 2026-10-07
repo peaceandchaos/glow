@@ -20,14 +20,16 @@
           "none": "Proven: worker.test expects deepseek none and kimi none for no stored level; moving none after low in openLevels fails 'the server default menu is the catalog the app bakes in'; the simulator harness logged model deepseek effort none for a real send. The app fixes come from the U03 lane report, the server hardening from U04, the registry, effort, open keys, catalog route, Luna and docs from U08a, the harness, transport and per-chat level from U08b, the catalog cache, picker and default level from U08b-2, and the lowest-level rule, divider, composer, gauge and dictation from U21."
         },
         {
-          "finding": "Compaction summaries for DeepSeek and Kimi no longer send reasoning effort none, because the reasoning-level change passes no effort on the summary path and the hard-coded Gateway line is gone.",
+          "finding": "Compaction summaries for DeepSeek and Kimi sent no reasoning effort after the merge, because the summary path passed null. They now send the model's lowest level, which is none for both.",
           "cites": "Steps 3",
-          "none": "The conflict resolution follows the stated rule that the per-chat effort mapping replaces the hard-coded line; summaries carried no effort in the reasoning-level change (U08a). Raised for a decision in the lane report."
+          "commit": "9125b70bbaba30be969592f79a90f90ea0e55418",
+          "patch": "f842987dfaa4d0cb1cdab187e2a25e18a8bbfb99"
         },
         {
-          "finding": "tools/native-transport/app-server.mjs still passes a publish option that runAttempt no longer reads.",
+          "finding": "tools/native-transport/app-server.mjs passed a publish option that runAttempt no longer reads. WorkerOptions in worker.ts has no publish key, so removing the line changes nothing at runtime.",
           "cites": "Steps 3",
-          "none": "Present on main before this change and harmless in untyped JavaScript; left out of a conflict-only rebuild and listed as a follow-up."
+          "commit": "5e63ed287b54ffcb43631921deb182e2859e0ad6",
+          "patch": "bbc928e7503c945f7f56fc6dd70ac0ec50c9d911"
         }
       ],
       "receipts": [
@@ -57,7 +59,7 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The conflict resolutions in gateway.ts, worker.ts, reply.ts, worker.test.ts and reply-speed.bench.ts add no casts, guards, try/catch or comments.",
+          "finding": "The conflict resolutions and the four fix commits add no catch-all guard, cast or narration comment.",
           "cites": "Focus Areas",
           "none": "Nothing to remove."
         }
@@ -177,6 +179,11 @@
           "finding": "Built the Debug simulator app with xcodebuild, launched it on the iPhone 15 Pro simulator with the harness Metro entry and app server, and drove the sends.",
           "cites": "3) Build + run (when requested)",
           "none": "BUILD SUCCEEDED; the app server logged deepseek none and gpt-6.1-sol high."
+        },
+        {
+          "finding": "The fix commits change no native iOS code. The dictation alert text was not checked on the simulator; Composer.test pins it with the native module faked.",
+          "cites": "3) Build + run (when requested)",
+          "none": "No native change; JavaScript tests cover the alert text."
         }
       ],
       "receipts": [
@@ -206,9 +213,9 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "The resolutions add no comment; the comments that remain were reviewed in their source lanes (U20 for the speed fix, U08a and U21 for the reasoning-level change).",
+          "finding": "The fix commits add one comment, in useDictation.ts. It names the sentence that Dictation.m rejects with, a coupling across files that the code cannot show. The comments from the source lanes were reviewed there.",
           "cites": "Steps 2",
-          "none": "No new comment to judge."
+          "none": "The one new comment states a non-obvious why."
         }
       ],
       "receipts": [
@@ -243,6 +250,7 @@
         "packages/server/src/api.ts",
         "packages/server/src/auth.ts",
         "packages/server/src/schema.ts",
+        "packages/server/tests/adapters.test.ts",
         "shared/catalog.ts",
         "shared/contracts.ts"
       ],
@@ -251,6 +259,12 @@
           "finding": "The worker trusts the parsed catalog from runtimeCatalog and the parsed submission; the merge adds no validation inside the worker.",
           "cites": "Boundary Discipline",
           "none": "Parsing stays at the catalog and request boundaries."
+        },
+        {
+          "finding": "The native dictation rejection is parsed where it enters JavaScript, in the catch of useDictation, and the message helper works on the parsed shape.",
+          "cites": "Boundary Discipline",
+          "commit": "5d652471573f73c2fbcb976bf3648674bafa5482",
+          "patch": "4ab4e0697a419a1dd6913965e856175f2f2a07a3"
         }
       ],
       "receipts": [
@@ -429,9 +443,9 @@
       "files": ["<change>"],
       "findings": [
         {
-          "finding": "Checked the head: lint, format, typecheck, tests (288, 147, 206), server build, iOS bundle, Release-bundle harness grep 0, bench 119, 119, 124 statements per reply, simulator sends, and verify:commit.",
+          "finding": "Checked the head after the fix commits: lint, format, typecheck, exports:check, security and tests (288, 150, 208) pass, and npm run verify:commit -- HEAD passes every check.",
           "cites": "Prove It Works",
-          "none": "Evidence is in the lane report."
+          "none": "Evidence is the verify:commit log for this head."
         }
       ],
       "receipts": [
@@ -464,6 +478,11 @@
           "finding": "Each conflicted pick was typechecked and its server tests run before cherry-pick --continue, and every pick passed the staged hook. Commits 668032e to 7724119 do not send none for DeepSeek and Kimi; f816dd9 restores it.",
           "cites": "Sequence work into verifiable units",
           "none": "Intermediate commits are not deployed; the head carries both behaviors."
+        },
+        {
+          "finding": "Each fix is its own commit with its own check: exports:check, then security and the Composer tests, then the adapters tests, then lint.",
+          "cites": "Sequence work into verifiable units",
+          "none": "Each commit passed its check before the next."
         }
       ],
       "receipts": [
@@ -572,6 +591,18 @@
           "cites": "Test behavior, not implementation",
           "commit": "668032e0cab4bf61528aad6f67967c64a1d7f2b9",
           "patch": "d811a247a0b0d7660a5d67d4b5919ebc2fcd7a7b"
+        },
+        {
+          "finding": "The dictation tests pin each fixed sentence and the absence of the native text. A mutation that returned the native message failed them with Received \"NATIVE DETAIL\".",
+          "cites": "Test behavior, not implementation",
+          "commit": "5d652471573f73c2fbcb976bf3648674bafa5482",
+          "patch": "4ab4e0697a419a1dd6913965e856175f2f2a07a3"
+        },
+        {
+          "finding": "The new adapters test sends a Kimi and a DeepSeek summary through LiveProviders.prepare. Before the fix it failed with Expected {\"effort\": \"none\"}, Received undefined.",
+          "cites": "Test behavior, not implementation",
+          "commit": "9125b70bbaba30be969592f79a90f90ea0e55418",
+          "patch": "f842987dfaa4d0cb1cdab187e2a25e18a8bbfb99"
         }
       ],
       "receipts": [
@@ -675,6 +706,12 @@
           "finding": "WorkerOptions requires catalog, so the bench and every runAttempt caller had to pass one; no cast or optional field was added.",
           "cites": "Type System Discipline",
           "none": "The compiler found the bench caller."
+        },
+        {
+          "finding": "Dictation and DictationControl are no longer exported, because only their own modules use them.",
+          "cites": "Type System Discipline",
+          "commit": "4b37da468a5f78993db237faf42214547590151d",
+          "patch": "79893c56cee09c040b57694f623d6b32850eda4f"
         }
       ],
       "receipts": [
@@ -742,9 +779,9 @@
       ],
       "findings": [
         {
-          "finding": "App code arrived unchanged from U03, U08b, U08b-2 and U21, whose reports carry the measurements.",
+          "finding": "The fix commits change only the dictation alert text and two type exports. No render path, list or animation changes, so there is nothing to measure.",
           "cites": "Review Guardrails",
-          "none": "No app change in this rebuild."
+          "none": "No performance-relevant app change."
         }
       ],
       "receipts": [
@@ -807,9 +844,9 @@
       ],
       "findings": [
         {
-          "finding": "Reanimated and Gesture Handler use in the composer and gauge arrived unchanged from U21.",
+          "finding": "Reanimated and Gesture Handler use in the composer and gauge arrived unchanged from U21. The fix commits do not touch them.",
           "cites": "Sub-skills",
-          "none": "No app change in this rebuild."
+          "none": "No change to motion or gesture code."
         }
       ],
       "receipts": [
@@ -875,9 +912,9 @@
       "files": ["<change>", "docs/providers.md"],
       "findings": [
         {
-          "finding": "Commit messages are the source commits' messages, and docs/providers.md is unchanged from U08a and U21.",
+          "finding": "The four fix commit messages state only the change, in plain sentences. docs/providers.md is unchanged from U08a and U21.",
           "cites": "Voice and repo specifics",
-          "none": "No new prose besides this record."
+          "none": "Checked."
         }
       ],
       "receipts": [
@@ -937,10 +974,10 @@
       ],
       "findings": [
         {
-          "finding": "One test removed (gateway-routing '%s asks for no reasoning effort', two cases) because the behavior it pinned was replaced; the replacement contract keeps two checks at different boundaries. Server tests 206 = 202 + 6 speed-fix tests - 2.",
+          "finding": "One test removed (gateway-routing '%s asks for no reasoning effort', two cases) because the behavior it pinned was replaced. The Composer test 'a refused dictation explains why' pinned the native error text as the alert body. That behavior is now forbidden, so four cases replace it: each fixed sentence, and the native text never reaches the alert.",
           "cites": "Decisions and repairs",
-          "commit": "668032e0cab4bf61528aad6f67967c64a1d7f2b9",
-          "patch": "d811a247a0b0d7660a5d67d4b5919ebc2fcd7a7b"
+          "commit": "5d652471573f73c2fbcb976bf3648674bafa5482",
+          "patch": "4ab4e0697a419a1dd6913965e856175f2f2a07a3"
         }
       ],
       "receipts": [
@@ -1073,9 +1110,10 @@
       ],
       "findings": [
         {
-          "finding": "The resolutions add no as cast; EventPayload and ProviderChunk types replace the dropped JobEvent import.",
+          "finding": "The dictation rejection is parsed with a zod schema in the catch, so failureMessage takes a named shape and no as cast or unknown parameter is added.",
           "cites": "TypeScript best practices",
-          "none": "Nothing to change."
+          "commit": "5d652471573f73c2fbcb976bf3648674bafa5482",
+          "patch": "4ab4e0697a419a1dd6913965e856175f2f2a07a3"
         }
       ],
       "receipts": [
