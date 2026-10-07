@@ -11,7 +11,7 @@ interface NativeDictation extends TurboModule {
   removeListeners(count: number): void;
 }
 
-export type Dictation = {
+type Dictation = {
   // Rejects when permission is denied or the recognizer is unavailable.
   start(): Promise<void>;
   stop(): void;
