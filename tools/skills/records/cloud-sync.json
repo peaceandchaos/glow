@@ -404,5 +404,313 @@
         }
       ]
     }
-  ]
+  ],
+  "review": {
+    "skills": [
+      {
+        "skill": "blast-radius",
+        "findings": [
+          {
+            "finding": "The one fact sync is safe because of: every row the server stores decodes under syncPageSchema on pull, because one row that fails it makes every later pull for that owner answer 400. Pushed rows pass messageRowSchema and chatPushSchema at the route. storeReply takes picker, level and retryModel from the stored Submission and actualModel from the snapshot, which use the same key schemas; its status is a terminal status other than deleted; and it now refuses text or reasoning over the row limit.",
+            "cites": "Steps 2",
+            "none": "Checked against chats.ts and contracts.ts. The over-limit half is proven by the chats.test case, which passes at head in verify:commit."
+          },
+          {
+            "finding": "A message whose text holds a NUL character or an unpaired surrogate passes messageRowSchema on the phone, but ChatRows.push fails on it, because PostgreSQL jsonb refuses both. The phone keeps that row first in its outbox, and sync.ts retries the same batch and swallows the error, so every later upload from that phone stops with no notice. Pulls keep working. A scratch run of the real ChatRows on PGlite showed both failures: push threw 'unsupported Unicode escape sequence' for NUL and 'invalid input syntax for type json' for an unpaired surrogate.",
+            "cites": "How sure are you 4",
+            "none": "Minor, a documented limit. jobs.submit on main already refuses the same text, and no app code cuts saved text by UTF-16 index (the title uses a code-point spread), so only pasted input can reach it. Follow-up: add a well-formedness check to messageRowSchema and the chat title so the phone moves such a row to its unsynced list, and treat a repeated server refusal of a one-row batch as a refusal."
+          },
+          {
+            "finding": "Lock order between ChatRows.push, storeReply and deleteChat. A delete that stamps first makes the waiting push's next statement see the tombstone; a delete that stamps second runs its DELETE after the push commits and removes those rows. Both orders end with no rows for the deleted chat.",
+            "cites": "How sure are you 3",
+            "none": "Walkthrough under READ COMMITTED agrees with the author's; the two-connection test still needs a real Postgres."
+          },
+          {
+            "finding": "ownerStorage gives the shared store to the first Apple user who opens it after this update. On a phone that two Apple users shared before the update, that user now also uploads the other user's older chats to their own account. Before the update both users already saw those chats on the phone.",
+            "cites": "Steps 4",
+            "none": "Minor, a documented limit: it needs two Apple accounts on one phone before the update."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "blast-radius",
+            "source": "Skill",
+            "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01324JJjQ7HsFFCSoByAS3RA",
+            "time": "2026-10-07T07:02:55.118Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "7Bn+kvg2CjJiDEOvV4XZLCkImw74aDmWv9sbgnNh4sOX6dvPh3gD66wsieGkcz5GqjDpzrIZEMg30nV/aCSCBw=="
+          }
+        ]
+      },
+      {
+        "skill": "deslop",
+        "findings": [
+          {
+            "finding": "Read the full diff for slop. No casts to any, no deep nesting. The one try/catch in receiveChat is the held-row signal, and the swallowed sync and search errors are stated behavior, not defensive noise.",
+            "cites": "Focus Areas",
+            "none": "Nothing to remove. Telemetry for sync errors is a follow-up, because it hides both the held-chat limit and the ill-formed text limit on a phone."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "deslop",
+            "source": "Skill",
+            "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_011DEpigJaYttHUYRwWVgd1i",
+            "time": "2026-10-07T07:02:55.581Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "y8v/P+U1NhC+oIfSV3kzK9z9zQK+i2yf46LNF4b46EMyHo4zJMtgskZDEC5BvjsBqWi3CuDDjiQZQfZCwg9sAQ=="
+          }
+        ]
+      },
+      {
+        "skill": "ios-debugger-agent",
+        "findings": [
+          {
+            "finding": "No new simulator run. The author's statement that the app tree at abaff66 equals the tree tested on the simulator could not be checked here, because that earlier commit was never pushed. The app jest suite (162 tests) passes at head in verify:commit, and the commits after abaff66 touch only server code and the record.",
+            "cites": "Core Workflow",
+            "none": "Accepted for a server-only fix on top of the tested app code."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "ios-debugger-agent",
+            "source": "Skill",
+            "sha256": "bb8ad932ec473cee097c9c8d106051134e9ab6cf9dc85d6a8e62ce80ad24c385",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_014HYwVVWLFFgZ64Bo1hGPnh",
+            "time": "2026-10-07T07:02:55.868Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "iszsB5g4NJzSSa46y82uK4H67xiOrw9iTqZ/UNPHkQqxL7m3N6XLOX1lpyeD+hN/tGDcSuJ3W3hPIfeGUj9IAA=="
+          }
+        ]
+      },
+      {
+        "skill": "no-comments",
+        "findings": [
+          {
+            "finding": "Read each of the 51 comment lines that the diff adds to app, server and shared source. Each gives a why the code cannot show: lock order, the stale-field push rule, held rows, journaled staging, the owner adoption rule. The fix commit adds none. One gap: the messageRow comment says null means the server would refuse the row, but the server also refuses ill-formed text that messageRow accepts (see the blast-radius finding).",
+            "cites": "Steps 2",
+            "none": "No comment to delete. The gap is covered by the blast-radius follow-up."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "no-comments",
+            "source": "Skill",
+            "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_0158gLZkd7SVJYzYWkXABndP",
+            "time": "2026-10-07T07:02:56.173Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "MxKoAHCEmNxNXk9pMzUx08AEOg4+1kOfvp4jCwagQpWQn7aj6vk68MqcdSpmn4FsVYJrlq/xd9EYYI9GJn+IBg=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-boundary-discipline",
+        "findings": [
+          {
+            "finding": "Each payload is parsed once at its edge: the route parses requests, the transport parses responses, and syncRows parses outbound rows. ChatRows and applyRemote trust their typed input. The edge is incomplete in one way: messageRowSchema accepts strings that PostgreSQL jsonb refuses.",
+            "cites": "Boundary Discipline",
+            "none": "Placement is right. The well-formedness gap is the blast-radius follow-up."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-boundary-discipline",
+            "source": "Skill",
+            "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01U7ZrbwBx11xK85NY7g4H41",
+            "time": "2026-10-07T07:02:56.976Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "ZZoJYccDz+M+uFDYHT8ejx8mLB5jB4FuaHxLdRzQdHn6gwjCypfg75EFeGtHP1HsD7uStHv3DwK+5LJ4JiY2Ag=="
+          }
+        ]
+      },
+      {
+        "skill": "principle-prove-it-works",
+        "findings": [
+          {
+            "finding": "Re-ran the decisive checks in a separate clone at 2de64c8: verify:commit passed all 16 checks (tests: root 212, app 162, server 234), the strict privacy scan found 0 hits, the commit date scan found 0 non-UTC commits, and all 12 commits carry the co-author trailer. Ran a PGlite probe of push with ill-formed text against the real ChatRows.",
+            "cites": "Prove It Works",
+            "none": "All checks pass."
+          },
+          {
+            "finding": "The README still describes Recents search as loose title matching and does not say that the server now stores chat text and reply text for sync and search.",
+            "cites": "Prove It Works",
+            "none": "Minor: the local title match is still true, so no claim is wrong. Follow-up for the docs."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "principle-prove-it-works",
+            "source": "Skill",
+            "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01A1mpScdQw74n1tgFG6VeHS",
+            "time": "2026-10-07T07:02:57.139Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "4YtZhNPqycnq04uEYqBNR8pHMzNmh5hUJr9ju81M+jLmMyYlZXE/5f9MD51g5B1rZBUZmbn1hH/YoMVAdKKuBw=="
+          }
+        ]
+      },
+      {
+        "skill": "react-native-best-practices",
+        "findings": [
+          {
+            "finding": "Recents builds server hits in one useMemo and renders at most 20 rows in the list footer. Sync runs on session start, on return to the foreground, and after commits that add to the outbox, with no timers.",
+            "cites": "Review Guardrails",
+            "none": "No measured render problem, so no change. The empty History header above a server-only result is cosmetic."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "react-native-best-practices",
+            "source": "Skill",
+            "sha256": "abdbb7fc34ad739420fe43632e0baa1d646a01d097c6905211aa8b5b41957bf1",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01As4Yx3DaNQK2TX5KoMM7rK",
+            "time": "2026-10-07T07:02:57.276Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "JHLkhG4dq4/OJzRGcy6AwN4Vpnn7UhsiOmgd88xxz4vj74KphW8CZtKpJMRtZ2yPHFno1OOs/uoq0ldAJHIjCw=="
+          }
+        ]
+      },
+      {
+        "skill": "thermo-nuclear-code-quality-review",
+        "findings": [
+          {
+            "finding": "archive.ts grows from 578 to 944 lines. It stays under 1,000, but the sync half (outbox, applyRemote, receiveMessage, receiveChat) is a separate concern.",
+            "cites": "Non-Negotiable Additional Standards 1",
+            "none": "Under the limit. The next sync change should move that half into its own module before it adds lines."
+          },
+          {
+            "finding": "receiveChat and the server chat upsert list title, model and leaf by hand, so a new ChatField compiles without being merged.",
+            "cites": "Non-Negotiable Additional Standards 2",
+            "none": "Agree with the author's follow-up; fieldHolds already forces an entry per field on the phone."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "thermo-nuclear-code-quality-review",
+            "source": "Skill",
+            "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01Bwutu5UrGRpNakwfSxKr1Q",
+            "time": "2026-10-07T07:02:57.686Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "cic6syRUGTxLHiykFPID9WSsJaJrT7BFVNDTZlFmyKWBB91f7DgxzRrXvBLbW1aRE+M0T5u45GMjW3ZU8hVsDA=="
+          }
+        ]
+      },
+      {
+        "skill": "typescript-best-practices",
+        "findings": [
+          {
+            "finding": "The added source has no as casts and no non-null assertions. fieldHolds is a Record over ChatField, and pullableReply derives from messageRowSchema instead of a copied limit. The test fakes gain their fields in the commits that add them to ChatViewState, so each commit typechecks alone.",
+            "cites": "TypeScript best practices",
+            "none": "Confirmed by the commit-types check at head."
+          }
+        ],
+        "receipts": [
+          {
+            "v": 1,
+            "client": "claude-code",
+            "skill": "typescript-best-practices",
+            "source": "Skill",
+            "sha256": "fd61fe218e2d08226a63533d344277ccacd6e92fd07a81ca663817594585221d",
+            "partial": false,
+            "session": "4093e694-015f-4f10-a114-d4b70088d910",
+            "agent": "ac9068f84e0816d8f",
+            "agentType": "pstack:poteto-agent-high",
+            "toolUseId": "toolu_01F6gRuu2jBPhWePGpeDkNua",
+            "time": "2026-10-07T07:02:57.902Z",
+            "cwd": "3389522ebe7fd3c02f1da6eb75ce07837740e2b73e25a5b62b3487600fc8da63",
+            "commonDir": "00e10a04839372ad8639930b4b769e52e7eac1d23502825b68d9eedab7586b29",
+            "branch": "submission/cloud-sync-2",
+            "head": "2de64c8b3d1dd1dd97869f54fe25318633d095aa",
+            "headPatch": "0cd335c56f385e323cd994d31a51f1893906739d",
+            "sig": "0I/SaR4vgdfHqvd1JDwOFl1LALMAL+HTVIZykW+6SffUjyakOgDqM24iC3Qdm5qVAf8Y2JHRoNSyfWeWhNXiDQ=="
+          }
+        ]
+      }
+    ]
+  }
 }
