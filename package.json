@@ -7,7 +7,7 @@
     "packages/server"
   ],
   "scripts": {
-    "lint": "oxlint --deny-warnings .",
+    "lint": "oxlint --deny-warnings --disable-nested-config .",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "format:app": "oxfmt --write packages/app",
