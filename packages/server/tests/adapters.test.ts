@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { WebSocketServer } from 'ws';
 import type { ResponseInputItem } from '../../../shared/contracts';
@@ -7,6 +8,7 @@ import { GatewayClient, gatewayMessages } from '../src/gateway';
 import { JevClient } from '../src/jev';
 import type { ProviderChunk } from '../src/provider';
 import { models, type Effort } from '../src/models';
+import { LiveProviders } from '../src/providers';
 import { ResponsesClient, trimCompacted } from '../src/responses';
 import { exampleGatewayAuth, submission } from './fixtures';
 
@@ -150,6 +152,51 @@ test('Gateway sends a reasoning effort only when one is chosen', async () => {
   expect(await sent(null)).not.toHaveProperty('reasoning');
   expect((await sent('high')).reasoning).toEqual({ effort: 'high' });
 });
+
+test.each(['kimi', 'deepseek'] as const)(
+  'a %s context summary asks for the lowest reasoning effort',
+  async model => {
+    const requests: RequestInit[] = [];
+    const providers = new LiveProviders(
+      new ResponsesClient({
+        apiKey: 'example-key',
+        socketUrl: 'ws://127.0.0.1:9',
+      }),
+      fakeGateway(
+        [chunk('Earlier context.'), chunk(null, 'stop'), '[DONE]'],
+        requests,
+      ),
+      new JevClient(exampleGatewayAuth, () =>
+        Promise.reject(new Error('A summary must not call Jev')),
+      ),
+    );
+    const turn = submission();
+    let parentId: string | null = null;
+    turn.history = Array.from({ length: 9 }, (_, index) => {
+      const id = randomUUID();
+      const entry = {
+        id,
+        parentId,
+        role: index % 2 === 0 ? ('user' as const) : ('assistant' as const),
+        text: `${index}: ${'A'.repeat(100_000)}`,
+        images: [],
+        complete: true,
+      };
+      parentId = id;
+      return entry;
+    });
+    turn.userTurnId = turn.history[8].id;
+    await providers.prepare(turn, model, signal, before);
+    expect(requests).toHaveLength(1);
+    const body = requests[0].body;
+    expect(
+      z
+        .record(z.string(), z.unknown())
+        .parse(JSON.parse(typeof body === 'string' ? body : '')).reasoning,
+    ).toEqual({ effort: models[model].levels[0] });
+    expect(models[model].levels[0]).toBe('none');
+  },
+);
 
 test('OpenAI opaque context is never translated into a Gateway request', () => {
   expect(() =>
