@@ -1,8 +1,8 @@
 {
   "change": "control-paths",
   "base": {
-    "commit": "573cd701be21d47c058d0daa6187538e8e9bfd9f",
-    "patch": "0ae535b53301b208631863bcf46416d2bcda0db0"
+    "commit": "f1d71d760d6c43502d794db320110557b8b6e5c5",
+    "patch": "3d1610213fb70095de5643662c73b6a755ce84e4"
   },
   "skills": [
     {
@@ -33,31 +33,31 @@
         {
           "finding": "The change is safe because a change to unowned files alone cannot hide source from lint, format, or the type check, and cannot hide app or shared source from the security check. Ownership is half of that fact. .github/CODEOWNERS leaves only app and server source, tests, harness, assets, native iOS files, shared contracts, and skill records without an owner, and it gives back every dotfile, dot folder, *.config.* file, package manifest, lockfile, tsconfig, Podfile, Gemfile, and packages/app/src/config.example.ts at any depth. tools/__tests__/codeowners.test.js applies GitHub's last-match rule to every tracked file and to new files such as packages/server/src/.gitignore, packages/app/src/.npmrc, and packages/server/nitro.config.ts. The guards are the other half, because a check's own ignore list can skip unowned paths. verify.cjs pins the npm registry, and npm run lint passes --disable-nested-config. Lint and format read packages/app/ios/, and format skips only its JSON files. The ignored-files check fails on a tracked file under a .gitignore path. The security check scans packages/app and shared, and it fails on source in a path that rnsec skips. Lint bans @ts-nocheck, @ts-ignore, and inline disables of typescript/ban-ts-comment. Two exceptions remain and docs/github-controls.md names them. The unowned project.pbxproj can add a Swift package, and the suppression policy allows a named inline lint disable with a reason in unowned source for other rules. The security check does not read unowned source in other folders, such as packages/server/src/, and the docs name that limit too.",
           "cites": "How sure are you 4",
-          "commit": "135fe0ebd492",
+          "commit": "46263ea195c9",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
           "finding": "packages/app/App.tsx and packages/app/index.js are app source, so .github/CODEOWNERS now lists them in the unowned block, before the owned config lines. The controls rule lists both in excludePaths, because its packages/*/* glob would route them otherwise. codeowners.test.js expects no owner for both files and checks that they are not routed to controls. packages/app/app.json and packages/app/android/** keep the owner.",
           "cites": "How sure are you 4",
-          "commit": "860a50270033",
+          "commit": "181b91be5787",
           "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
         },
         {
           "finding": "A project .npmrc could send the dependency audit to another registry. tools/verify.cjs now sets npm_config_registry for every check it runs, and npm ranks the environment above a project .npmrc. With a stub-registry .npmrc and the old environment, audit:check sent its bulk advisory request to the stub and failed. With the new variable, the stub got no request and audit:check passed against the public registry. verify:commit on a commit that adds the stub .npmrc on top of this range made no request to the stub.",
           "cites": "How sure are you 4",
-          "commit": "c12bc17200d8",
+          "commit": "4c1fa343cbc3",
           "patch": "bb192d0161e83e7c47a7d013fcbbc1b5ae412492"
         },
         {
           "finding": "A nested .oxlintrc.json replaced the root lint rules for its folder. With {} in packages/server/src/.oxlintrc.json and a line that breaks eqeqeq and the type-assertion rules in api.ts, oxlint without the flag exited 0. npm run lint now passes --disable-nested-config and exits 1 with those rules named. The only tracked .oxlintrc.json is the root one, so the flag changes nothing today.",
           "cites": "How sure are you 4",
-          "commit": "55c822b42b72",
+          "commit": "dc5d758820ba",
           "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
           "finding": "No oxlint or oxfmt flag stops a nested .gitignore from hiding source. With src/ appended to packages/server/.gitignore, npm run lint still exits 0 on the probe line. Ownership is the control, so packages/server/.gitignore and any new nested .gitignore, .eslintignore, or .prettierignore now need owner review.",
           "cites": "Steps 4",
-          "commit": "135fe0ebd492",
+          "commit": "46263ea195c9",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
@@ -68,25 +68,25 @@
         {
           "finding": "tools/github/integration-rules.json now equals the live ruleset, rule by rule, after adding the rebase-only merge method, the extra approval for unattributed changes, and the empty reviewer list. ruleset.cjs passes the parameters through unchanged, and ruleset.test.js still passes.",
           "cites": "Steps 3",
-          "commit": "4285d26694a9",
+          "commit": "a5cf5f80a326",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
         },
         {
           "finding": "oxlint and oxfmt skip every path that .gitignore names, and **/coverage/** matched at any depth, so a tracked file in packages/server/src/coverage/, build/, or node_modules/ escaped lint and format. The coverage patterns now name only coverage/, packages/app/coverage/, and packages/server/coverage/, and a probe in packages/server/src/coverage/ is reported by both tools while packages/app/coverage/ stays ignored. The new ignored-files check runs git ls-files --cached --ignored --exclude-standard with an empty core.excludesFile, so a personal global ignore list cannot change its result. It lists no file on the clean head.",
           "cites": "How sure are you 4",
-          "commit": "09da1f2222a5",
+          "commit": "64ae62617819",
           "patch": "d58c2c083fdc81156b92c8accc10fda8d30d549a"
         },
         {
           "finding": "rnsec 1.3.0 skips a fixed list of paths (dist/core/fileWalker.js defaultIgnore) that no option removes, and the list is a local constant, so the check cannot import it. tools/security-check.cjs copies it, and hidden-source.test.js reads the list from rnsec's source and fails when the two differ. The check fails on tracked .js, .jsx, .ts, or .tsx files that match the list outside packages/app/__tests__/, packages/server/tests/, and tools/__tests__/. The guard lists the whole repo, although rnsec scans only packages/app, because the brief names the server and tools test folders. On the clean head no file matches.",
           "cites": "How sure are you 4",
-          "commit": "7e9c7b5f3af6",
+          "commit": "e86d02e69271",
           "patch": "f5f85d233f147d5843726c1d032f6190a570af53"
         },
         {
           "finding": "oxlint applies an inline disable of a built-in rule under any plugin prefix or none. typescript/ban-ts-comment, @typescript-eslint/ban-ts-comment, typescript-eslint/ban-ts-comment, xyz/ban-ts-comment, and bare ban-ts-comment each turned the rule off. A JS plugin rule such as project/no-type-assertion needs its exact name. require-disable-reason therefore matches ban-ts-comment as the last part of any listed rule name, and lint-policy.test.js covers the prefixed, the @typescript-eslint, and the bare comma-joined forms.",
           "cites": "Steps 3",
-          "commit": "0255018eaa31",
+          "commit": "7dd166c73c5b",
           "patch": "7ce880548de9f903ef6508882c83be5c382658a7"
         },
         {
@@ -97,19 +97,19 @@
         {
           "finding": "packages/app/src/config.example.ts is the allow-list that check-app-config.cjs applies to the gitignored config.ts before every bundle. It now has a code owner, and the controls rule lists it. With its CODEOWNERS line removed, codeowners.test.js fails the owned-config case for the file and the controls-match case.",
           "cites": "How sure are you 4",
-          "commit": "663fc6cd6fcf",
+          "commit": "047f8537bdc6",
           "patch": "41e4806a67b3a675a1ee363f2ba1bac25aedc16e"
         },
         {
           "finding": "Lint and format ignored all of packages/app/ios/, which has no code owner, while Metro bundles any .ts file there that app code imports. .oxlintrc.json now lints the folder, and .oxfmtrc.json skips only packages/app/ios/**/*.json, because the Xcode Contents.json files are not in oxfmt style. On the clean head npm run lint and npm run format:check exit 0. With a probe line that uses == and a type assertion in packages/app/ios/probe/index.ts, lint exits 1 with 7 problems in that file and format exits 1 naming it. With the two config lines restored, both exit 0 on the same probe.",
           "cites": "How sure are you 4",
-          "commit": "d7c01f9de287",
+          "commit": "9db03cf29908",
           "patch": "d146fec5aa2882bdc70180585e01655429ec21e6"
         },
         {
-          "finding": "The app imports shared/contracts.ts and shared/provider-events.ts at run time, and shared/ has no code owner, but rnsec read only packages/app. scanAll in tools/security-check.cjs now scans packages/app and shared, merges findings and ignored rules into one report before evaluate checks dispositions, and throws when either folder yields no files. The clean head passes with 52 files, against 50 before. An eval probe appended to shared/provider-events.ts fails with EVAL_USAGE and INSECURE_DESERIALIZATION HIGH, and passes with the old check. packages/app/.rnsec.json still applies to the app scan.",
+          "finding": "The app imports shared/contracts.ts and shared/provider-events.ts at run time, and shared/ has no code owner, but rnsec read only packages/app. scanAll in tools/security-check.cjs now scans packages/app and shared, merges findings and ignored rules into one report before evaluate checks dispositions, and throws when either folder yields no files. The clean head passes with 58 files, against 55 before. An eval probe appended to shared/provider-events.ts fails with EVAL_USAGE and INSECURE_DESERIALIZATION HIGH, and passes with the old check. packages/app/.rnsec.json still applies to the app scan.",
           "cites": "How sure are you 4",
-          "commit": "adef9e9581c9",
+          "commit": "96f5622ef395",
           "patch": "5001c83152dbdacf21e9f088fa8e841cf6792848"
         },
         {
@@ -127,16 +127,16 @@
           "sha256": "5ae00d4f1ba5abcbdef1eadd3109c1a721b6766b506d3c8c7d11e84c6001c0df",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01K2Qxox3eE8AyCT6JvRm9sc",
-          "time": "2026-10-07T00:55:32.300Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "fbWtVLkeqayaCp6VuDui+xUbChlzWn+/sgze5g0xV8liPWQPOKH7ndvnOYDatWmiMlXUnI2fLqi3R3ndpkQnBA=="
+          "toolUseId": "toolu_012AbscdrKMBCbP13yJxcK3r",
+          "time": "2026-10-07T03:18:23.315Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "IcYf7erCLq9eaOKiD2zEfAXlDVVzmU2irKAviQq0OICMKXe4/gkwW07ebSM2+Zph58Ji2cRp/GQatmmFjPQuDg=="
         }
       ]
     },
@@ -169,16 +169,16 @@
           "sha256": "2f7b7def74af7ed11f5b44b4d32f0f91fca8c5d1f92bf2171e8d12fd33a0f810",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_019g9MQWMdUo11hXKH4WJwyx",
-          "time": "2026-10-07T00:55:32.496Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "505TaTI9jwRSiJvCwmEvlBqtXkiT3Xv1ahCyUR12E/TCNvYvUUqpZwsrXogpDX8DlmzGkmbFlq6+pVxSo0GICg=="
+          "toolUseId": "toolu_01YMs72iCVZwGavGftFtkdC3",
+          "time": "2026-10-07T03:18:24.094Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "U0mLjYZfnGEH+kJnrOtw6F8LncAml/2aIMx2d7pHUtky+kv3doLYU8/hkyyg/NNGTwuhYbL30J345c4ZKIu7CA=="
         }
       ]
     },
@@ -211,16 +211,16 @@
           "sha256": "6de3c00a2a773ac982ad96fa74b10032133a7ca455d6902defeaf237105bfbad",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01BFr5m6cFjqu1XdJbS558LJ",
-          "time": "2026-10-07T00:55:32.793Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "ammljgOWgI7bSV9ps4HRACBtVZjIgN1Ojwcx6VvTLRFcVzPjJ1BE4NVmc0iCRWImExGEabghTRwPaV+UE6psAQ=="
+          "toolUseId": "toolu_01TH7kn8cE6PQYi2rEcEgJZA",
+          "time": "2026-10-07T03:18:24.172Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "+etrkIpFJ1iDFd5M/sVhDEYHuAwxZ36lMs54Y2EhhjYQzo7Od9x0RKaHbG4A9p5S40XEJLXmolhf9aShmD+dDw=="
         }
       ]
     },
@@ -248,16 +248,16 @@
           "sha256": "e59efe04ed66e3a403a50e70640daeb5c7b592598687a67b6e25ceed6251d19f",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "a78fcf7914e22f2cf",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01DWe4ednx4BcPyAr7NmBZWh",
-          "time": "2026-10-07T01:33:06.956Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "053360f9cbfbc5ecb1ca3e8b3783189dc6c490a3",
-          "headPatch": "02a752c18b67be36eccb6a4ed656d2f7187915fd",
-          "sig": "i4S4v+HP8tVsZ4thFUQCTrlhTZ7cEdlZoUIiQ929d0TFO8TGUYzf/YGRtOa12UL6m/qKbFBqR/O9gjK4vqdfCQ=="
+          "toolUseId": "toolu_016fLnWjg7mBEohshnFv6YHz",
+          "time": "2026-10-07T03:18:24.836Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "PkIdtq/cQqu4XAl6AMr45B8P6xZg22paKKA6bkhfWnMUxFHP8IXouRXv6+QYQW4WyF6mbUmVUcwU1IFMroN9CA=="
         }
       ]
     },
@@ -268,37 +268,37 @@
         {
           "finding": "The ownership proof is a jest test that runs on every verify. Each mutation failed with the predicted diff. Removing the default owner line or unowning tools/ listed the newly unowned files, such as tools/__tests__/app-config.test.js. Owning packages/app/ios/ made project.pbxproj expect false and receive true. Dropping docs/** from controls listed the five docs files as owned but not routed. Restoring each file made all 24 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "135fe0ebd492",
+          "commit": "46263ea195c9",
           "patch": "97a1aee34ca2583a71dbe38941a3638fbf94f106"
         },
         {
           "finding": "With the /packages/app/index.js line removed from CODEOWNERS, two cases failed with the predicted diff. The no-owner case for index.js received true, and the controls case listed packages/app/index.js as routed but not owned. Restoring the line made all 26 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "860a50270033",
+          "commit": "181b91be5787",
           "patch": "680cdb1675a07f8891e9723bb0ae2b5346c6e8e5"
         },
         {
           "finding": "The registry and nested-config guards were proven on real runs of audit:check and npm run lint, before and after, not by reading npm or oxlint docs.",
           "cites": "Prove It Works",
-          "commit": "55c822b42b72",
+          "commit": "dc5d758820ba",
           "patch": "af079bb3bd8f4ea258bcfdf5702fd4fdcede420e"
         },
         {
           "finding": "The ruleset values came from a read-only fetch of the live ruleset, compared field by field, not from the review's summary.",
           "cites": "Prove It Works",
-          "commit": "4285d26694a9",
+          "commit": "a5cf5f80a326",
           "patch": "939db07c8e93d864f4a36a724ae503acfaeb0564"
         },
         {
           "finding": "Each new guard was proven on the real check command and mutation-checked. The B6 probe went through node tools/verify.cjs commit HEAD with probe files in packages/server/src/coverage/ and packages/server/src/build/. lint and format failed on the coverage file, ignored-files failed on the build file, and security failed on both. The B7 probe ran node tools/security-check.cjs with the same file in plain/, e2e/, dist/, and test/, and every run exits 1. The B8 probe ran npm run lint with @ts-nocheck, @ts-ignore, and two disable spellings. Removing a guard line made its tests fail: the excludesFile pin, the --ignored flag, the e2e pattern, the ban-ts-comment lock, and the config.example.ts CODEOWNERS line.",
           "cites": "Script the check when you can",
-          "commit": "7e9c7b5f3af6",
+          "commit": "e86d02e69271",
           "patch": "f5f85d233f147d5843726c1d032f6190a570af53"
         },
         {
           "finding": "Both new guards were proven on the real commands and mutation-checked once. Without the ios config edits, the ios probe passes lint and format. With scanRoots cut to packages/app, the new hidden-source.test.js case fails on scannedFiles, expected 2 and received 1. With the zero-file throw removed, it fails because scanAll did not throw. Restoring each made all 4 cases pass.",
           "cites": "Script the check when you can",
-          "commit": "adef9e9581c9",
+          "commit": "96f5622ef395",
           "patch": "5001c83152dbdacf21e9f088fa8e841cf6792848"
         }
       ],
@@ -311,16 +311,16 @@
           "sha256": "779a5955bfcff1bdd6274a3287ac527fa6b00246cd0d66d7cf8ffc354e4d76ce",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01DWLqAqy2p8HbRSMmeryYwT",
-          "time": "2026-10-07T00:55:33.142Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "ENBE94ogC+fnOxeaG1bWsA2pdidZ+BWdjdM9zuET2mRPRTrtjqL36Qle6Sx43VsmOzqUf54rS4xHKqavDRseDQ=="
+          "toolUseId": "toolu_01URQmfxvrR9N1nJLhPVk1Br",
+          "time": "2026-10-07T03:18:24.924Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "bbygq9quV/GHNYA4ZLiIULWr729g0RBeIaLsqkopWZBocf7HffAxk6WEqWnoPGUe12XobxBSvqDQGPcsVw/ZAg=="
         }
       ]
     },
@@ -336,31 +336,31 @@
         {
           "finding": "README.md now says acceptance requires protected GitHub checks, the owner reviews changes to the control paths in .github/CODEOWNERS, and other changes merge on green checks. AGENTS.md says acceptance requires the full suite and protected GitHub checks, changes to the control paths in .github/CODEOWNERS also require owner review, and other changes merge on green checks. docs/github-controls.md says CODEOWNERS assigns the checks and their configs, CI, hooks, dependencies, and agent rules to the owner, and that after a repair approval full candidate checks still apply and owner review applies when the PR changes a code-owned control path. docs/skills.md does not describe owner review.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "c3d1873fd95b",
+          "commit": "d48f41d0ab3a",
           "patch": "4ef376cacab0d65ab3973c0f213b0ab34c22a7ee"
         },
         {
           "finding": "README.md, AGENTS.md, and docs/github-controls.md now say that .github/CODEOWNERS gives the owner every file except app and server source, tests, harness, and native project files, that the owner still owns every dotfile and config inside them, and that a change that touches only unowned files merges on green checks. docs/github-controls.md names the registry pin and the lint flag in two sentences of one claim each. docs/skills.md does not describe ownership.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "e737ca7f31d4",
+          "commit": "b9265fea5e48",
           "patch": "af58f26f95e956c3f635d4e9f9655fa19c1a7d5e"
         },
         {
           "finding": "docs/github-controls.md now names the two exceptions to code-owner review in plain sentences, the unowned project.pbxproj and named inline lint disables in unowned source. It then states each guard as the cause and the check that answers it. README.md adds one sentence about the scanner-skip guard next to the scanner description.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "aa3b067225b3",
+          "commit": "216e053dda61",
           "patch": "f72d52d30c065e56925590805b01dccd1dbff0b5"
         },
         {
           "finding": "docs/github-controls.md now says lint and format read packages/app/ios/, the security check runs rnsec on packages/app/ and shared/, the two exceptions still hold, and the security check does not read other unowned folders.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "98676921c42b",
+          "commit": "3fbc87268c38",
           "patch": "032ba2c2512727826e0c893850a24f9c2cad0442"
         },
         {
           "finding": "README.md said the scanner scans the remaining app. It now says the scanner reads shared/ and the app, except Android-specific files.",
           "cites": "Leave no sentence open to two readings (Global English)",
-          "commit": "0af3b2981bc5",
+          "commit": "b3a547040dab",
           "patch": "d6f6b7fea7d4538b6a1f0039dcb6385ca75ed60d"
         }
       ],
@@ -373,16 +373,16 @@
           "sha256": "a450d685f477833640054828477fff97e1fd4ffb396a845b512d131b633c1919",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01S93QMzLKHqRLeCd1F47qy4",
-          "time": "2026-10-07T00:55:33.475Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "fiS5OOAiAV+mCnqux2HH64F79RZVIIiatIms585mLx4iHdf2rT646TOSQgGrLTfwlqrH5VjPEOqJUk+kwuzDDg=="
+          "toolUseId": "toolu_01XGwywx9dEjQyVqBdn1x7m9",
+          "time": "2026-10-07T03:18:25.572Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "g0eG2lTQLF27FBeyAOeSff+ee30ejaNuXsYVquq2vPYW5s2n/9NY/5RgMB5IR7WDhi5jsaIKLhY/dGR/uW+wAw=="
         }
       ]
     },
@@ -415,16 +415,16 @@
           "sha256": "35f68c89a24f690eaba7f77c637d3b7dc1cb0fc7bf17670606ffd83f074fa626",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01WP3mdahn8ur1dWyqurE8zF",
-          "time": "2026-10-07T00:55:33.831Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "GHwqjfOVn3BA6E3RTrxGorK4pvoMfYSM85EoNVFRuyqLu18Gk2R+Jbl+P3tnDUvT/SUZadR24bQT9+NSgdS5Dg=="
+          "toolUseId": "toolu_01HtaEcGAP3wcNgBRfyAaVfJ",
+          "time": "2026-10-07T03:18:26.300Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "r18e22oZgIsFcYpBJRvZoROEMxLRdTjSErd8inoJiPkTxa2vAA8FQuyNdcimFKbb/kdmT5AmcGh3LDSIdhyNBg=="
         }
       ]
     },
@@ -463,16 +463,16 @@
           "sha256": "290a10a90e52f080fdf0f225f043088990b5cd8d8b8307c800a91cfeb1568aa4",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_01BUUBkPoz9Jkppo3DryC5HJ",
-          "time": "2026-10-07T00:55:34.198Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "yi/5u2OsFgGy/Y3f0gvHyVbVV+/WAELMlOp3Js4xLABqjEqfesESeBIRJEwZL8ZJxF4k6cQqT8KcleK/owRICA=="
+          "toolUseId": "toolu_01SnPqohzsZgHRiz9bovgDqy",
+          "time": "2026-10-07T03:18:26.380Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "rXYOSc+xaEKtrelYOwz9Io3uGSrz3yknQ6W12kZrdqXkLY3nzAtLPs1ZEQd/r8hXuW9Joj0PCBIQkufS8xgYAw=="
         }
       ]
     },
@@ -505,16 +505,16 @@
           "sha256": "a842323e664e5af104eac5c97ad22fda929ebeb62d81c501161ac1f6f482db58",
           "partial": false,
           "session": "778be78f-2b66-44f5-8676-cd35b4d6581a",
-          "agent": "af5fec0bdea8cd34d",
+          "agent": "afbecc549d474498b",
           "agentType": "pstack:poteto-agent-high",
-          "toolUseId": "toolu_018LaESiLK8MjVvZ1v2Q4jTN",
-          "time": "2026-10-07T00:55:34.422Z",
-          "cwd": "55b9854b93725dfb41d728ebce9ea7d706dee74abd550e5ca0374ae2486c627c",
-          "commonDir": "977be6c3958ba97951c4a3ada0d5693ca0e0d617b63ec082b906f2469d8254c6",
-          "branch": "submission/control-paths-4",
-          "head": "c58e26ac2cfb029913b9d515be9ea89abfe3ce56",
-          "headPatch": "d075b49ab715b38483830e32c9a10dbb52b2861a",
-          "sig": "OgJyLmxRzmrDueqd02rmrPu4H7Oql+kMPWqW47+eecoUf/Hi7nQVZs4smli7IkO50YWqD8B4eUBIAXXnp47QBQ=="
+          "toolUseId": "toolu_014m1Y5WXWsjzJBzsv8p7KhP",
+          "time": "2026-10-07T03:18:26.458Z",
+          "cwd": "fb4393b21e4e74d843e5b1a31bb8047896cfcc53df411d9575e99155c34aa36c",
+          "commonDir": "4c0c618240a658385a3f06bdf7f9175d7e974276b8b66695943f1efd74018252",
+          "branch": "submission/control-paths-5",
+          "head": "8c4631cf7ac27aef888b3612195d892cf1ea51c1",
+          "headPatch": "ba684b23a2ae07bc4c16661ab3a171d1d4474c51",
+          "sig": "++A851OEKPz7qLZxZHuer0EYcdm5KnV3Pvge5m1a7uqoAgqz3ouPmRTd9CLJtAJb8++k+hZBygGwZI0ceNENDw=="
         }
       ]
     }
