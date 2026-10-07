@@ -19,6 +19,8 @@ export type Message = {
   attachments?: string[];
   reasoning?: string;
   statusLabel?: ReplyLabel;
+  // Set on a user turn sent with another model choice than the turn before it.
+  modelSwitch?: { from: Picker; to: Picker };
 };
 
 export type ChatViewState = {
@@ -77,6 +79,7 @@ export function toMessage(
   saved: SavedMessage,
   activity: AttemptActivity,
   localImagePaths?: string[],
+  previousPicker?: Picker,
 ): Message {
   if (saved.role === 'user')
     return {
@@ -85,6 +88,10 @@ export function toMessage(
       text: saved.text,
       status: 'done',
       attachments: localImagePaths,
+      modelSwitch:
+        previousPicker && previousPicker !== saved.picker
+          ? { from: previousPicker, to: saved.picker }
+          : undefined,
     };
   return {
     id: saved.id,
@@ -102,7 +109,8 @@ function sameMessage(a: Message, b: Message): boolean {
     a.status === b.status &&
     a.reasoning === b.reasoning &&
     a.statusLabel === b.statusLabel &&
-    a.attachments === b.attachments
+    a.attachments === b.attachments &&
+    a.modelSwitch?.from === b.modelSwitch?.from
   );
 }
 
@@ -150,12 +158,16 @@ export function createChatView(
     }
   }
 
+  // A user turn's parent is the previous reply, saved with the previous turn's
+  // choice. Rows view in path order, so a shown parent is already in `rows`;
+  // loadOlder views the old first row again once its parent is shown.
   const view = (saved: SavedMessage): Message => {
     const previous = rows.get(saved.id)?.view;
     const next = toMessage(
       saved,
       session.activity(saved.id),
       sentImages.get(saved.id),
+      saved.parentId ? rows.get(saved.parentId)?.saved.picker : undefined,
     );
     const kept = previous && sameMessage(previous, next) ? previous : next;
     rows.set(saved.id, { saved, view: kept });
@@ -267,8 +279,9 @@ export function createChatView(
         const { messages } = store.getState();
         const oldest = rows.get(messages[0]?.id ?? '')?.saved;
         if (!oldest?.parentId) return;
-        const older = session.path(oldest.parentId, historyPage);
-        store.setState({ messages: [...older.map(view), ...messages] });
+        const older = session.path(oldest.parentId, historyPage).map(view);
+        const [, ...rest] = messages;
+        store.setState({ messages: [...older, view(oldest), ...rest] });
       }),
     draftText: chatId => {
       const known = pendingDrafts.get(chatId)?.text ?? storedDrafts.get(chatId);

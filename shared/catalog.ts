@@ -87,6 +87,11 @@ export function resolveChoice(
   };
 }
 
+export function pickerLabel(catalog: Catalog, picker: Picker): string {
+  if (picker === 'auto') return 'Auto';
+  return catalog.models.find(model => model.key === picker)?.label ?? picker;
+}
+
 const openLevels = [
   { key: 'none', label: 'None' },
   { key: 'low', label: 'Low' },

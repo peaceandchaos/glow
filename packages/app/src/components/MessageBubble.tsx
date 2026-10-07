@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeIn, SlideInDown } from 'react-native-reanimated';
 import { NitroImage } from 'react-native-nitro-image';
 import type { SFSymbol } from 'sf-symbols-typescript';
-import type { Message } from '../state/chatStore';
+import { pickerLabel } from '../../../../shared/catalog';
+import type { Picker } from '../../../../shared/contracts';
+import { useChatStore, type Message } from '../state/chatStore';
 import { Icon } from './Icon';
 import { ShimmerText } from './ShimmerText';
 import { theme } from '../theme';
@@ -40,6 +42,20 @@ function reasoningLabel(reasoning: string): string {
   return 'Thinking';
 }
 
+function ModelSwitch({ from, to }: { from: Picker; to: Picker }) {
+  const catalog = useChatStore(state => state.catalog);
+  return (
+    <View style={styles.switchRow}>
+      <View style={styles.switchLine} />
+      <Text style={styles.switchText}>
+        Model switched from {pickerLabel(catalog, from)} to{' '}
+        {pickerLabel(catalog, to)}
+      </Text>
+      <View style={styles.switchLine} />
+    </View>
+  );
+}
+
 type MessageBubbleProps = {
   message: Message;
   onOpenReasoning: (reasoning: string) => void;
@@ -57,6 +73,7 @@ export const MessageBubble = memo(function ({
         style={styles.userRow}
         entering={SlideInDown.easing(Easing.out(Easing.exp)).duration(700)}
       >
+        {message.modelSwitch ? <ModelSwitch {...message.modelSwitch} /> : null}
         {message.attachments?.length ? (
           <View style={styles.userImages}>
             {message.attachments.map((uri, index) => (
@@ -158,6 +175,25 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 16,
     paddingVertical: 4,
+  },
+  switchRow: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 8,
+    marginBottom: 14,
+  },
+  switchLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: theme.border,
+  },
+  switchText: {
+    flexShrink: 1,
+    color: theme.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
   },
   userImages: {
     flexDirection: 'row',
