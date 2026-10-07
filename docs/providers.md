@@ -45,8 +45,9 @@ Each registry entry in `packages/server/src/models.ts` lists the reasoning
 efforts its provider accepts. A chat can store one level. The server sends it as
 `reasoning.effort` on a Responses request and as `reasoning: { effort }` on a
 Gateway chat-completions request. With no effort, the request has no effort
-field, so the body is the same as before levels existed. Context summaries,
-standalone compaction and Jev never send an effort.
+field, so the body is the same as before levels existed. Kimi and DeepSeek
+context summaries send the first effort in the model's registry entry, which is
+`none`. Standalone compaction and Jev never send an effort.
 
 | Model               | Accepted efforts                                | Default effort |
 | ------------------- | ----------------------------------------------- | -------------- |
