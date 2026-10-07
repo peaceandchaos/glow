@@ -193,7 +193,8 @@
         "**/Podfile",
         "**/Podfile.lock",
         "**/Gemfile",
-        "**/Gemfile.lock"
+        "**/Gemfile.lock",
+        "packages/app/src/config.example.ts"
       ],
       "excludePaths": [
         "packages/app/App.tsx",
